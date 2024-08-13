@@ -2,6 +2,7 @@ import { ProgramEvent } from "../core/event.js";
 import { Canvas } from "../gfx/canvas.js";
 import { Scene, SceneParameter } from "../core/scene.js";
 import { Background } from "./background.js";
+import { Flip } from "../gfx/flip.js";
 
 
 export class Game implements Scene {
@@ -42,7 +43,7 @@ export class Game implements Scene {
 
         this.background.draw(canvas);
 
-        // canvas.drawBitmap("g", Flip.None, 64, 16);
+        // canvas.drawBitmap("f", Flip.None, 64, 16);
         //canvas.drawBitmap("p", Flip.None, 64, 80);
         //canvas.drawBitmap("s", Flip.None, 128, 80);
 

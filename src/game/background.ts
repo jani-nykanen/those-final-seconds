@@ -1,5 +1,7 @@
 import { ProgramEvent } from "../core/event.js";
+import { Bitmap } from "../gfx/bitmap.js";
 import { Canvas } from "../gfx/canvas.js";
+import { Flip } from "../gfx/flip.js";
 
 
 export class Background {
@@ -14,22 +16,49 @@ export class Background {
     }
 
 
-    private drawGround(canvas : Canvas, ypos : number) : void {
+    private drawRepeatingBitmap(canvas : Canvas, bmp : Bitmap, ypos : number, shiftFactor : number = 1.0) : void {
 
-        const LINE_DISTANCE : number = 21.33333;
-        
-        if (ypos >= canvas.height) {
+        const w : number = bmp?.width ?? 0;
+        const count : number = ((canvas.width/w) | 0) + 2;
 
-            return;
+        for (let i = 0; i < count; ++ i) {
+
+            canvas.drawBitmap(bmp, Flip.None, i*w - ((this.position*shiftFactor) % w), ypos);
         }
+    }
 
-        canvas.setColor("#92db00");
-        canvas.fillRect(0, ypos, canvas.width, canvas.height - ypos);
-        canvas.setColor("#246d00");
+
+    private drawGrass(canvas : Canvas, ypos : number) : void {
+
+        const bmpGameArt : Bitmap = canvas.getBitmap("g");
+        const count : number = ((canvas.width/16) | 0) + 2;
+
+        for (let i = 0; i < count; ++ i) {
+
+            canvas.drawBitmap(bmpGameArt, Flip.None, i*16 - (this.position % 16), ypos, 0, 0, 16, 8);
+        }
+    }
+
+
+    private drawGround(canvas : Canvas) : void {
+
+        const HEIGHT : number = 48;
+        const LINE_DISTANCE : number = 24;
+
+        const ypos : number = canvas.height - HEIGHT;
+
+        this.drawRepeatingBitmap(canvas, canvas.getBitmap("b"), ypos - 68, 0.5);
+        this.drawRepeatingBitmap(canvas, canvas.getBitmap("f"), ypos - 36);
+        this.drawGrass(canvas, ypos - 3);
+        
+        // Green bottom
+        canvas.setColor("#6db600");
+        canvas.fillRect(0, ypos + 6, canvas.width, HEIGHT - 6);
+        canvas.setColor("#dbff00");
 
         // Horizontal lines
         const vcount : number = ((canvas.width/LINE_DISTANCE) | 0) + 2;
-        const shiftx : number = -((this.position/3*2) % LINE_DISTANCE);
+        const shiftx : number = -(this.position % LINE_DISTANCE);
         for (let i = 0; i < vcount; ++ i) {
 
             // Create an impression of a 3D grid with minimal computations
@@ -41,21 +70,23 @@ export class Background {
 
 
         // Vertical lines
-        const hcount : number = 5; // A magic number of out of nowhere
-        for (let i = 0; i < hcount; ++ i) {
+        let dy = ypos;
+        for (let i = 0; i < 5; ++ i) {
 
-            
+            dy += (i + 1)*5.5;
+
+            canvas.fillRect(0, dy, canvas.width, 1);
         }
 
         // Test
         // canvas.setColor("#ff0000");
-        // canvas.fillRect(canvas.width - this.position - 16, ypos + (canvas.height - ypos)/2 - 32, 32, 32);
+        // canvas.fillRect(canvas.width - this.position - 16, ypos + HEIGHT/2 - 32, 32, 32);
     }
 
     
     public update(globalSpeed : number, event : ProgramEvent) : void {
 
-        const POSITION_MODULO : number = 256;
+        const POSITION_MODULO : number = 384;
 
         this.position = (this.position + globalSpeed) % POSITION_MODULO;
     }
@@ -63,8 +94,6 @@ export class Background {
 
     public draw(canvas : Canvas) : void {
 
-        const GROUND_BASE_HEIGHT = 64;
-
-        this.drawGround(canvas, canvas.height - GROUND_BASE_HEIGHT);
+        this.drawGround(canvas);
     }
 }
