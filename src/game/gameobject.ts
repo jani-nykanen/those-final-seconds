@@ -4,6 +4,7 @@ import { Rectangle } from "../math/rectangle.js";
 import { ProgramEvent } from "../core/event.js";
 import { Bitmap } from "../gfx/bitmap.js";
 import { Canvas } from "../gfx/canvas.js";
+import { GROUND_LEVEL } from "./background.js";
 
 
 export const updateSpeedAxis = (speed : number, target : number, step : number) : number => {
@@ -45,8 +46,22 @@ export class GameObject implements ExistingObject {
     }
 
 
+    private checkGroundCollision(event : ProgramEvent) : void {
+
+        const ground : number = event.screenHeight - GROUND_LEVEL;
+        if (this.speed.y > 0 && this.pos.y + this.hitbox.y + this.hitbox.h/2 > ground) {
+
+            this.pos.y = ground - this.hitbox.y - this.hitbox.h/2;
+            this.speed.y = 0.0;
+
+            this.groundCollisionEvent?.(event);
+        }
+    }
+
+
     protected updateEvent?(event : ProgramEvent) : void;
     protected postMovementEvent?(event : ProgramEvent) : void;
+    protected groundCollisionEvent?(event : ProgramEvent) : void;
     protected die?(event : ProgramEvent) : boolean;
 
 
@@ -81,6 +96,7 @@ export class GameObject implements ExistingObject {
 
         this.updateEvent?.(event);
         this.updateMovement(event);
+        this.checkGroundCollision(event);
         this.postMovementEvent?.(event);
     }
 

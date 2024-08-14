@@ -4,8 +4,10 @@ import { Bitmap } from "../gfx/bitmap.js";
 import { Canvas } from "../gfx/canvas.js";
 import { Flip } from "../gfx/flip.js";
 import { Rectangle } from "../math/rectangle.js";
+import { clamp } from "../math/utility.js";
 import { Vector } from "../math/vector.js";
 import { GROUND_LEVEL } from "./background.js";
+import { CAMERA_MIN_Y } from "./constants.js";
 import { GameObject, updateSpeedAxis } from "./gameobject.js";
 
 
@@ -23,7 +25,7 @@ export class Player extends GameObject {
 
         super(x, y, true);
 
-        this.hitbox = new Rectangle(0, 16, 24, 16);
+        this.hitbox = new Rectangle(0, 2, 24, 16);
 
         this.friction = new Vector(0.15, 0.15);
     }
@@ -60,20 +62,53 @@ export class Player extends GameObject {
     }
 
 
+    private checkBorders(event : ProgramEvent) : void {
+
+        const left : number = this.hitbox.x + this.hitbox.w/2;
+        const right : number = event.screenWidth - this.hitbox.w/2 + this.hitbox.x;
+        const top : number = CAMERA_MIN_Y + this.hitbox.y + this.hitbox.h/2;
+
+        if ((this.speed.x < 0 && this.pos.x <= left) || (this.speed.x > 0 && this.pos.x >= right)) {
+
+            this.speed.x = 0;
+        }
+        this.pos.x = clamp(this.pos.x, left, right);
+
+        if (this.speed.y < 0 && this.pos.y < top) {
+
+            this.speed.y = 0;
+            this.pos.y = top;
+
+            this.angleTarget = 0.0;
+        }
+    }
+
+
     protected updateEvent(event : ProgramEvent) : void {
 
+        this.control(event);
+    }
+
+
+    protected postMovementEvent(event : ProgramEvent) : void {
+        
         const ANGLE_FRICTION : number = 0.25;
 
-        this.control(event);
-
+        this.checkBorders(event);
         this.angle = updateSpeedAxis(this.angle, this.angleTarget, ANGLE_FRICTION*event.tick);
+    }
+
+
+    protected groundCollisionEvent(event : ProgramEvent) : void {
+        
+        this.angleTarget = 0.0
     }
 
 
     public draw(canvas : Canvas) : void {
         
-        const dx : number = Math.round(this.pos.x) - 16;
-        const dy : number = Math.round(this.pos.y) - 12;
+        const dx : number = this.pos.x - 16;
+        const dy : number = this.pos.y - 12;
 
         const angleStep : number = Math.round(this.angle);
         const angleRamp : number = (32/(1.0 + Math.abs(angleStep))) | 0;
@@ -94,7 +129,7 @@ export class Player extends GameObject {
     // TODO: Make a common method for all objects
     public drawShadow(canvas: Canvas) : void {
 
-        const dx : number = Math.round(this.pos.x);
+        const dx : number = this.pos.x;
         const dy : number = canvas.height - GROUND_LEVEL;
 
         const shadowSize : number = 16 + 20*(Math.min(this.pos.y, dy)/canvas.height);

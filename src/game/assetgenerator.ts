@@ -130,18 +130,18 @@ const generateBaseCloud = (colors : string[], yoffsets : number[],
 const generateClouds = (assets : Assets) : void => {
 
     assets.addBitmap("c",
-        generateBaseCloud(["#4992db", "#92dbff", "#ffffff"], [0, 2, 4], 192, 80, 16, 24, 1.5)
+        generateBaseCloud(["#4992db", "#92dbff", "#ffffff"], [0, 2, 4], 192, 96, 16, 24, 1.5)
     );
 }
 
 
 const generateBush = (assets : Assets, bmpGameArt : Bitmap) : void => {
     
-    const canvas : Canvas = new Canvas(48, 48);
+    const canvas : Canvas = new Canvas(48, 64);
 
     canvas.drawBitmap(bmpGameArt, Flip.None, 0, 0, 0, 16, 48, 16);
     canvas.setColor("#246d00");
-    canvas.fillRect(0, 16, 48, 32);
+    canvas.fillRect(0, 16, 48, 48);
 
     assets.addBitmap("b", canvas.toBitmap());
 }

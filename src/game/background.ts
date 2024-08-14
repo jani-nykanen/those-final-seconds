@@ -88,7 +88,7 @@ export class Background {
         
         // Green bottom
         canvas.setColor("#6db600");
-        canvas.fillRect(0, ypos + 6, canvas.width, GROUND_HEIGHT - 6);
+        canvas.fillRect(0, ypos + 4, canvas.width, GROUND_HEIGHT - 4);
         canvas.setColor("#dbff00");
 
         // Horizontal lines
@@ -128,16 +128,18 @@ export class Background {
     }
 
 
-    public draw(canvas : Canvas) : void {
+    public draw(canvas : Canvas, camPos : number) : void {
 
         canvas.clear("#6db6ff");
 
         // Sun
         canvas.drawBitmap("s", Flip.None, canvas.width - 96, 16);
 
-        this.drawRepeatingBitmap(canvas, canvas.getBitmap("c"), this.layerPositions[3], 48);
-        this.drawMushrooms(canvas, canvas.getBitmap("m"), this.layerPositions[2], 44);
-        this.drawRepeatingBitmap(canvas, canvas.getBitmap("b"), this.layerPositions[1], 96);
+        this.drawRepeatingBitmap(canvas, canvas.getBitmap("c"), this.layerPositions[3], 48 - camPos/4);
+        this.drawMushrooms(canvas, canvas.getBitmap("m"), this.layerPositions[2], 44 - camPos/2);
+        this.drawRepeatingBitmap(canvas, canvas.getBitmap("b"), this.layerPositions[1], 96 - camPos/1.5);
+
+        canvas.moveTo(0, -camPos);
         this.drawGround(canvas);
     }
 }
