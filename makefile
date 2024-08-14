@@ -41,7 +41,8 @@ pack:
 	mkdir -p temp
 	cp templates/index.html temp/index.html
 	cp style.css temp/style.css
-	cp -r assets temp/assets
+	cp f.png temp/f.png
+	cp g.png temp/g.png
 
 .PHONY: zip
 zip: 
