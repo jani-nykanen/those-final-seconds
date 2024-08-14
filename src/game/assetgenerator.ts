@@ -28,15 +28,27 @@ const PALETTE_LOOKUP : string[] = [
 
     // Bushes
     "246d00ff", // B Darkest green (this far!)
+
+    // Mushroom leg
+    "dbb649ff", // C Darker leg color
+    "ffffdbff", // D Very bright yellow
+
+    // Mushroom hat
+    "b62400ff", // E Slightly orange-ish red
+    "ff6d00ff", // F Orange
+    "ffb600ff", // G Bright orange
+
+    // Sun
+    "ffdb00ff", // H Brownish thing
 ];
 
 
 const GAME_ART_PALETTE_TABLE : string[] = [
 
-    "1056", "1056", "1089", "1087", "1A78", "0000", "0000", "0000",
-    "0007", "1034", "1089", "1087", "0000", "0000", "0000", "0000",
-    "10B5", "10B5", "10B5", "10B5", "10B5", "10B5", "0000", "0000",
-    "10B5", "10B5", "10B5", "10B5", "10B5", "10B5", "0000", "0000",
+    "1056", "1056", "1089", "1087", "1A78", "10CD", "10CD", "10CD",
+    "0007", "1034", "1089", "1087", "10CD", "10CD", "10GF", "10EF",
+    "10B5", "10B5", "10B5", "10B5", "10B5", "10B5", "10EF", "10EF",
+    "10B5", "10B5", "10B5", "10B5", "10B5", "10B5", "10H2", "0000",
 ];
 
 
@@ -114,7 +126,7 @@ const generateBaseCloud = (colors : string[], yoffsets : number[],
 const generateClouds = (assets : Assets) : void => {
 
     assets.addBitmap("c",
-        generateBaseCloud(["#ffffff"], [0], 192, 80, 16, 24, 1.5)
+        generateBaseCloud(["#4992db", "#92dbff", "#ffffff"], [0, 2, 4], 192, 80, 16, 24, 1.5)
     );
 }
 
@@ -128,6 +140,73 @@ const generateBush = (assets : Assets, bmpGameArt : Bitmap) : void => {
     canvas.fillRect(0, 16, 48, 32);
 
     assets.addBitmap("b", canvas.toBitmap());
+}
+
+
+const generateMushrooms = (assets : Assets, bmpGameArt : Bitmap) : void => {
+    
+    const canvas : Canvas = new Canvas(48, 96);
+
+    canvas.drawBitmap(bmpGameArt, Flip.None, 12, 16, 40, 0, 24, 8);
+    for (let i = 0; i < 32; ++ i) {
+
+        if (i < 10) {
+
+            canvas.drawBitmap(bmpGameArt, Flip.None, 16, 24 + i*8, 32, 8, 16, 8);
+        }
+        if (i < 2) {
+
+            canvas.drawBitmap(bmpGameArt, Flip.None, 40*i, 0, 48 + i*8, 8, 8, 16);
+        }
+
+        canvas.drawBitmap(bmpGameArt, Flip.None, 8 + i, 0, 55, 8, 1, 16);
+    }
+    
+
+    assets.addBitmap("m", canvas.toBitmap());
+}
+
+
+const generateSun = (assets : Assets, bmpGameArt : Bitmap) : void => {
+
+    const RADIUS : number = 32;
+    const EYE_SHIFT_X : number = 4;
+    const EYE_SHIFT_Y : number = 2;
+
+    const canvas : Canvas = new Canvas(RADIUS*2, RADIUS*2);
+
+    // "Body"
+    canvas.setColor("#ffdb00");
+    canvas.fillCircle(RADIUS, RADIUS, RADIUS);
+    canvas.setColor("#ffff92");
+    canvas.fillCircle(RADIUS - 2, RADIUS - 2, RADIUS - 2);
+
+    // Eyes & mouth
+    
+    let mouthLineRadius : number = 12;
+    for (let i = 0; i < 5; ++ i) {
+
+        if (i < 2) {
+
+            canvas.drawBitmap(bmpGameArt, Flip.None, 
+                RADIUS - 10 + 12*i - EYE_SHIFT_X, 
+                RADIUS - 4 - EYE_SHIFT_Y, 
+                48, 24, 8, 8);
+        }
+
+        const dx : number = RADIUS - EYE_SHIFT_X - mouthLineRadius;
+        const dy : number = RADIUS + 6 + i - EYE_SHIFT_Y
+
+        canvas.setColor("#ffdb00");
+        canvas.fillRect(dx, dy + 1, mouthLineRadius*2, 1);
+
+        canvas.setColor("#000000");
+        canvas.fillRect(dx, dy, mouthLineRadius*2, 1);
+
+        mouthLineRadius -= (i + 1);
+    }
+
+    assets.addBitmap("s", canvas.toBitmap());
 }
 
 
@@ -185,7 +264,9 @@ export const generateAssets = (assets : Assets, audio : AudioPlayer) : void => {
     const bmpGameArt : Bitmap = generateGameArt(assets);
     generateFence(assets, bmpGameArt);
     generateBush(assets, bmpGameArt);
+    generateMushrooms(assets, bmpGameArt);
     generateClouds(assets);
+    generateSun(assets, bmpGameArt);
     generateFonts(assets);
 
     // Audio

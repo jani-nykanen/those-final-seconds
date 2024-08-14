@@ -4,8 +4,12 @@ import { Canvas } from "../gfx/canvas.js";
 import { Flip } from "../gfx/flip.js";
 
 
-const LAYER_MODULO : number[] = [192, 48, 128, 192];
-const LAYER_SPEED : number[] = [1, 0.5, 0.25, 0.67];
+const LAYER_MODULO : number[] = [192, 48, 192, 192];
+const LAYER_SPEED : number[] = [1, 0.5, 0.25, 0.33];
+
+
+const SKY_COLORS : string[] = ["#004992", "#246db6", "#4992db", "#6db6ff"];
+const SKY_COLOR_HEIGHT : number[] = [2, 8, 16, -1];
 
 
 export class Background {
@@ -28,6 +32,29 @@ export class Background {
         for (let i = 0; i < count; ++ i) {
 
             canvas.drawBitmap(bmp, Flip.None, i*w - (xpos % w), ypos);
+        }
+    }
+
+
+    private drawMushrooms(canvas : Canvas, bmp : Bitmap, xpos : number, ypos : number) : void {
+
+        const YOFF : number = 24;
+        const XOFF : number = 96;
+
+        const count : number = ((canvas.width/(XOFF*2)) | 0) + 2;
+
+        for (let j = 0; j < count; ++ j) {
+
+            const dx : number = -xpos + j*(XOFF*2);
+            if (dx >= canvas.width) {
+
+                break;
+            }
+
+            for (let i = 0; i < 2; ++ i) {
+
+                canvas.drawBitmap(bmp, Flip.None, dx + XOFF*i, ypos + YOFF*i);
+            }
         }
     }
 
@@ -90,7 +117,6 @@ export class Background {
     
     public update(globalSpeed : number, event : ProgramEvent) : void {
 
-
         for (let k in this.layerPositions) {
 
             this.layerPositions[k] = (this.layerPositions[k] + LAYER_SPEED[k]*globalSpeed) % LAYER_MODULO[k];
@@ -102,7 +128,11 @@ export class Background {
 
         canvas.clear("#6db6ff");
 
+        // Sun
+        canvas.drawBitmap("s", Flip.None, canvas.width - 96, 16);
+
         this.drawRepeatingBitmap(canvas, canvas.getBitmap("c"), this.layerPositions[3], 48);
+        this.drawMushrooms(canvas, canvas.getBitmap("m"), this.layerPositions[2], 44);
         this.drawRepeatingBitmap(canvas, canvas.getBitmap("b"), this.layerPositions[1], 96);
         this.drawGround(canvas);
     }

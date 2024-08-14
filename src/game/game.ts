@@ -41,7 +41,7 @@ export class Game implements Scene {
         canvas.moveTo();
         this.background.draw(canvas);
 
-        // canvas.drawBitmap("f", Flip.None, 64, 16);
+        // canvas.drawBitmap("g", Flip.None, 64, 16);
         //canvas.drawBitmap("p", Flip.None, 64, 80);
         //canvas.drawBitmap("s", Flip.None, 128, 80);
 
