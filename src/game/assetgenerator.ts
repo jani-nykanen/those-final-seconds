@@ -38,8 +38,10 @@ const PALETTE_LOOKUP : string[] = [
     "ff6d00ff", // F Orange
     "ffb600ff", // G Bright orange
 
-    // Sun
+    // Cat
     "ffdb00ff", // H Brownish thing
+    "db9200ff", // I More yellowish brown
+
 ];
 
 
@@ -48,7 +50,9 @@ const GAME_ART_PALETTE_TABLE : string[] = [
     "1056", "1056", "1089", "1087", "1A78", "10CD", "10CD", "10CD",
     "0007", "1034", "1089", "1087", "10CD", "10CD", "10GF", "10EF",
     "10B5", "10B5", "10B5", "10B5", "10B5", "10B5", "10EF", "10EF",
-    "10B5", "10B5", "10B5", "10B5", "10B5", "10B5", "10H2", "0000",
+    "10B5", "10B5", "10B5", "10B5", "10B5", "10B5", "10H2", "00GD",
+    "10IH", "10IH", "1034", "1034", "1034", "1024", "0000", "0000",
+    "10IH", "10IH", "1034", "1034", "1034", "1034", "0000", "0000",
 ];
 
 
@@ -147,6 +151,7 @@ const generateMushrooms = (assets : Assets, bmpGameArt : Bitmap) : void => {
     
     const canvas : Canvas = new Canvas(48, 96);
 
+    // Base mushroom
     canvas.drawBitmap(bmpGameArt, Flip.None, 12, 16, 40, 0, 24, 8);
     for (let i = 0; i < 32; ++ i) {
 
@@ -158,10 +163,14 @@ const generateMushrooms = (assets : Assets, bmpGameArt : Bitmap) : void => {
 
             canvas.drawBitmap(bmpGameArt, Flip.None, 40*i, 0, 48 + i*8, 8, 8, 16);
         }
-
         canvas.drawBitmap(bmpGameArt, Flip.None, 8 + i, 0, 55, 8, 1, 16);
     }
-    
+
+    // Dots
+    for (let i = 0; i < 3; ++ i) {
+
+        canvas.drawBitmap(bmpGameArt, Flip.None, 6 + 13*i, 4 + 4*(i % 2), 56, i == 2 ? 28 : 24, 8, 4);
+    }
 
     assets.addBitmap("m", canvas.toBitmap());
 }
@@ -182,7 +191,6 @@ const generateSun = (assets : Assets, bmpGameArt : Bitmap) : void => {
     canvas.fillCircle(RADIUS - 2, RADIUS - 2, RADIUS - 2);
 
     // Eyes & mouth
-    
     let mouthLineRadius : number = 12;
     for (let i = 0; i < 5; ++ i) {
 
@@ -207,6 +215,20 @@ const generateSun = (assets : Assets, bmpGameArt : Bitmap) : void => {
     }
 
     assets.addBitmap("s", canvas.toBitmap());
+}
+
+
+const generatePlayer = (assets : Assets, bmpGameArt : Bitmap) : void => {
+
+    const canvas : Canvas = new Canvas(32, 24);
+
+    canvas.setColor("#ffffff");
+    canvas.fillRect(1, 16, 27, 4);
+
+    canvas.drawBitmap(bmpGameArt, Flip.None, 0, 8, 16, 32, 32, 16);
+    canvas.drawBitmap(bmpGameArt, Flip.None, 9, 0, 0, 32, 16, 16);
+
+    assets.addBitmap("p", canvas.toBitmap());
 }
 
 
@@ -267,6 +289,7 @@ export const generateAssets = (assets : Assets, audio : AudioPlayer) : void => {
     generateMushrooms(assets, bmpGameArt);
     generateClouds(assets);
     generateSun(assets, bmpGameArt);
+    generatePlayer(assets, bmpGameArt);
     generateFonts(assets);
 
     // Audio
