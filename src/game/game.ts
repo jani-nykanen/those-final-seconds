@@ -82,14 +82,15 @@ export class Game implements Scene {
         this.player.drawShadow(canvas);
 
         // Objects
+        this.player.preDraw(canvas);
         this.player.draw(canvas);
 
-        // canvas.drawBitmap("p", Flip.None, 64, 16);
+        // canvas.drawBitmap("gp", Flip.None, 64, 16);
         //canvas.drawBitmap("p", Flip.None, 64, 80);
         //canvas.drawBitmap("s", Flip.None, 128, 80);
 
-        canvas.moveTo();
-        canvas.drawText("fw", "HELLO WORLD!", 2, 2);
+        // canvas.moveTo();
+        // canvas.drawText("fw", "HELLO WORLD!", 2, 2);
     }
 
 

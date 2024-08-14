@@ -27,7 +27,7 @@ const PALETTE_LOOKUP : string[] = [
     "6d2400ff", // A Darkest reddish brownish thing
 
     // Bushes
-    "246d00ff", // B Darkest green (this far!)
+    "246d00ff", // B Dark green
 
     // Mushroom leg
     "dbb649ff", // C Darker leg color
@@ -42,15 +42,19 @@ const PALETTE_LOOKUP : string[] = [
     "ffdb00ff", // H Brownish thing
     "db9200ff", // I More yellowish brown
 
+    // Misc. outline colors
+    "244900ff", // J Darkest green
+    "492400ff", // K Darkest brown
+
 ];
 
 
 const GAME_ART_PALETTE_TABLE : string[] = [
 
-    "1056", "1056", "1089", "1087", "1A78", "10CD", "10CD", "10CD",
-    "0007", "1034", "1089", "1087", "10CD", "10CD", "10GF", "10EF",
-    "10B5", "10B5", "10B5", "10B5", "10B5", "10B5", "10EF", "10EF",
-    "10B5", "10B5", "10B5", "10B5", "10B5", "10B5", "10H2", "00GD",
+    "J056", "J056", "K089", "K087", "KA78", "A0CD", "A0CD", "A0CD",
+    "0007", "1034", "K089", "K087", "A0CD", "A0CD", "A0GF", "A0EF",
+    "J0B5", "J0B5", "J0B5", "J0B5", "J0B5", "J0B5", "A0EF", "A0EF",
+    "J0B5", "J0B5", "J0B5", "J0B5", "J0B5", "J0B5", "10H2", "00GD",
     "10IH", "10IH", "1034", "1034", "1034", "1024", "0000", "0000",
     "10IH", "10IH", "1034", "1034", "1034", "1034", "0000", "0000",
 ];
@@ -232,6 +236,26 @@ const generatePlayer = (assets : Assets, bmpGameArt : Bitmap) : void => {
 }
 
 
+const generateGasParticles = (assets : Assets) : void => {
+
+    const canvas : Canvas = new Canvas(64, 16);
+
+    for (let i = 0; i < 4; ++ i) {
+
+        const cx : number = 8 + i*16;
+        const radius : number = 5 - i;
+
+        canvas.setColor("#b6b6b6");
+        canvas.fillCircle(cx, 8, radius);
+
+        canvas.setColor("#ffffff");
+        canvas.fillCircle(cx - 1, 8 - 1, radius - 1);
+    }
+
+    assets.addBitmap("gp", canvas.toBitmap());
+}
+
+
 const generateFonts = (assets : Assets) : void => {
 
     const bmpFontRaw : Bitmap = assets.getBitmap("_f");
@@ -290,6 +314,7 @@ export const generateAssets = (assets : Assets, audio : AudioPlayer) : void => {
     generateClouds(assets);
     generateSun(assets, bmpGameArt);
     generatePlayer(assets, bmpGameArt);
+    generateGasParticles(assets);
     generateFonts(assets);
 
     // Audio

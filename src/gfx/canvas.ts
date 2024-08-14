@@ -206,21 +206,7 @@ export class Canvas {
 
     public fillCircle(cx : number, cy : number, radius : number) : void {
 
-        cx = (cx + this.translation.x) | 0;
-        cy = (cy + this.translation.y) | 0;
-
-        for (let y = -radius; y <= radius; ++ y) {
-
-            const ny : number = y/radius;
-            const r : number =  Math.round(Math.sqrt(1 - ny*ny)*radius);
-
-            if (r <= 0) {
-
-                continue;
-            }
-
-            this.ctx.fillRect(cx - r, cy + y, r*2, 1);
-        }
+        this.fillEllipse(cx, cy, radius, radius);
     }
 
 
