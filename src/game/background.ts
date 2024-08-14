@@ -4,38 +4,42 @@ import { Canvas } from "../gfx/canvas.js";
 import { Flip } from "../gfx/flip.js";
 
 
+const LAYER_MODULO : number[] = [192, 48, 128, 192];
+const LAYER_SPEED : number[] = [1, 0.5, 0.25, 0.67];
+
+
 export class Background {
 
 
-    private position : number = 0;
+    private layerPositions : number[];
 
 
     constructor() {
 
-        // ...
+        this.layerPositions = (new Array<number> (4)).fill(0.0);
     }
 
 
-    private drawRepeatingBitmap(canvas : Canvas, bmp : Bitmap, ypos : number, shiftFactor : number = 1.0) : void {
+    private drawRepeatingBitmap(canvas : Canvas, bmp : Bitmap, xpos : number, ypos : number) : void {
 
         const w : number = bmp?.width ?? 0;
         const count : number = ((canvas.width/w) | 0) + 2;
 
         for (let i = 0; i < count; ++ i) {
 
-            canvas.drawBitmap(bmp, Flip.None, i*w - ((this.position*shiftFactor) % w), ypos);
+            canvas.drawBitmap(bmp, Flip.None, i*w - (xpos % w), ypos);
         }
     }
 
 
-    private drawGrass(canvas : Canvas, ypos : number) : void {
+    private drawGrass(canvas : Canvas, xpos : number, ypos : number) : void {
 
         const bmpGameArt : Bitmap = canvas.getBitmap("g");
         const count : number = ((canvas.width/16) | 0) + 2;
 
         for (let i = 0; i < count; ++ i) {
 
-            canvas.drawBitmap(bmpGameArt, Flip.None, i*16 - (this.position % 16), ypos, 0, 0, 16, 8);
+            canvas.drawBitmap(bmpGameArt, Flip.None, i*16 - (xpos % 16), ypos, 0, 0, 16, 8);
         }
     }
 
@@ -45,11 +49,11 @@ export class Background {
         const HEIGHT : number = 48;
         const LINE_DISTANCE : number = 24;
 
+        const xpos : number = this.layerPositions[0];
         const ypos : number = canvas.height - HEIGHT;
 
-        this.drawRepeatingBitmap(canvas, canvas.getBitmap("b"), ypos - 68, 0.5);
-        this.drawRepeatingBitmap(canvas, canvas.getBitmap("f"), ypos - 36);
-        this.drawGrass(canvas, ypos - 3);
+        this.drawRepeatingBitmap(canvas, canvas.getBitmap("f"), xpos, ypos - 36);
+        this.drawGrass(canvas, xpos, ypos - 3);
         
         // Green bottom
         canvas.setColor("#6db600");
@@ -58,7 +62,7 @@ export class Background {
 
         // Horizontal lines
         const vcount : number = ((canvas.width/LINE_DISTANCE) | 0) + 2;
-        const shiftx : number = -(this.position % LINE_DISTANCE);
+        const shiftx : number = -(xpos % LINE_DISTANCE);
         for (let i = 0; i < vcount; ++ i) {
 
             // Create an impression of a 3D grid with minimal computations
@@ -86,14 +90,20 @@ export class Background {
     
     public update(globalSpeed : number, event : ProgramEvent) : void {
 
-        const POSITION_MODULO : number = 384;
 
-        this.position = (this.position + globalSpeed) % POSITION_MODULO;
+        for (let k in this.layerPositions) {
+
+            this.layerPositions[k] = (this.layerPositions[k] + LAYER_SPEED[k]*globalSpeed) % LAYER_MODULO[k];
+        }
     }
 
 
     public draw(canvas : Canvas) : void {
 
+        canvas.clear("#6db6ff");
+
+        this.drawRepeatingBitmap(canvas, canvas.getBitmap("c"), this.layerPositions[3], 48);
+        this.drawRepeatingBitmap(canvas, canvas.getBitmap("b"), this.layerPositions[1], 96);
         this.drawGround(canvas);
     }
 }

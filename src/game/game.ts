@@ -39,8 +39,6 @@ export class Game implements Scene {
     public redraw(canvas : Canvas) : void {
         
         canvas.moveTo();
-        canvas.clear("#0055AA");
-
         this.background.draw(canvas);
 
         // canvas.drawBitmap("f", Flip.None, 64, 16);

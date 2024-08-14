@@ -25,6 +25,9 @@ const PALETTE_LOOKUP : string[] = [
     "b66d00ff", // 8 Brown
     "ffb66dff", // 9 Beige?
     "6d2400ff", // A Darkest reddish brownish thing
+
+    // Bushes
+    "246d00ff", // B Darkest green (this far!)
 ];
 
 
@@ -32,6 +35,8 @@ const GAME_ART_PALETTE_TABLE : string[] = [
 
     "1056", "1056", "1089", "1087", "1A78", "0000", "0000", "0000",
     "0007", "1034", "1089", "1087", "0000", "0000", "0000", "0000",
+    "10B5", "10B5", "10B5", "10B5", "10B5", "10B5", "0000", "0000",
+    "10B5", "10B5", "10B5", "10B5", "10B5", "10B5", "0000", "0000",
 ];
 
 
@@ -81,7 +86,7 @@ const generateFence = (assets : Assets, bmpGameArt : Bitmap) : void => {
 
 
 
-const generateClouds = (colors : string[], yoffsets : number[], 
+const generateBaseCloud = (colors : string[], yoffsets : number[], 
     width : number, height : number, 
     amplitude : number, period : number, sineFactor : number) : Bitmap => {
 
@@ -106,14 +111,23 @@ const generateClouds = (colors : string[], yoffsets : number[],
 }
 
 
-const generateBush = (assets : Assets) : void => {
+const generateClouds = (assets : Assets) : void => {
 
-    const bmpBush : Bitmap = generateClouds(
-        ["#000000", "#92b600", "#246d00"],
-        [0, 1, 3], 192, 80, 16, 24, 1.0
+    assets.addBitmap("c",
+        generateBaseCloud(["#ffffff"], [0], 192, 80, 16, 24, 1.5)
     );
+}
 
-    assets.addBitmap("b", bmpBush);
+
+const generateBush = (assets : Assets, bmpGameArt : Bitmap) : void => {
+    
+    const canvas : Canvas = new Canvas(48, 48);
+
+    canvas.drawBitmap(bmpGameArt, Flip.None, 0, 0, 0, 16, 48, 16);
+    canvas.setColor("#246d00");
+    canvas.fillRect(0, 16, 48, 32);
+
+    assets.addBitmap("b", canvas.toBitmap());
 }
 
 
@@ -170,7 +184,8 @@ export const generateAssets = (assets : Assets, audio : AudioPlayer) : void => {
     // Bitmaps
     const bmpGameArt : Bitmap = generateGameArt(assets);
     generateFence(assets, bmpGameArt);
-    generateBush(assets);
+    generateBush(assets, bmpGameArt);
+    generateClouds(assets);
     generateFonts(assets);
 
     // Audio
