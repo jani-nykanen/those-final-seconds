@@ -35,27 +35,32 @@ export class Vector {
         this.w = 0;
 	}
 
-    
-    static normalize(v : Vector, forceUnit : boolean = false) : Vector {
+
+    // NOTE: this does *not* clone the vector, use the method below instead to
+    // create a normalized copy without modifying the original.
+    public normalize(forceUnit : boolean = false) : Vector {
+
+        const EPS : number = 0.0001;
 		
-		const EPS : number = 0.0001;
-		
-		const len : number = v.length;
+		const len : number = this.length;
 		if (len < EPS) {
 			
-            v.zeros();
-			v.x = forceUnit ? 1 : 0;
+            this.zeros();
+			this.x = forceUnit ? 1 : 0;
 
-			return v;
+			return this;
 		}
 		
-		v.x /= len;
-		v.y /= len;
-        v.z /= len;
-        v.w /= len;
+		this.x /= len;
+		this.y /= len;
+        this.z /= len;
+        this.w /= len;
 
-        return v;
-	}
+        return this;
+    }
+
+    
+    static normalize = (v : Vector, forceUnit : boolean = false) : Vector => v.clone().normalize(forceUnit);
 
 
     static add = (a : Vector, b : Vector) : Vector => new Vector(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w);

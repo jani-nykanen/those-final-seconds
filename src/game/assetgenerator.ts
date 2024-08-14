@@ -223,7 +223,7 @@ const generatePlayer = (assets : Assets, bmpGameArt : Bitmap) : void => {
     const canvas : Canvas = new Canvas(32, 24);
 
     canvas.setColor("#ffffff");
-    canvas.fillRect(1, 16, 27, 4);
+    canvas.fillRect(1, 14, 27, 6);
 
     canvas.drawBitmap(bmpGameArt, Flip.None, 0, 8, 16, 32, 32, 16);
     canvas.drawBitmap(bmpGameArt, Flip.None, 9, 0, 0, 32, 16, 16);

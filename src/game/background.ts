@@ -12,6 +12,11 @@ const SKY_COLORS : string[] = ["#004992", "#246db6", "#4992db", "#6db6ff"];
 const SKY_COLOR_HEIGHT : number[] = [2, 8, 16, -1];
 
 
+const GROUND_HEIGHT : number = 48;
+// Yes it's a constant now
+export const GROUND_LEVEL : number = GROUND_HEIGHT/2;
+
+
 export class Background {
 
 
@@ -73,18 +78,17 @@ export class Background {
 
     private drawGround(canvas : Canvas) : void {
 
-        const HEIGHT : number = 48;
         const LINE_DISTANCE : number = 24;
 
         const xpos : number = this.layerPositions[0];
-        const ypos : number = canvas.height - HEIGHT;
+        const ypos : number = canvas.height - GROUND_HEIGHT;
 
         this.drawRepeatingBitmap(canvas, canvas.getBitmap("f"), xpos, ypos - 36);
         this.drawGrass(canvas, xpos, ypos - 3);
         
         // Green bottom
         canvas.setColor("#6db600");
-        canvas.fillRect(0, ypos + 6, canvas.width, HEIGHT - 6);
+        canvas.fillRect(0, ypos + 6, canvas.width, GROUND_HEIGHT - 6);
         canvas.setColor("#dbff00");
 
         // Horizontal lines

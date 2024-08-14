@@ -225,6 +225,28 @@ export class Canvas {
     }
 
 
+    public fillEllipse(cx : number, cy : number, hradius : number, vradius : number) : void {
+
+        cx = (cx + this.translation.x) | 0;
+        cy = (cy + this.translation.y) | 0;
+
+        hradius |= 0;
+        vradius |= 0;
+
+        for (let y = -vradius; y <= vradius; ++ y) {
+
+            const ny : number = y/vradius;
+            const r : number = Math.round(Math.sqrt(1 - ny*ny)*hradius);
+
+            if (r <= 0) {
+
+                continue;
+            }
+            this.ctx.fillRect(cx - r, cy + y, r*2, 1);
+        }
+    }
+
+
     public fillCircleOutside(r : number, cx : number = this.width/2, cy : number = this.height/2) : void {
 
         cx = (cx + this.translation.x) | 0;

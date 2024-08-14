@@ -3,12 +3,14 @@ import { Canvas } from "../gfx/canvas.js";
 import { Scene, SceneParameter } from "../core/scene.js";
 import { Background } from "./background.js";
 import { Flip } from "../gfx/flip.js";
+import { Player } from "./player.js";
 
 
 export class Game implements Scene {
 
 
     private background : Background;
+    private player : Player;
 
     private globalSpeed : number = 1.0;
 
@@ -16,6 +18,8 @@ export class Game implements Scene {
     constructor(event : ProgramEvent) {
 
         this.background = new Background();
+
+        this.player = new Player(96, 96);
     }
 
     
@@ -32,6 +36,7 @@ export class Game implements Scene {
             return;
         }
 
+        this.player.update(event);
         this.background.update(this.globalSpeed, event);
     }
 
@@ -39,7 +44,15 @@ export class Game implements Scene {
     public redraw(canvas : Canvas) : void {
         
         canvas.moveTo();
+
         this.background.draw(canvas);
+
+        // Shadows
+        canvas.setColor("rgba(0, 0, 0, 0.33)");
+        this.player.drawShadow(canvas);
+
+        // Objects
+        this.player.draw(canvas);
 
         // canvas.drawBitmap("p", Flip.None, 64, 16);
         //canvas.drawBitmap("p", Flip.None, 64, 80);
