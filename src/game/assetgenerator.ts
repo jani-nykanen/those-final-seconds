@@ -39,7 +39,7 @@ const PALETTE_LOOKUP : string[] = [
     "ffb600ff", // G Bright orange
 
     // Cat
-    "ffdb00ff", // H Brownish thing
+    "ffdb00ff", // H Yellow
     "db9200ff", // I More yellowish brown
 
     // Misc. outline colors
@@ -329,6 +329,25 @@ const generateHUD = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt : Bitma
 } 
 
 
+const generateEnemyBodies = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt : Bitmap) : void => {
+ 
+    const bmpBallBodies : Canvas = new Canvas(24, 24);
+
+    for (let i = 0; i < 4; ++ i) {
+
+        bmpBallBodies.drawBitmap(bmpRawGameArt, Flip.None, i*24, 0, 0, 48, 24, 24);
+    }
+
+    const colors : string[] = [
+        "10DH", "10DH", "10FH", 
+        "10DH", "10DH", "10FH", 
+        "10FH", "10FH", "10FH", 
+    ];
+
+    assets.addBitmap("e", applyPalette(bmpBallBodies.toBitmap(), colors, PALETTE_LOOKUP));
+}
+
+
 const generateFonts = (assets : Assets) : void => {
 
     const bmpFontRaw : Bitmap = assets.getBitmap("_f");
@@ -381,6 +400,7 @@ export const generateAssets = (assets : Assets, audio : AudioPlayer) : void => {
 
     // Bitmaps
     const bmpGameArt : Bitmap = generateGameArt(assets);
+    const bmpGameArtRaw : Bitmap = assets.getBitmap("_g");
     generateFence(assets, bmpGameArt);
     generateBush(assets, bmpGameArt);
     generateMushrooms(assets, bmpGameArt);
@@ -389,7 +409,8 @@ export const generateAssets = (assets : Assets, audio : AudioPlayer) : void => {
     generatePlayer(assets, bmpGameArt);
     generateGasParticles(assets);
     generateProjectiles(assets, bmpGameArt);
-    generateHUD(assets, assets.getBitmap("_g"), bmpGameArt);
+    generateHUD(assets, bmpGameArtRaw, bmpGameArt);
+    generateEnemyBodies(assets, bmpGameArtRaw, bmpGameArt);
     generateFonts(assets);
 
     // Audio

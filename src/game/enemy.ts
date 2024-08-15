@@ -5,20 +5,20 @@ import { Canvas } from "../gfx/canvas.js";
 import { Bitmap } from "../gfx/bitmap.js";
 import { Flip } from "../gfx/flip.js";
 import { Rectangle } from "../math/rectangle.js";
-import { CAMERA_MIN_Y } from "./constants.js";
+import { Projectile } from "./projectile.js";
 
 
 const DEATH_TIME : number = 10;
 
 
-export class Projectile extends GameObject {
+export class Enemy extends GameObject {
 
 
     private id : number = 0;
-    private friendly : boolean = true;
 
+    private animationTimer : number = 0;
     private deathTimer : number = 0.0;
-
+    
 
     constructor() {
 
@@ -36,18 +36,20 @@ export class Projectile extends GameObject {
 
     protected groundCollisionEvent(event : ProgramEvent) : void {
         
-        this.kill(event);
+        this.dying = true;
+        this.deathTimer = 0.0;
     }
 
 
     protected updateEvent(event : ProgramEvent) : void {
         
-        if (this.pos.x - 8 > event.screenWidth || this.pos.x + 8 < 0 ||
-            this.pos.y + 8 < CAMERA_MIN_Y) {
+        const ANIMATION_SPEED : number = 1.0/16.0;
+
+        if (this.pos.x < -24) {
 
             this.exist = false;
-            // console.log("Poof!");
         }
+        this.animationTimer = (this.animationTimer + ANIMATION_SPEED*event.tick) % 1.0;
     }
 
 
@@ -61,29 +63,45 @@ export class Projectile extends GameObject {
         if (this.dying) {
 
             const t : number = this.deathTimer/DEATH_TIME;
-            const r1 : number = (1 + t)*(6 + this.id*2);
-            const r2 : number = (11 + 4*this.id)*t;
+            const r1 : number = (1 + t)*12;
+            const r2 : number = 23*t;
 
-            canvas.setColor("#ffdbff");
+            canvas.setColor("#ffffff");
             canvas.fillRing(this.pos.x, this.pos.y, r2, r1);
             return;
         }
 
-        canvas.drawBitmap(bmp, Flip.None, this.pos.x - 8, this.pos.y - 8, this.id*16, 0, 16, 16);
+        // Body
+        canvas.drawBitmap("e", Flip.None, this.pos.x - 12, this.pos.y - 12, this.id*24, 0, 24, 24);
     }
 
 
-    public spawn(x : number, y : number, speedx : number, speedy : number, id : number, friendly : boolean = true) : void {
+    public spawn(x : number, y : number, id : number) : void {
 
         this.pos = new Vector(x, y);
-        this.speed = new Vector(speedx, speedy);
-        this.target = this.speed.clone();
+        this.speed.zeros();
+        this.target.zeros();
 
         this.id = id;
-        this.friendly = friendly;
 
         this.dying = false;
         this.exist = true;
+
+        this.animationTimer = 0;
+    }
+
+
+    public projectileCollision(p : Projectile, event : ProgramEvent) : boolean {
+
+        if (!this.exist || this.dying || !p.doesExist() || p.isDying())
+            return false;
+
+        if (p.overlay(this)) {
+
+            p.kill(event);
+            this.kill(event);
+        }
+        return false;
     }
 
 
