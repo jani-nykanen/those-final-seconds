@@ -11,9 +11,11 @@ import { CAMERA_MIN_Y } from "./constants.js";
 import { next } from "./existingobject.js";
 import { GameObject, updateSpeedAxis } from "./gameobject.js";
 import { GasParticle } from "./gasparticle.js";
+import { ProjectileGenerator } from "./projectilegenerator.js";
 
 
 const ANGLE_MAX : number = 4.0;
+const SHOOT_RECOVER_TIME : number = 10.0;
 
 
 export class Player extends GameObject {
@@ -25,8 +27,13 @@ export class Player extends GameObject {
     private gasSupply : GasParticle[];
     private gasTimer : number = 0.0;
 
+    private overheatLevel : number = 0;
+    private shootRecoverTimer : number = 0.0;
 
-    constructor(x : number, y : number) {
+    private readonly projectiles : ProjectileGenerator;
+
+
+    constructor(x : number, y : number, projectiles : ProjectileGenerator) {
 
         super(x, y, true);
 
@@ -35,6 +42,36 @@ export class Player extends GameObject {
         this.friction = new Vector(0.15, 0.15);
     
         this.gasSupply = new Array<GasParticle> ();
+        this.projectiles = projectiles;
+    }
+
+
+    private shoot(event : ProgramEvent) : void {
+
+        const KNOCKBACK : number = -0.5;
+        const KNOCKBACK_MAX : number = -4.0;
+
+        const BULLET_ANGLE : number = Math.PI/8;
+        const BULLET_SPEED : number = 4.0;
+
+        const count : number = Math.min(5, 1 + this.overheatLevel*2);
+
+        const startAngle = -BULLET_ANGLE*(count - 1)/2;
+
+        for (let i = 0; i < count; ++ i) {
+
+            const angle : number = startAngle + i*BULLET_ANGLE;
+
+            const speedx : number = Math.cos(angle)*BULLET_SPEED;
+            const speedy : number = Math.sin(angle)*BULLET_SPEED;
+
+            this.projectiles.next().spawn(
+                this.pos.x + 14, this.pos.y + 4, speedx + this.speed.x/2, speedy + this.speed.y/2, 0, true);
+        }
+
+        this.shootRecoverTimer = SHOOT_RECOVER_TIME;
+
+        this.speed.x = Math.max(KNOCKBACK_MAX, KNOCKBACK*this.overheatLevel);
     }
 
 
@@ -66,6 +103,12 @@ export class Player extends GameObject {
         this.target.y = dir.y*MOVE_SPEED;
 
         this.angleTarget = dir.y*ANGLE_MAX;
+
+        if (event.input.getAction("s") == InputState.Pressed) {
+
+            this.shoot(event);
+            ++ this.overheatLevel;
+        }
     }
 
 
@@ -110,7 +153,7 @@ export class Player extends GameObject {
                 o = new GasParticle();
                 this.gasSupply.push(o);
             }
-            o.spawn(this.pos.x - 16, this.pos.y + 4, -2.0 + this.speed.x, this.speed.y/2, 1.0/32.0, 0);
+            o.spawn(this.pos.x - 16, this.pos.y + 4 + this.angle, -2.0 + this.speed.x, this.speed.y/2, 1.0/32.0, 0);
         }
     }
 
@@ -119,6 +162,11 @@ export class Player extends GameObject {
 
         this.control(event);
         this.updateGas(event);
+
+        if (this.shootRecoverTimer > 0) {
+
+            this.shootRecoverTimer -= event.tick;
+        }
     }
 
 
@@ -165,6 +213,15 @@ export class Player extends GameObject {
 
             canvas.drawBitmap(bmp, Flip.None, dx + x, dy + shifty + y, x, 0, angleRamp, 24);
         }
+
+        // Draw the muzzle flash
+        if (this.shootRecoverTimer > 0) {
+
+            const t : number = 1.0 - this.shootRecoverTimer/SHOOT_RECOVER_TIME;
+            canvas.setColor("#ffdb00");
+            canvas.fillRing(this.pos.x + 15, this.pos.y + 4 + angleStep, 8*t, 4 + 5*t);
+            return;
+        }
     }
 
 
@@ -178,4 +235,7 @@ export class Player extends GameObject {
 
         canvas.fillEllipse(dx, dy, shadowSize/2, shadowSize/6);
     }
+
+
+    public getOverheatLevel = () : number => this.overheatLevel;
 }

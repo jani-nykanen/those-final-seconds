@@ -46,6 +46,10 @@ const PALETTE_LOOKUP : string[] = [
     "244900ff", // J Darkest green
     "492400ff", // K Darkest brown
 
+    // Bullets
+    "b649dbff", // L Darker purple
+    "db92ffff", // M Brighter, pinkish purple
+
 ];
 
 
@@ -55,7 +59,7 @@ const GAME_ART_PALETTE_TABLE : string[] = [
     "0007", "1034", "K089", "K087", "A0CD", "A0CD", "A0GF", "A0EF",
     "J0B5", "J0B5", "J0B5", "J0B5", "J0B5", "J0B5", "A0EF", "A0EF",
     "J0B5", "J0B5", "J0B5", "J0B5", "J0B5", "J0B5", "10H2", "00GD",
-    "10IH", "10IH", "1034", "1034", "1034", "1024", "0000", "0000",
+    "10IH", "10IH", "1034", "1034", "1034", "1024", "10LM", "0000",
     "10IH", "10IH", "1034", "1034", "1034", "1034", "0000", "0000",
 ];
 
@@ -256,6 +260,31 @@ const generateGasParticles = (assets : Assets) : void => {
 }
 
 
+const generateProjectiles = (assets : Assets, bmpGameArt : Bitmap) : void => {
+
+    const canvas : Canvas = new Canvas(16, 16);
+
+    // White outlines
+    canvas.setColor("#ffffff");
+    for (let i = 0; i < 4; ++ i) {
+
+        const w : number = 10 - i*2;
+        const dy : number = 6 - i;
+
+        canvas.fillRect(9 - dy, dy, w, 14 - w);
+    }
+
+    // Projectile body
+    canvas.drawBitmap(bmpGameArt, Flip.None, 4, 4, 48, 32, 8, 8);
+
+    // Reflection
+    canvas.setColor("#ffdbff");
+    canvas.fillRect(6, 6, 2, 2);
+
+    assets.addBitmap("pr", canvas.toBitmap());
+}
+
+
 const generateFonts = (assets : Assets) : void => {
 
     const bmpFontRaw : Bitmap = assets.getBitmap("_f");
@@ -315,6 +344,7 @@ export const generateAssets = (assets : Assets, audio : AudioPlayer) : void => {
     generateSun(assets, bmpGameArt);
     generatePlayer(assets, bmpGameArt);
     generateGasParticles(assets);
+    generateProjectiles(assets, bmpGameArt);
     generateFonts(assets);
 
     // Audio

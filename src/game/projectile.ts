@@ -4,9 +4,10 @@ import { ProgramEvent } from "../core/event.js";
 import { Canvas } from "../gfx/canvas.js";
 import { Bitmap } from "../gfx/bitmap.js";
 import { Flip } from "../gfx/flip.js";
+import { Rectangle } from "../math/rectangle.js";
 
 
-const DEATH_TIME : number = 16;
+const DEATH_TIME : number = 10;
 
 
 export class Projectile extends GameObject {
@@ -21,6 +22,8 @@ export class Projectile extends GameObject {
     constructor() {
 
         super(0, 0, false);
+
+        this.hitbox = new Rectangle(0, 0, 4, 4);
     }
 
 
@@ -42,6 +45,7 @@ export class Projectile extends GameObject {
         if (this.pos.x - 8 > event.screenWidth || this.pos.x + 8 < 0) {
 
             this.exist = false;
+            // console.log("Poof!");
         }
     }
 
@@ -55,17 +59,16 @@ export class Projectile extends GameObject {
 
         if (this.dying) {
 
-            const t : number = 1.0 - this.deathTimer/DEATH_TIME;
-            const r1 : number = 8 + 8*t;
-            const r2 : number = 15*t;
+            const t : number = this.deathTimer/DEATH_TIME;
+            const r1 : number = 6 + 6*t;
+            const r2 : number = 11*t;
 
-            // TODO: Maybe alter the color?
-            canvas.setColor("#ffffff");
+            canvas.setColor("#ffdbff");
             canvas.fillRing(this.pos.x, this.pos.y, r2, r1);
             return;
         }
 
-        // TODO: Draw the projectile itself
+        canvas.drawBitmap(bmp, Flip.None, this.pos.x - 8, this.pos.y - 8, 0, 0, 16, 16);
     }
 
 
