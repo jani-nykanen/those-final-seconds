@@ -262,7 +262,9 @@ const generateGasParticles = (assets : Assets) : void => {
 
 const generateProjectiles = (assets : Assets, bmpGameArt : Bitmap) : void => {
 
-    const canvas : Canvas = new Canvas(16, 16);
+    const SECONDARY_PROJECTILE_COLORS : string[] = ["#6d0092", "#b649db","#db92ff", "#ffdbff"];
+
+    const canvas : Canvas = new Canvas(64, 32);
 
     // White outlines
     canvas.setColor("#ffffff");
@@ -278,8 +280,21 @@ const generateProjectiles = (assets : Assets, bmpGameArt : Bitmap) : void => {
     canvas.drawBitmap(bmpGameArt, Flip.None, 4, 4, 48, 32, 8, 8);
 
     // Reflection
-    canvas.setColor("#ffdbff");
+    canvas.setColor(SECONDARY_PROJECTILE_COLORS[3]);
     canvas.fillRect(6, 6, 2, 2);
+
+    // "Secondary" bullets (big bullets?)
+    for (let i = 0; i < 4; ++ i) {
+
+        const cx : number = i*16 + 8;
+        for (let j = 0; j < 4; ++ j) {
+
+            const r : number = 8 - 2*j;
+
+            canvas.setColor(SECONDARY_PROJECTILE_COLORS[(i + j) % 4]);
+            canvas.fillCircle(cx, 24, r);
+        }
+    }
 
     assets.addBitmap("pr", canvas.toBitmap());
 }

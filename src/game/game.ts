@@ -12,7 +12,7 @@ import { Bitmap } from "../gfx/bitmap.js";
 import { Align } from "../gfx/align.js";
 
 
-const OVERHEAT_BAR_BASE_COLORS : string[] = ["#ffffff", "#000000", "#929292"];
+const OVERHEAT_BAR_BASE_COLORS : string[] = ["#ffffff", "#000000", "#6d6d6d"];
 const OVERHEAT_BAR_PIECES_HEIGHTS : number[] = [11, 9, 4];
 const OVERHEAT_BAR_PIECES_Y : number[] = [0, 0, 2];
 
@@ -117,11 +117,12 @@ export class Game implements Scene {
 
         // Bar colors
         const colors : string[] = this.computeOverheatBarColors(level);
+        const activeBarWidth : number = this.player.getOverheatBar()*(OVERHEAT_BAR_WIDTH - 4);
         for (let i = 0; i < 3; ++ i) {
 
             const y : number = dy + 2 + OVERHEAT_BAR_PIECES_Y[i];
             canvas.setColor(colors[i]);
-            canvas.fillRect(dx + 2, y, OVERHEAT_BAR_WIDTH - 4, OVERHEAT_BAR_PIECES_HEIGHTS[i]);
+            canvas.fillRect(dx + 2, y, activeBarWidth, OVERHEAT_BAR_PIECES_HEIGHTS[i]);
         }
 
         // Overheat text
