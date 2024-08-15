@@ -15,7 +15,7 @@ import { ProjectileGenerator } from "./projectilegenerator.js";
 
 
 const ANGLE_MAX : number = 4.0;
-const SHOOT_RECOVER_TIME : number = 12.0;
+const SHOOT_RECOVER_TIME : number = 10.0;
 
 
 export class Player extends GameObject {
@@ -27,14 +27,16 @@ export class Player extends GameObject {
     private gasSupply : GasParticle[];
     private gasTimer : number = 0.0;
 
-    private overheatLevel : number = 0;
-    // TODO: Rename
-    private overheatBarTarget : number = 0.0;
-    private overheatBarCurrent : number = 0.0;
-    private overheatBonus : number = 0.0;
     private shootRecoverTimer : number = 0.0;
+    private level : number = 0;
+    private experienceTarget : number = 0.0;
+    private experienceCurrent : number = 0.0;
 
+    private health : number = 3;
+    
     private readonly projectiles : ProjectileGenerator;
+
+    public readonly maxHealth : number = 3;
 
 
     constructor(x : number, y : number, projectiles : ProjectileGenerator) {
@@ -52,40 +54,25 @@ export class Player extends GameObject {
 
     private shoot(event : ProgramEvent) : void {
 
-        const OVERHEAT_BASE : number = 0.125;
-        const OVERHEAT_BONUS : number = 0.025;
+        const BULLET_ANGLE : number = Math.PI/10;
+        const BULLET_SPEED : number = 4.0;
 
-        // const KNOCKBACK : number = -0.25;
-        // const KNOCKBACK_MAX : number = -4.0;
+        const count : number = Math.min(5, 1 + this.level);
+        const startAngle: number = -BULLET_ANGLE*(count - 1)/2;
 
-        const BULLET_ANGLE : number[] = [Math.PI/10, Math.PI/12];
-        const BULLET_SPEED : number[] = [3.5, 1.5];
+        for (let i = 0; i < count; ++ i) {
 
-        const baseCount : number = Math.min(5, 1 + this.overheatLevel);
-        const specialCount : number = clamp(this.overheatLevel - 4, 0, 5);
+            const angle : number = startAngle + i*BULLET_ANGLE;
 
-        // Shoot base bullets
-        const startAngleBase : number = -BULLET_ANGLE[0]*(baseCount - 1)/2;
-        const startAngleSpecial : number = -BULLET_ANGLE[1]*(specialCount - 1)/2;
-
-        for (let i = 0; i < baseCount + specialCount; ++ i) {
-
-            const id : number = Math.min(1, (i/5) | 0);
-
-            const angle : number = (id == 0 ? startAngleBase : startAngleSpecial) + (i % 5)*BULLET_ANGLE[id];
-
-            const speedx : number = Math.cos(angle)*BULLET_SPEED[id];
-            const speedy : number = Math.sin(angle)*BULLET_SPEED[id];
+            const speedx : number = Math.cos(angle)*BULLET_SPEED;
+            const speedy : number = Math.sin(angle)*BULLET_SPEED;
 
             this.projectiles.next().spawn(
-                this.pos.x + 14, this.pos.y + 4, speedx + this.speed.x/4, speedy + this.speed.y/2, id, true);
+                this.pos.x + 14, this.pos.y + 4 + this.angleTarget,
+                speedx + this.speed.x/2, speedy + this.speed.y/2, 0, true);
         }
+
         this.shootRecoverTimer = SHOOT_RECOVER_TIME;
-
-        // this.speed.x = Math.max(KNOCKBACK_MAX, KNOCKBACK*this.overheatLevel);
-
-        this.overheatBonus = Math.min(1.0 - OVERHEAT_BASE, this.overheatBonus + OVERHEAT_BONUS);
-        this.overheatBarTarget += 0.125 + this.overheatBonus;
     }
 
 
@@ -174,50 +161,17 @@ export class Player extends GameObject {
 
     private updateOverheatBar(event : ProgramEvent) : void {
 
-        const OVERHEAT_BONUS_REDUCTION : number = 0.01;
-        const OVERHEAT_REDUCTION_BASE : number = 1.0/120.0;
-        const OVERHEAT_REDUCTION_PENALTY : number = 4.0;
+        if (this.level == 5) {
 
-        const dist : number = Math.abs(this.overheatBarTarget - this.overheatBarCurrent);
-
-        if (this.overheatBarTarget > this.overheatBarCurrent) {
-
-            const delta : number = Math.max(1.0/120.0, dist/30.0);
-            this.overheatBarCurrent = Math.min(this.overheatBarTarget, this.overheatBarCurrent + delta*event.tick);
+            this.experienceCurrent = 0.0;
+            return;
         }
 
-        if (this.overheatBarCurrent >= 1.0) {
+        this.experienceCurrent = updateSpeedAxis(this.experienceCurrent, this.experienceTarget, 1.0/60.0);
+        if (this.experienceCurrent >= 1.0) {
 
-            this.overheatBarTarget = 0.0;
-            this.overheatBarCurrent = 0.0;
-            this.overheatLevel = Math.min(13, this.overheatLevel + 1);
-        }
-
-        if (this.overheatBonus > 0 && this.shootRecoverTimer <= 0) {
-
-            this.overheatBonus = Math.max(0.0, this.overheatBonus - OVERHEAT_BONUS_REDUCTION*event.tick);
-        }
-
-        if (this.overheatBonus <= 0.0 && 
-            this.overheatBarCurrent >= this.overheatBarTarget) {
-
-            const reductionSpeed : number = OVERHEAT_REDUCTION_BASE/(1.0 + OVERHEAT_REDUCTION_PENALTY*(this.overheatLevel/13));
-
-            this.overheatBarCurrent -= reductionSpeed*event.tick
-            this.overheatBarTarget = this.overheatBarCurrent;
-
-            if (this.overheatBarCurrent < 0.0) {
-
-                if (this.overheatLevel == 0) {
-
-                    this.overheatBarCurrent = 0.0;
-                    return;
-                }
-
-                this.overheatBarCurrent += 1.0;
-                -- this.overheatLevel;
-            }
-
+            ++ this.level;
+            this.experienceCurrent -= 1.0;
         }
     }
 
@@ -302,6 +256,7 @@ export class Player extends GameObject {
     }
 
 
-    public getOverheatLevel = () : number => this.overheatLevel;
-    public getOverheatBar = () : number => this.overheatBarCurrent;
+    public getLevel = () : number => this.level;
+    public getExperienceCount = () : number => this.experienceCurrent;
+    public getHealth = () : number => this.health;
 }

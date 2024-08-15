@@ -59,8 +59,8 @@ const GAME_ART_PALETTE_TABLE : string[] = [
     "0007", "1034", "K089", "K087", "A0CD", "A0CD", "A0GF", "A0EF",
     "J0B5", "J0B5", "J0B5", "J0B5", "J0B5", "J0B5", "A0EF", "A0EF",
     "J0B5", "J0B5", "J0B5", "J0B5", "J0B5", "J0B5", "10H2", "00GD",
-    "10IH", "10IH", "1034", "1034", "1034", "1024", "10LM", "0000",
-    "10IH", "10IH", "1034", "1034", "1034", "1034", "0000", "0000",
+    "10IH", "10IH", "1034", "1034", "1034", "1024", "10LM", "1000",
+    "10IH", "10IH", "1034", "1034", "1034", "1034", "0000", "1000",
 ];
 
 
@@ -262,9 +262,7 @@ const generateGasParticles = (assets : Assets) : void => {
 
 const generateProjectiles = (assets : Assets, bmpGameArt : Bitmap) : void => {
 
-    const SECONDARY_PROJECTILE_COLORS : string[] = ["#6d0092", "#b649db","#db92ff", "#ffdbff"];
-
-    const canvas : Canvas = new Canvas(64, 32);
+    const canvas : Canvas = new Canvas(16, 16);
 
     // White outlines
     canvas.setColor("#ffffff");
@@ -280,24 +278,55 @@ const generateProjectiles = (assets : Assets, bmpGameArt : Bitmap) : void => {
     canvas.drawBitmap(bmpGameArt, Flip.None, 4, 4, 48, 32, 8, 8);
 
     // Reflection
-    canvas.setColor(SECONDARY_PROJECTILE_COLORS[3]);
+    canvas.setColor("#ffdbff");
     canvas.fillRect(6, 6, 2, 2);
-
-    // "Secondary" bullets (big bullets?)
-    for (let i = 0; i < 4; ++ i) {
-
-        const cx : number = i*16 + 8;
-        for (let j = 0; j < 4; ++ j) {
-
-            const r : number = 8 - 2*j;
-
-            canvas.setColor(SECONDARY_PROJECTILE_COLORS[(i + j) % 4]);
-            canvas.fillCircle(cx, 24, r);
-        }
-    }
 
     assets.addBitmap("pr", canvas.toBitmap());
 }
+
+
+const generateHUD = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt : Bitmap) : void => {
+
+    const bmpHeartRaw : Bitmap = cropBitmap(bmpRawGameArt, 48, 48, 16, 16);
+
+    const bmpHeart1 : Bitmap = applyPalette(bmpHeartRaw, ["10FG", "10FE", "10FE", "10FE"], PALETTE_LOOKUP);
+    const bmpHeart2 : Bitmap = applyPalette(bmpHeartRaw, ["1042", "1043", "1043", "1043"], PALETTE_LOOKUP);
+    // const bmpHeart3 : Bitmap = applyPalette(bmpHeartRaw, ["2022", "2022", "2022", "2022"], PALETTE_LOOKUP);
+
+    const canvas : Canvas = new Canvas(32, 16);
+
+    // White outlines
+    // Maybe not needed
+    /*
+    for (let i = 0; i < 2; ++ i) {
+
+        for (let y = -1; y <= 1; ++ y) {
+
+            for (let x = -1; x <= 1; ++ x){
+                
+                if (x*y != 0) {
+
+                    continue;
+                }
+
+                canvas.drawBitmap(bmpHeart3, Flip.None, i*16 + x, y);
+            }
+        }
+    }
+    */
+
+    // Hearts
+    canvas.drawBitmap(bmpHeart1, Flip.None, 0, 0);
+    canvas.drawBitmap(bmpHeart2, Flip.None, 16, 0);
+
+    // Faces
+    for (let i = 0; i < 2; ++ i) {
+
+        canvas.drawBitmap(bmpGameArt, Flip.None, 4 + 16*i, 4, 56, 32 + i*8, 8, 8);
+    }
+
+    assets.addBitmap("h", canvas.toBitmap());
+} 
 
 
 const generateFonts = (assets : Assets) : void => {
@@ -360,6 +389,7 @@ export const generateAssets = (assets : Assets, audio : AudioPlayer) : void => {
     generatePlayer(assets, bmpGameArt);
     generateGasParticles(assets);
     generateProjectiles(assets, bmpGameArt);
+    generateHUD(assets, assets.getBitmap("_g"), bmpGameArt);
     generateFonts(assets);
 
     // Audio

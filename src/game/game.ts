@@ -12,9 +12,10 @@ import { Bitmap } from "../gfx/bitmap.js";
 import { Align } from "../gfx/align.js";
 
 
-const OVERHEAT_BAR_BASE_COLORS : string[] = ["#ffffff", "#000000", "#6d6d6d"];
-const OVERHEAT_BAR_PIECES_HEIGHTS : number[] = [11, 9, 4];
-const OVERHEAT_BAR_PIECES_Y : number[] = [0, 0, 2];
+const EXPRIENCE_BAR_BACKGROUND_COLORS : string[] = ["#ffffff", "#000000", "#6d6d6d"];
+const EXPERIENCE_BAR_PIECES_HEIGHTS : number[] = [11, 9, 4];
+const EXPERIENCE_BAR_PIECES_Y : number[] = [0, 0, 2];
+const EXPERIENCE_BAR_COLORS : string[] = ["#246db6", "#6db6ff", "#92dbff"]; 
 
 
 export class Game implements Scene {
@@ -29,6 +30,8 @@ export class Game implements Scene {
     private cameraTarget : number = 0.0;
     private globalSpeed : number = 1.0;
 
+    private time : number = 0.0;
+    private frameCount : number = 0;
     
 
     constructor(event : ProgramEvent) {
@@ -64,70 +67,67 @@ export class Game implements Scene {
     }
 
 
-    private computeOverheatBarColors(level : number) : string[] {
+    private drawExperienceBar(canvas : Canvas) : void {
 
-        const START_COLORS : number[][] = [
-            [36, 109, 0],
-            [109, 182, 0],
-            [182, 255, 0],
-        ];
-        const TARGET_COLORS : number[][] = [
-            [109, 0, 0],
-            [219, 73, 0],
-            [255, 109, 73],
-        ];
+        const EXPERIENCE_BAR_WIDTH : number = 96;
+        const EXPERIENCE_BAR_HEIGHT : number = 13;
 
-        const t : number = 1.0 - Math.min(1.0, level/13);
+        const cx : number = canvas.width/2;
+        const by : number = canvas.height;
 
-        const out : [number[], number[], number[]] = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
-        let result : string[] = [];
+        const level : number = this.player.getLevel();
+
+        // Experience bar background
+        const dx : number = cx - EXPERIENCE_BAR_WIDTH/2;
+        const dy : number = by - 10 - EXPERIENCE_BAR_HEIGHT/2;
         for (let i = 0; i < 3; ++ i) {
 
-            for (let j = 0; j < 3; ++ j) {
-
-                out[i][j] = Math.round(START_COLORS[i][j]*t + (1.0 - t)*TARGET_COLORS[i][j]);
-            }
-            result[i] = "rgb(" + String(out[i][0]) + "," + String(out[i][1]) + "," + String(out[i][2]) + ")";
+            canvas.setColor(EXPRIENCE_BAR_BACKGROUND_COLORS[i]);
+            canvas.fillRect(dx + i, dy + i, EXPERIENCE_BAR_WIDTH - i*2, EXPERIENCE_BAR_HEIGHT - i*2);
         }
-        return result;
+
+        // Bar colors
+        const activeBarWidth : number = this.player.getExperienceCount()*(EXPERIENCE_BAR_WIDTH - 4);
+        for (let i = 0; i < 3; ++ i) {
+
+            const y : number = dy + 2 + EXPERIENCE_BAR_PIECES_Y[i];
+            canvas.setColor(EXPERIENCE_BAR_COLORS[i]);
+            canvas.fillRect(dx + 2, y, activeBarWidth, EXPERIENCE_BAR_PIECES_HEIGHTS[i]);
+        }
+        canvas.drawText("fw", "LEVEL " + String(level + 1), cx, by - 14, -1, 0, Align.Center);
+    }
+
+
+    private drawTime(canvas : Canvas) : void {
+
+        const milliseconds : number = ((this.time % 1000)/10) | 0;
+        const seconds : number = (this.time/1000) | 0;
+
+        canvas.drawText("fo", 
+            "#" + String(seconds) + ":" + ( (milliseconds < 10 ? "0" : "") + String(milliseconds)), 
+            canvas.width/2, -2, -7, 0, Align.Center);
+    }
+
+
+    private drawHealth(canvas : Canvas) : void {
+
+        const count : number = this.player.getHealth();
+
+        for (let i = 0; i < this.player.maxHealth; ++ i) {
+
+            canvas.drawBitmap("h", Flip.None, 2 + 16*i, 2, i < count ? 0 : 16, 0, 16, 16);
+        }
     }
 
 
     private drawHUD(canvas : Canvas) : void {
 
-        const OVERHEAT_BOTTOM_OFFSET : number = 20;
-        const OVERHEAT_BAR_WIDTH : number = 96;
-        const OVERHEAT_BAR_HEIGHT : number = 15;
+        this.drawExperienceBar(canvas);
+        this.drawTime(canvas);
+        this.drawHealth(canvas);
 
-        const fontOutlines : Bitmap = canvas.getBitmap("fo");
-
-        const cx : number = canvas.width/2;
-        const by : number = canvas.height;
-
-        const level : number = this.player.getOverheatLevel();
-
-        // Overheat bar background
-        const dx : number = cx - OVERHEAT_BAR_WIDTH/2;
-        const dy : number = by - OVERHEAT_BOTTOM_OFFSET/2 - OVERHEAT_BAR_HEIGHT/2;
-        for (let i = 0; i < 3; ++ i) {
-
-            canvas.setColor(OVERHEAT_BAR_BASE_COLORS[i]);
-            canvas.fillRect(dx + i, dy + i, OVERHEAT_BAR_WIDTH - i*2, OVERHEAT_BAR_HEIGHT - i*2);
-        }
-
-        // Bar colors
-        const colors : string[] = this.computeOverheatBarColors(level);
-        const activeBarWidth : number = this.player.getOverheatBar()*(OVERHEAT_BAR_WIDTH - 4);
-        for (let i = 0; i < 3; ++ i) {
-
-            const y : number = dy + 2 + OVERHEAT_BAR_PIECES_Y[i];
-            canvas.setColor(colors[i]);
-            canvas.fillRect(dx + 2, y, activeBarWidth, OVERHEAT_BAR_PIECES_HEIGHTS[i]);
-        }
-
-        // Overheat text
-        canvas.drawText(fontOutlines, "OVERHEAT: ", cx - 96, by - OVERHEAT_BOTTOM_OFFSET, -7, 0, Align.Center);
-        canvas.drawText(fontOutlines,  String(level) + "/13", cx, by - OVERHEAT_BOTTOM_OFFSET, -7, 0, Align.Center);
+        // A lonely phase text on the top-right corner
+        canvas.drawText("fo", "PHASE 1", canvas.width + 2, -2, -7, 0, Align.Right);
     }
 
     
@@ -149,6 +149,14 @@ export class Game implements Scene {
 
         this.updateCamera(event);
         this.background.update(this.globalSpeed, event);
+
+        this.time += this.frameCount == 0 ? 16 : 17;
+        if (this.time >= 13*1000) {
+
+            this.time = 13*1000;
+            // TODO: Kill the player
+        }
+        this.frameCount = (this.frameCount + 1) % 3;
     }
 
 
@@ -168,7 +176,7 @@ export class Game implements Scene {
         this.player.draw(canvas);
         this.projectiles.draw(canvas);
 
-        // canvas.drawBitmap("pr", Flip.None, 64, 16);
+        // canvas.drawBitmap("h", Flip.None, 64, 16);
         // canvas.drawBitmap("p", Flip.None, 64, 80);
         // canvas.drawBitmap("s", Flip.None, 128, 80);
 
