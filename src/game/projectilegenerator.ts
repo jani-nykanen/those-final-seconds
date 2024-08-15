@@ -49,4 +49,16 @@ export class ProjectileGenerator {
             o.draw(canvas, bmp);
         }
     }
+
+
+    public iterate(func : (p : Projectile) => void) : void {
+
+        for (let p of this.projectiles) {
+
+            if (!p.isActive())
+                return;
+
+            func(p);
+        }
+    }
 }

@@ -31,6 +31,8 @@ export class GameObject implements ExistingObject {
 
     protected hitbox : Rectangle;
 
+    protected shadowWidth : number = 16;
+
 
     constructor(x : number = 0, y : number = 0, exist : boolean = false) {
 
@@ -75,10 +77,6 @@ export class GameObject implements ExistingObject {
     }
 
 
-    public draw?(canvas : Canvas, bmp? : Bitmap | undefined) : void;
-    public drawShadow?(canvas : Canvas) : void;
-
-
     public update(event : ProgramEvent) : void {
 
         if (!this.exist) 
@@ -98,6 +96,23 @@ export class GameObject implements ExistingObject {
         this.updateMovement(event);
         this.checkGroundCollision(event);
         this.postMovementEvent?.(event);
+    }
+
+
+    public drawShadow(canvas: Canvas) : void {
+
+        if (!this.isActive()) {
+
+            return;
+        }
+
+        const dx : number = this.pos.x;
+        const dy : number = canvas.height - GROUND_LEVEL;
+
+        // 20 here is a magic number coming out of nowhere...
+        const shadowSize : number = this.shadowWidth + 20*(Math.min(this.pos.y, dy)/canvas.height);
+
+        canvas.fillEllipse(dx, dy, shadowSize/2, shadowSize/6);
     }
 
     

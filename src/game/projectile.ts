@@ -19,6 +19,8 @@ export class Projectile extends GameObject {
 
     private deathTimer : number = 0.0;
 
+    public readonly radius : number = 6;
+
 
     constructor() {
 

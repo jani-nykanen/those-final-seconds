@@ -244,18 +244,6 @@ export class Player extends GameObject {
     }
 
 
-    // TODO: Make a common method for all objects
-    public drawShadow(canvas: Canvas) : void {
-
-        const dx : number = this.pos.x;
-        const dy : number = canvas.height - GROUND_LEVEL;
-
-        const shadowSize : number = 16 + 20*(Math.min(this.pos.y, dy)/canvas.height);
-
-        canvas.fillEllipse(dx, dy, shadowSize/2, shadowSize/6);
-    }
-
-
     public getLevel = () : number => this.level;
     public getExperienceCount = () : number => this.experienceCurrent;
     public getHealth = () : number => this.health;
