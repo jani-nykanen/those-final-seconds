@@ -1,10 +1,11 @@
-import { Rectangle } from "./rectangle.js";
 
 
 export class Vector {
 
     public x : number;
     public y : number;
+
+    // TODO: The last two components unused
     public z : number;
     public w : number;
 
@@ -57,6 +58,18 @@ export class Vector {
         this.w /= len;
 
         return this;
+    }
+
+
+    public distanceFrom(from : Vector) : number {
+
+        return Math.hypot(this.x - from.x, this.y - from.y, this.z - from.z, this.w - from.w);
+    }
+
+
+    public directionTo(to : Vector) : Vector {
+
+        return (new Vector(to.x - this.x, to.y - this.y, to.z - this.z, to.w - this.w)).normalize();
     }
 
     

@@ -15,6 +15,8 @@ const DEATH_TIME : number = 10;
 export class Enemy extends GameObject {
 
 
+    private startY : number = 0.0;
+
     private id : number = 0;
 
     private animationTimer : number = 0;
@@ -27,9 +29,9 @@ export class Enemy extends GameObject {
 
         super(0, 0, false);
 
-        this.hitbox = new Rectangle(0, 0, 24, 24);
+        this.hitbox = new Rectangle(0, 0, 22, 22);
 
-        this.shadowWidth = 12;
+        this.shadowWidth = 24;
     }
 
 
@@ -48,17 +50,29 @@ export class Enemy extends GameObject {
 
     protected updateEvent(event : ProgramEvent) : void {
         
-        const ANIMATION_SPEED : number = 1.0/16.0;
+        const WAVE_SPEED : number = Math.PI*2/120.0;
+        const AMPLITUDE : number = 8.0;
 
         if (this.pos.x < -24) {
 
             this.exist = false;
             return;
         }
-        this.animationTimer = (this.animationTimer + ANIMATION_SPEED*event.tick) % 1.0;
+        
 
         this.target.x = -1.5;
         this.speed.x = this.target.x;
+
+        switch (this.id) {
+
+        case 0:
+            this.animationTimer = (this.animationTimer + WAVE_SPEED*event.tick) % (Math.PI*2);
+            this.pos.y = this.startY + Math.sin(this.animationTimer)*AMPLITUDE;
+            break;
+
+        default:
+            break;
+        }
     }
 
 
@@ -86,18 +100,20 @@ export class Enemy extends GameObject {
     }
 
 
-    public spawn(x : number, y : number, id : number, projectiles : ProjectileGenerator) : void {
+    public spawn(x : number, y : number, id : number, shift : number, projectiles : ProjectileGenerator) : void {
 
         this.pos = new Vector(x, y);
         this.speed.zeros();
         this.target.zeros();
+
+        this.startY = y;
 
         this.id = id;
 
         this.dying = false;
         this.exist = true;
 
-        this.animationTimer = 0;
+        this.animationTimer = Math.PI/3*shift;
 
         this.projectiles = projectiles;
     }
@@ -105,17 +121,36 @@ export class Enemy extends GameObject {
 
     public projectileCollision(p : Projectile, event : ProgramEvent) : boolean {
 
-        if (!this.exist || this.dying || !p.doesExist() || p.isDying())
+        if (!this.isActive() || !p.isActive())
             return false;
 
-        const ppos : Vector = p.getPosition();
-
-        if (Math.hypot(ppos.x - this.pos.x, ppos.y - this.pos.y) < 12 + p.radius) {
+        if (this.overlay(p)) {
 
             p.kill(event);
             this.kill(event);
         }
         return false;
+    }
+
+
+    public enemyCollision(e : Enemy) : void {
+
+        if (!this.isActive() || !e.isActive())
+            return;
+
+        const dist : number = 24 - this.pos.distanceFrom(e.pos);
+        if (dist > 0) {
+
+            const dir : Vector = this.pos.directionTo(e.pos);
+
+            this.pos.x -= dir.x*dist/2;
+            this.pos.y -= dir.y*dist/2;
+            this.startY -= dir.y*dist/2;
+
+            e.pos.x += dir.x*dist/2;
+            e.pos.y += dir.y*dist/2;
+            e.startY += dir.y*dist/2;
+        }
     }
 
 

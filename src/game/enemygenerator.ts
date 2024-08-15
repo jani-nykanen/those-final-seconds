@@ -25,18 +25,23 @@ export class EnemyGenerator {
     }
 
 
-    private spawnEnemy(projectiles : ProjectileGenerator, event : ProgramEvent) : void {
+    private spawnEnemy(count : number, projectiles : ProjectileGenerator, event : ProgramEvent) : void {
+
+        const XOFF : number = 32;
 
         const dx : number = event.screenWidth + 16;
         const dy : number = Math.random()*(event.screenHeight - GROUND_LEVEL - 32);
 
-        let e : Enemy | undefined = next<Enemy> (this.enemies);
-        if (e === undefined) {
+        for (let i = 0; i < count; ++ i) {
 
-            e = new Enemy();
-            this.enemies.push(e);
+            let e : Enemy | undefined = next<Enemy> (this.enemies);
+            if (e === undefined) {
+
+                e = new Enemy();
+                this.enemies.push(e);
+            }
+            e.spawn(dx + i*32, dy, 0, i, projectiles);
         }
-        e.spawn(dx, dy, 0, projectiles);
     }
 
 
@@ -46,8 +51,10 @@ export class EnemyGenerator {
 
             if ((this.timers[i] -= event.tick) <= 0) {
 
-                this.timers[i] += 60 + Math.random()*120;
-                this.spawnEnemy(projectiles, event);
+                const count : number = 1 + ( (Math.random()*3) | 0); 
+
+                this.timers[i] += count*60 + Math.random()*120;
+                this.spawnEnemy(count, projectiles, event);
             }
         }
     }
@@ -57,7 +64,9 @@ export class EnemyGenerator {
 
         this.updateTimers(projectiles, event);
 
-        for (let e of this.enemies) {
+        for (let i = 0; i < this.enemies.length; ++ i) {
+
+            const e : Enemy = this.enemies[i];
 
             e.update(event);
             if (e.isActive()) {
@@ -66,6 +75,11 @@ export class EnemyGenerator {
 
                     e.projectileCollision(p, event);
                 });
+
+                for (let j = i + 1; j < this.enemies.length; ++ j) {
+
+                    e.enemyCollision(this.enemies[j]);
+                }
 
                 // TODO: Player collision
             }

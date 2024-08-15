@@ -19,14 +19,12 @@ export class Projectile extends GameObject {
 
     private deathTimer : number = 0.0;
 
-    public readonly radius : number = 6;
-
 
     constructor() {
 
         super(0, 0, false);
 
-        this.hitbox = new Rectangle(0, 0, 4, 4);
+        this.hitbox = new Rectangle(0, 0, 6, 6);
     }
 
 

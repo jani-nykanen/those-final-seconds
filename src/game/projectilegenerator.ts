@@ -56,8 +56,7 @@ export class ProjectileGenerator {
         for (let p of this.projectiles) {
 
             if (!p.isActive())
-                return;
-
+                continue;
             func(p);
         }
     }
