@@ -35,9 +35,9 @@ export class Enemy extends GameObject {
 
         super(0, 0, false);
 
-        this.hitbox = new Rectangle(0, 0, 22, 22);
+        this.hitbox = new Rectangle(0, 0, 18, 18);
 
-        this.shadowWidth = 24;
+        this.shadowWidth = 20;
     }
 
 
@@ -110,13 +110,14 @@ export class Enemy extends GameObject {
             return;
         }
 
-        // Body
-        canvas.drawBitmap("e", Flip.None, this.pos.x - 12, this.pos.y - 12, this.id*24, 0, 24, 24);
 
         // Propeller
         // TODO: Different place for different enemies
         const frame : number = (this.propellerTimer*4) | 0; 
-        canvas.drawBitmap("ro", Flip.None, this.pos.x - 12, this.pos.y - 28, frame*24, 0, 24, 16);
+        canvas.drawBitmap("ro", Flip.None, this.pos.x - 8, this.pos.y - 25, frame*16, 0, 16, 16);
+
+        // Body
+        canvas.drawBitmap("e", Flip.None, this.pos.x - 12, this.pos.y - 12, this.id*24, 0, 24, 24);
     }
 
 
@@ -175,10 +176,12 @@ export class Enemy extends GameObject {
 
     public enemyCollision(e : Enemy) : void {
 
+        const RADIUS : number = 10;
+
         if (!this.isActive() || !e.isActive())
             return;
 
-        const dist : number = 24 - this.pos.distanceFrom(e.pos);
+        const dist : number = RADIUS*2 - this.pos.distanceFrom(e.pos);
         if (dist > 0) {
 
             const dir : Vector = this.pos.directionTo(e.pos);

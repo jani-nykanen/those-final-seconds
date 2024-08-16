@@ -349,9 +349,9 @@ const generateEnemyBodies = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt
     const canvas : Canvas = new Canvas(
         applyPalette(bmpBallBodiesRaw.toBitmap(), colors, PALETTE_LOOKUP) as HTMLCanvasElement);
 
-    const bmpNose : Bitmap = applyPalette(cropBitmap(bmpRawGameArt, 48, 32, 8, 8), ["10EF"], PALETTE_LOOKUP);
-
+    // const bmpNose : Bitmap = applyPalette(cropBitmap(bmpRawGameArt, 48, 32, 8, 8), ["10EF"], PALETTE_LOOKUP);
     // Faces
+    /*
     canvas.setColor("#ffb600");
     for (let i = 0; i < 2; ++ i) {
 
@@ -363,26 +363,26 @@ const generateEnemyBodies = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt
         canvas.drawBitmap(bmpNose, Flip.None, 6, 11);
         canvas.fillRect(8, 13, 2, 2);
     }
-
+*/
     assets.addBitmap("e", canvas.toBitmap());
 }
 
 
 const generatePropeller = (assets : Assets, bmpGameArt : Bitmap) : void => {
 
-    const SX : number[] = [25, 24, 37, 24];
-    const SY : number[] = [48, 54, 54, 54];
-    const SW : number[] = [19, 13, 5, 13];
+    const SX : number[] = [24, 24, 34, 24];
+    const SY : number[] = [48, 56, 56, 56];
+    const SW : number[] = [16, 10, 6, 10];
 
-    const canvas : Canvas = new Canvas(null, 96, 16);
+    const canvas : Canvas = new Canvas(null, 64, 16);
 
     // Arms
     for (let i = 0; i < 4; ++ i) {
 
-        canvas.drawBitmap(bmpGameArt, Flip.None, i*24 + 11, 8, 50, 40, 3, 8);
+        canvas.drawBitmap(bmpGameArt, Flip.None, i*16 + 7, 8, 51, 40, 2, 8);
     
         const sw : number = SW[i];
-        const px : number = i*24 + 13 - sw/2;
+        const px : number = i*16 + 8 - sw/2;
 
         canvas.drawBitmap(bmpGameArt, i == 3 ? Flip.Horizontal : Flip.None, px, 7, SX[i], SY[i], sw, 6);
     }

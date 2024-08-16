@@ -103,7 +103,7 @@ export class GameObject implements ExistingObject {
 
     public drawShadow(canvas: Canvas) : void {
 
-        const DISAPPEAR_HEIGHT : number = 512;
+        const DISAPPEAR_HEIGHT : number = 576;
 
         if (!this.isActive()) {
 
