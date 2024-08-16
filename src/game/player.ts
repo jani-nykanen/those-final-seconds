@@ -6,7 +6,6 @@ import { Flip } from "../gfx/flip.js";
 import { Rectangle } from "../math/rectangle.js";
 import { clamp } from "../math/utility.js";
 import { Vector } from "../math/vector.js";
-import { GROUND_LEVEL } from "./background.js";
 import { CAMERA_MIN_Y } from "./constants.js";
 import { next } from "./existingobject.js";
 import { GameObject, updateSpeedAxis } from "./gameobject.js";
@@ -159,18 +158,21 @@ export class Player extends GameObject {
     }
 
 
-    private updateOverheatBar(event : ProgramEvent) : void {
+    private updateExperience(event : ProgramEvent) : void {
 
-        if (this.level == 5) {
+        if (this.level == 4) {
 
             this.experienceCurrent = 0.0;
+            this.experienceTarget = 0.0;
             return;
         }
 
-        this.experienceCurrent = updateSpeedAxis(this.experienceCurrent, this.experienceTarget, 1.0/60.0);
-        if (this.experienceCurrent >= 1.0) {
+        this.experienceCurrent = updateSpeedAxis(this.experienceCurrent, this.experienceTarget, 1.0/60.0*event.tick);
+        if (this.experienceCurrent >= 1.0 && 
+            this.experienceTarget >= 1.0) {
 
             ++ this.level;
+            this.experienceTarget -= 1.0;
             this.experienceCurrent -= 1.0;
         }
     }
@@ -180,7 +182,7 @@ export class Player extends GameObject {
 
         this.control(event);
         this.updateGas(event);
-        this.updateOverheatBar(event);
+        this.updateExperience(event);
 
         if (this.shootRecoverTimer > 0) {
 
@@ -241,6 +243,14 @@ export class Player extends GameObject {
             canvas.fillRing(this.pos.x + 15, this.pos.y + 4 + angleStep, 8*t, 4 + 5*t);
             return;
         }
+    }
+
+
+    public addExperience(multiplier : number = 1.0) : void {
+
+        const BASE_EXPERIENCE : number = 1.0;
+
+        this.experienceTarget += (BASE_EXPERIENCE/(4*(this.level + 1)))*multiplier;
     }
 
 

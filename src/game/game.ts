@@ -14,8 +14,8 @@ import { EnemyGenerator } from "./enemygenerator.js";
 
 
 const EXPRIENCE_BAR_BACKGROUND_COLORS : string[] = ["#ffffff", "#000000", "#6d6d6d"];
-const EXPERIENCE_BAR_PIECES_HEIGHTS : number[] = [11, 9, 4];
-const EXPERIENCE_BAR_PIECES_Y : number[] = [0, 0, 2];
+const EXPERIENCE_BAR_PIECES_HEIGHTS : number[] = [9, 7, 3];
+const EXPERIENCE_BAR_PIECES_Y : number[] = [0, 0, 1];
 const EXPERIENCE_BAR_COLORS : string[] = ["#246db6", "#6db6ff", "#92dbff"]; 
 
 

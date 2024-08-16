@@ -73,7 +73,7 @@ export class EnemyGenerator {
 
                 projectiles.iterate((p : Projectile) : void => {
 
-                    e.projectileCollision(p, event);
+                    e.projectileCollision(player, p, event);
                 });
 
                 for (let j = i + 1; j < this.enemies.length; ++ j) {

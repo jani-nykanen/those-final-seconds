@@ -7,9 +7,11 @@ import { Flip } from "../gfx/flip.js";
 import { Rectangle } from "../math/rectangle.js";
 import { Projectile } from "./projectile.js";
 import { ProjectileGenerator } from "./projectilegenerator.js";
+import { Player } from "./player.js";
 
 
 const DEATH_TIME : number = 10;
+const BASE_SPEED : number = 1.5;
 
 
 export class Enemy extends GameObject {
@@ -21,6 +23,9 @@ export class Enemy extends GameObject {
 
     private animationTimer : number = 0;
     private deathTimer : number = 0.0;
+    private hurtTimer : number = 0.0;
+
+    private health : number = 0;
 
     private projectiles : ProjectileGenerator | undefined = undefined;
     
@@ -58,11 +63,12 @@ export class Enemy extends GameObject {
             this.exist = false;
             return;
         }
+
+        if (this.hurtTimer > 0) {
+
+            this.hurtTimer -= event.tick;
+        }
         
-
-        this.target.x = -1.5;
-        this.speed.x = this.target.x;
-
         switch (this.id) {
 
         case 0:
@@ -95,6 +101,11 @@ export class Enemy extends GameObject {
             return;
         }
 
+        if (this.hurtTimer > 0 && Math.floor(this.hurtTimer/4) % 2 != 0) {
+
+            return;
+        }
+
         // Body
         canvas.drawBitmap(bmpBody, Flip.None, this.pos.x - 12, this.pos.y - 12, this.id*24, 0, 24, 24);
     }
@@ -103,8 +114,11 @@ export class Enemy extends GameObject {
     public spawn(x : number, y : number, id : number, shift : number, projectiles : ProjectileGenerator) : void {
 
         this.pos = new Vector(x, y);
-        this.speed.zeros();
-        this.target.zeros();
+        this.speed.y = 0.0;
+        this.target.y = 0.0;
+
+        this.target.x = -BASE_SPEED;
+        this.speed.x = this.target.x;
 
         this.startY = y;
 
@@ -116,10 +130,15 @@ export class Enemy extends GameObject {
         this.animationTimer = Math.PI/3*shift;
 
         this.projectiles = projectiles;
+
+        this.health = 3;
     }
 
 
-    public projectileCollision(p : Projectile, event : ProgramEvent) : boolean {
+    public projectileCollision(player : Player, p : Projectile, event : ProgramEvent) : boolean {
+
+        const HURT_TIME : number = 30;
+        const KNOCKBACK : number = 2.0;
 
         if (!this.isActive() || !p.isActive())
             return false;
@@ -127,7 +146,18 @@ export class Enemy extends GameObject {
         if (this.overlay(p)) {
 
             p.kill(event);
-            this.kill(event);
+
+            if ((-- this.health) <= 0) {
+
+                this.kill(event);
+                player.addExperience(1.0);
+            }
+            else {
+
+                this.hurtTimer = HURT_TIME;
+                // TODO: Also apply global speed?
+                this.speed.x = KNOCKBACK;
+            }
         }
         return false;
     }

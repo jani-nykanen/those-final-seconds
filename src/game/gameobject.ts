@@ -40,7 +40,7 @@ export class GameObject implements ExistingObject {
 
         this.speed = new Vector();
         this.target = new Vector();
-        this.friction = new Vector(1, 1);
+        this.friction = new Vector(0.15, 0.15);
 
         this.hitbox = new Rectangle(0, 0, 16, 16)
 
