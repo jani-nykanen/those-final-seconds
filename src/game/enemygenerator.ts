@@ -97,12 +97,9 @@ export class EnemyGenerator {
 
     public draw(canvas : Canvas) : void {
 
-        const bmpGameArt : Bitmap = canvas.getBitmap("g");
-        const bmpEnemyBody : Bitmap = canvas.getBitmap("e");
-
         for (let e of this.enemies) {
 
-            e.draw(canvas, bmpEnemyBody, bmpGameArt);
+            e.draw(canvas);
         }
     }
 }

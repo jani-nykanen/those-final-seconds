@@ -22,6 +22,7 @@ export class Enemy extends GameObject {
     private id : number = 0;
 
     private animationTimer : number = 0;
+    private propellerTimer : number = 0;
     private deathTimer : number = 0.0;
     private hurtTimer : number = 0.0;
 
@@ -56,6 +57,7 @@ export class Enemy extends GameObject {
     protected updateEvent(event : ProgramEvent) : void {
         
         const WAVE_SPEED : number = Math.PI*2/120.0;
+        const PROPELLER_SPEED : number = 1.0/16.0;
         const AMPLITUDE : number = 8.0;
 
         if (this.pos.x < -24) {
@@ -68,6 +70,8 @@ export class Enemy extends GameObject {
 
             this.hurtTimer -= event.tick;
         }
+
+        this.propellerTimer = (this.propellerTimer + PROPELLER_SPEED*event.tick) % 1.0;
         
         switch (this.id) {
 
@@ -82,7 +86,7 @@ export class Enemy extends GameObject {
     }
 
 
-    public draw(canvas : Canvas, bmpBody : Bitmap, bmpGameArt : Bitmap) : void {
+    public draw(canvas : Canvas) : void {
         
         if (!this.exist) {
 
@@ -107,7 +111,12 @@ export class Enemy extends GameObject {
         }
 
         // Body
-        canvas.drawBitmap(bmpBody, Flip.None, this.pos.x - 12, this.pos.y - 12, this.id*24, 0, 24, 24);
+        canvas.drawBitmap("e", Flip.None, this.pos.x - 12, this.pos.y - 12, this.id*24, 0, 24, 24);
+
+        // Propeller
+        // TODO: Different place for different enemies
+        const frame : number = (this.propellerTimer*4) | 0; 
+        canvas.drawBitmap("ro", Flip.None, this.pos.x - 12, this.pos.y - 28, frame*24, 0, 24, 16);
     }
 
 
@@ -128,10 +137,11 @@ export class Enemy extends GameObject {
         this.exist = true;
 
         this.animationTimer = Math.PI/3*shift;
+        this.hurtTimer = 0.0;
 
         this.projectiles = projectiles;
 
-        this.health = 3;
+        this.health = 2; // 3;
     }
 
 
