@@ -40,7 +40,7 @@ export class Program {
             (name : string) : Sample | undefined => this.assets.getSample(name), 
             audioMaxVolume);
 
-        this.canvas = new Canvas(
+        this.canvas = new Canvas(null,
             canvasMinWidth, canvasMinHeight,
             canvasMaxWidth, canvasMaxHeight,
             (name : string) : Bitmap => this.assets.getBitmap(name), true);

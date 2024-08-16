@@ -14,7 +14,7 @@ import { ProjectileGenerator } from "./projectilegenerator.js";
 
 
 const ANGLE_MAX : number = 4.0;
-const SHOOT_RECOVER_TIME : number = 10.0;
+const SHOOT_RECOVER_TIME : number = 16.0;
 
 
 export class Player extends GameObject {
@@ -32,6 +32,7 @@ export class Player extends GameObject {
     private experienceCurrent : number = 0.0;
 
     private health : number = 3;
+    private hurtTimer : number = 0.0;
     
     private readonly projectiles : ProjectileGenerator;
 
@@ -188,6 +189,11 @@ export class Player extends GameObject {
 
             this.shootRecoverTimer -= event.tick;
         }
+
+        if (this.hurtTimer > 0) {
+
+            this.hurtTimer -= event.tick;
+        }
     }
 
 
@@ -218,6 +224,18 @@ export class Player extends GameObject {
 
     public draw(canvas : Canvas) : void {
         
+        const MUZZLE_FLASH_TIME : number = 12;
+
+        if (!this.exist) {
+
+            return;
+        }
+
+        if (this.hurtTimer > 0 && Math.floor(this.hurtTimer/4) % 2 != 0) {
+
+            return;
+        }
+
         const dx : number = this.pos.x - 16;
         const dy : number = this.pos.y - 12;
 
@@ -236,9 +254,9 @@ export class Player extends GameObject {
         }
 
         // Draw the muzzle flash
-        if (this.shootRecoverTimer > 0) {
+        if (this.shootRecoverTimer > SHOOT_RECOVER_TIME - MUZZLE_FLASH_TIME) {
 
-            const t : number = 1.0 - this.shootRecoverTimer/SHOOT_RECOVER_TIME;
+            const t : number = 1.0 - (this.shootRecoverTimer - SHOOT_RECOVER_TIME + MUZZLE_FLASH_TIME )/MUZZLE_FLASH_TIME;
             canvas.setColor("#ffdb00");
             canvas.fillRing(this.pos.x + 15, this.pos.y + 4 + angleStep, 8*t, 4 + 5*t);
             return;
@@ -251,6 +269,24 @@ export class Player extends GameObject {
         const BASE_EXPERIENCE : number = 1.0;
 
         this.experienceTarget += (BASE_EXPERIENCE/(4*(this.level + 1)))*multiplier;
+    }
+
+
+    public hurt(event : ProgramEvent) : void {
+
+        const HURT_TIME : number = 60;
+
+        if (this.hurtTimer > 0) {
+
+            return;
+        }
+
+        if ((-- this.health) <= 0) {
+
+            // TODO: Kill
+        }
+
+        this.hurtTimer = HURT_TIME;
     }
 
 

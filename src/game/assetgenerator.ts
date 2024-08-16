@@ -61,6 +61,9 @@ const GAME_ART_PALETTE_TABLE : string[] = [
     "J0B5", "J0B5", "J0B5", "J0B5", "J0B5", "J0B5", "10H2", "00GD",
     "10IH", "10IH", "1034", "1034", "1034", "1024", "10LM", "1000",
     "10IH", "10IH", "1034", "1034", "1034", "1034", "0000", "1000",
+    "0000", "0000", "0000", "1034", "1034", "1084", "0000", "0000",
+    "0000", "0000", "0000", "1034", "1034", "0000", "0000", "0000",
+    "0000", "0000", "0000", "0000", "0000", "0000", "0000", "0000",
 ];
 
 
@@ -78,7 +81,7 @@ const generateGameArt = (assets : Assets) : Bitmap => {
 
 const generateFence = (assets : Assets, bmpGameArt : Bitmap) : void => {
 
-    const canvas : Canvas = new Canvas(32, 48);
+    const canvas : Canvas = new Canvas(null, 32, 48);
 
     // Horizontal bar
     for (let i = 0; i < 6; ++ i) {
@@ -114,7 +117,7 @@ const generateBaseCloud = (colors : string[], yoffsets : number[],
     width : number, height : number, 
     amplitude : number, period : number, sineFactor : number) : Bitmap => {
 
-    const canvas : Canvas = new Canvas(width, height);
+    const canvas : Canvas = new Canvas(null, width, height);
 
     for (let y = 0; y < yoffsets.length; ++ y) {
 
@@ -145,7 +148,7 @@ const generateClouds = (assets : Assets) : void => {
 
 const generateBush = (assets : Assets, bmpGameArt : Bitmap) : void => {
     
-    const canvas : Canvas = new Canvas(48, 64);
+    const canvas : Canvas = new Canvas(null, 48, 64);
 
     canvas.drawBitmap(bmpGameArt, Flip.None, 0, 0, 0, 16, 48, 16);
     canvas.setColor("#246d00");
@@ -157,7 +160,7 @@ const generateBush = (assets : Assets, bmpGameArt : Bitmap) : void => {
 
 const generateMushrooms = (assets : Assets, bmpGameArt : Bitmap) : void => {
     
-    const canvas : Canvas = new Canvas(48, 96);
+    const canvas : Canvas = new Canvas(null, 48, 96);
 
     // Base mushroom
     canvas.drawBitmap(bmpGameArt, Flip.None, 12, 16, 40, 0, 24, 8);
@@ -190,7 +193,7 @@ const generateSun = (assets : Assets, bmpGameArt : Bitmap) : void => {
     const EYE_SHIFT_X : number = 4;
     const EYE_SHIFT_Y : number = 2;
 
-    const canvas : Canvas = new Canvas(RADIUS*2, RADIUS*2);
+    const canvas : Canvas = new Canvas(null, RADIUS*2, RADIUS*2);
 
     // "Body"
     canvas.setColor("#ffdb00");
@@ -228,7 +231,7 @@ const generateSun = (assets : Assets, bmpGameArt : Bitmap) : void => {
 
 const generatePlayer = (assets : Assets, bmpGameArt : Bitmap) : void => {
 
-    const canvas : Canvas = new Canvas(32, 24);
+    const canvas : Canvas = new Canvas(null, 32, 24);
 
     canvas.setColor("#ffffff");
     canvas.fillRect(1, 14, 27, 6);
@@ -242,7 +245,7 @@ const generatePlayer = (assets : Assets, bmpGameArt : Bitmap) : void => {
 
 const generateGasParticles = (assets : Assets) : void => {
 
-    const canvas : Canvas = new Canvas(64, 16);
+    const canvas : Canvas = new Canvas(null, 64, 16);
 
     for (let i = 0; i < 4; ++ i) {
 
@@ -262,7 +265,7 @@ const generateGasParticles = (assets : Assets) : void => {
 
 const generateProjectiles = (assets : Assets, bmpGameArt : Bitmap) : void => {
 
-    const canvas : Canvas = new Canvas(16, 16);
+    const canvas : Canvas = new Canvas(null, 16, 16);
 
     // White outlines
     canvas.setColor("#ffffff");
@@ -293,7 +296,7 @@ const generateHUD = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt : Bitma
     const bmpHeart2 : Bitmap = applyPalette(bmpHeartRaw, ["1042", "1043", "1043", "1043"], PALETTE_LOOKUP);
     // const bmpHeart3 : Bitmap = applyPalette(bmpHeartRaw, ["2022", "2022", "2022", "2022"], PALETTE_LOOKUP);
 
-    const canvas : Canvas = new Canvas(32, 16);
+    const canvas : Canvas = new Canvas(null, 32, 16);
 
     // White outlines
     // Maybe not needed
@@ -331,11 +334,11 @@ const generateHUD = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt : Bitma
 
 const generateEnemyBodies = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt : Bitmap) : void => {
  
-    const bmpBallBodies : Canvas = new Canvas(24, 24);
+    const bmpBallBodiesRaw : Canvas = new Canvas(null, 24, 24);
 
     for (let i = 0; i < 4; ++ i) {
 
-        bmpBallBodies.drawBitmap(bmpRawGameArt, Flip.None, i*24, 0, 0, 48, 24, 24);
+        bmpBallBodiesRaw.drawBitmap(bmpRawGameArt, Flip.None, i*24, 0, 0, 48, 24, 24);
     }
 
     const colors : string[] = [
@@ -344,7 +347,41 @@ const generateEnemyBodies = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt
         "10FH", "10FH", "10FH", 
     ];
 
-    assets.addBitmap("e", applyPalette(bmpBallBodies.toBitmap(), colors, PALETTE_LOOKUP));
+    const canvas : Canvas = new Canvas(
+        applyPalette(bmpBallBodiesRaw.toBitmap(), colors, PALETTE_LOOKUP) as HTMLCanvasElement);
+
+    // Body 1
+    for (let i = 0; i < 2; ++ i) {
+
+        canvas.drawBitmap(bmpGameArt, Flip.None, 
+            2 + i*8, 8,
+            48, 24, 8, 8);
+    }
+
+    assets.addBitmap("e", canvas.toBitmap());
+}
+
+
+const generatePropeller = (assets : Assets, bmpGameArt : Bitmap) : void => {
+
+    const SX : number[] = [24, 24, 35, 24];
+    const SY : number[] = [48, 56, 56, 56];
+    const SW : number[] = [16, 10, 4, 10];
+
+    const canvas : Canvas = new Canvas(null, 64, 8);
+
+    // Arms
+    for (let i = 0; i < 4; ++ i) {
+
+        canvas.drawBitmap(bmpGameArt, Flip.None, 6 + i*16, 0, 40, 48, 4, 8);
+    
+        const sw : number = SW[i];
+        const px : number = i*16 + 8 - sw/2;
+
+        canvas.drawBitmap(bmpGameArt, i == 3 ? Flip.Horizontal : Flip.None, px, 0, SX[i], SY[i], sw, 8);
+    }
+
+    assets.addBitmap("ro", canvas.toBitmap());
 }
 
 
@@ -360,7 +397,7 @@ const generateFonts = (assets : Assets) : void => {
         PALETTE_LOOKUP);
 
     // Generate a font with black outlines
-    const canvas : Canvas = new Canvas(256, 64);
+    const canvas : Canvas = new Canvas(null, 256, 64);
     for (let y = 0; y < 4; ++ y) {
 
         for (let x = 0; x < 16; ++ x) {
@@ -411,6 +448,7 @@ export const generateAssets = (assets : Assets, audio : AudioPlayer) : void => {
     generateProjectiles(assets, bmpGameArt);
     generateHUD(assets, bmpGameArtRaw, bmpGameArt);
     generateEnemyBodies(assets, bmpGameArtRaw, bmpGameArt);
+    generatePropeller(assets, bmpGameArt);
     generateFonts(assets);
 
     // Audio

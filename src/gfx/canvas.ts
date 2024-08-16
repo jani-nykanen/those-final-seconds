@@ -31,8 +31,11 @@ export class Canvas {
     public readonly getBitmap : ((name : string) => Bitmap) = () => undefined;
 
 
-    constructor(minWidth : number, minHeight : number, 
-        maxWidth : number = minWidth, maxHeight : number = minHeight,
+    constructor(canvasElement : HTMLCanvasElement | null,
+        minWidth : number = canvasElement?.width ?? 0, 
+        minHeight : number = canvasElement?.height ?? 0, 
+        maxWidth : number = minWidth, 
+        maxHeight : number = minHeight,
         getBitmap : ((name : string) => Bitmap) = () => undefined,
         embed : boolean = false) {
 
@@ -43,11 +46,19 @@ export class Canvas {
 
         this.getBitmap = getBitmap;
 
-        this.createCanvas(minWidth, minHeight, embed);
-        if (embed) {
+        if (canvasElement !== null) {
 
-            this.resizeEvent(window.innerWidth, window.innerHeight);
-            window.addEventListener("resize", () : void => this.resizeEvent(window.innerWidth, window.innerHeight));
+            this.canvas = canvasElement;
+            this.ctx = canvasElement.getContext("2d");
+        }
+        else {
+
+            this.createCanvas(minWidth, minHeight, embed);
+            if (embed) {
+
+                this.resizeEvent(window.innerWidth, window.innerHeight);
+                window.addEventListener("resize", () : void => this.resizeEvent(window.innerWidth, window.innerHeight));
+            }
         }
 
         // Hide cursor

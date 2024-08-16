@@ -80,8 +80,7 @@ export class EnemyGenerator {
 
                     e.enemyCollision(this.enemies[j]);
                 }
-
-                // TODO: Player collision
+                e.playerCollision(player, event);
             }
         }
     }

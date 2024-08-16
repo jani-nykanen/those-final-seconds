@@ -184,6 +184,20 @@ export class Enemy extends GameObject {
     }
 
 
+    public playerCollision(p : Player, event : ProgramEvent) : void {
+
+        if (!this.isActive() || !p.isActive()) {
+
+            return;
+        }
+
+        if (this.overlay(p)) {
+
+            p.hurt(event);
+        }
+    }
+
+
     public kill(event : ProgramEvent) : void {
 
         this.dying = true;
