@@ -338,28 +338,43 @@ const generateHUD = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt : Bitma
 
 const generateEnemyBodies = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt : Bitmap) : void => {
  
-    const bmpBallBodiesRaw : Canvas = new Canvas(null, 48, 24);
+    const bmpBallBodiesRaw : Canvas = new Canvas(null, 72, 48);
 
+    // This is required to get alpha background behind the balls.
+    bmpBallBodiesRaw.setColor("#555555");
+    bmpBallBodiesRaw.fillRect(0, 0, 72, 24);
     for (let i = 0; i < 4; ++ i) {
 
-        bmpBallBodiesRaw.drawBitmap(bmpRawGameArt, Flip.None, i*24, 0, 0, 48, 24, 24);
+        const dx : number = i*24;
+        const dy : number = 0;
+
+        bmpBallBodiesRaw.drawBitmap(bmpRawGameArt, Flip.None, dx + 2, dy + 2, 0, 48, 20, 20);
+        // Hands for the gray ball
+        if (i == 2) {
+
+            bmpBallBodiesRaw.drawBitmap(bmpRawGameArt, Flip.None, dx + 3, dy + 17, 9, 68, 4, 4);
+            bmpBallBodiesRaw.drawBitmap(bmpRawGameArt, Flip.None, dx + 9, dy + 17, 0, 68, 9, 4);
+        }
     }
 
     // TODO: Generate in code to save bytes
     const colors : string[] = [
-        "10DH", "10DH", "10FH",  "10PO", "10PO", "10NO", 
-        "10DH", "10DH", "10FH",  "10PO", "10PO", "10NO", 
-        "10FH", "10FH", "10FH",  "10NO", "10NO", "10NO", 
+        "10DH", "10DH", "10FH",  "10PO", "10PO", "10NO",  "1024", "1024", "1034",
+        "10DH", "10DH", "10FH",  "10PO", "10PO", "10NO",  "1024", "1024", "1034", 
+        "10FH", "10FH", "10FH",  "10NO", "10NO", "10NO",  "1034", "1034", "1034", 
     ];
 
     const canvas : Canvas = new Canvas(
         applyPalette(bmpBallBodiesRaw.toBitmap(), colors, PALETTE_LOOKUP) as HTMLCanvasElement);
 
-    // Face for ball 1
-    canvas.drawBitmap(bmpGameArt, Flip.None, 5, 8, 40, 48, 8, 4);
-    canvas.drawBitmap(bmpGameArt, Flip.None, 7, 11, 40, 56, 4, 4);
-    // Mouth (for ball 2)
-    // canvas.drawBitmap(bmpGameArt, Flip.None, 24 + 5, 12, 40, 52, 8, 4);
+    // Faces
+    for (let i = 0; i < 3; ++ i) {
+
+        canvas.drawBitmap(bmpGameArt, Flip.None, i*24 + 5, 32, 40, 48, 8, i == 1 ? 8 : 4);
+    }
+    // Noses for balls 1 & 2
+    canvas.drawBitmap(bmpGameArt, Flip.None, 7, 35, 40, 56, 4, 4);
+    canvas.drawBitmap(bmpGameArt, Flip.None, 54, 35, 44, 56, 4, 8);
 
     assets.addBitmap("e", canvas.toBitmap());
 }

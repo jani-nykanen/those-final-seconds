@@ -19,7 +19,10 @@ const JUMP_TIME : number = 30;
 const DEATH_COLORS : string[][] = [
     ["#ff6d00", "#ffdb00"],
     ["#2492db", "#6ddbff"],
-]
+    ["#6d6d6d", "#b6b6b6"],
+];
+
+const PROPELLER_ANGLE : number[] = [0, 0, -Math.PI/2, 0, 0];
 
 
 export class Enemy extends GameObject {
@@ -30,6 +33,8 @@ export class Enemy extends GameObject {
     private id : number = 0;
 
     private animationTimer : number = 0;
+    private animationFlag : number = 0;
+
     private propellerTimer : number = 0;
     private deathTimer : number = 0.0;
     private hurtTimer : number = 0.0;
@@ -53,6 +58,18 @@ export class Enemy extends GameObject {
     }
 
 
+    private drawPropeller(canvas : Canvas) : void {
+
+        const frame : number = (this.propellerTimer*4) | 0; 
+
+        const angle : number = PROPELLER_ANGLE[this.id];
+        const dx : number = this.pos.x + Math.cos(angle + Math.PI/2)*17;
+        const dy : number = this.pos.y - Math.sin(angle + Math.PI/2)*17;
+
+        canvas.drawBitmap("ro", Flip.None, dx - 8, dy - 8, frame*16, 0, 16, 16, 8, 8, angle);
+    }
+
+
     protected die(event: ProgramEvent) : boolean {
         
         return (this.deathTimer += event.tick) >= DEATH_TIME;
@@ -69,7 +86,6 @@ export class Enemy extends GameObject {
         
         const WAVE_SPEED : number = Math.PI*2/120.0;
         const PROPELLER_SPEED : number = 1.0/16.0;
-        const AMPLITUDE : number = 8.0;
         const GRAVITY : number = 4.0;
 
         if (this.pos.x < -24) {
@@ -93,8 +109,11 @@ export class Enemy extends GameObject {
         switch (this.id) {
 
         case 0:
+
+            this.target.x = -BASE_SPEED;
+
             this.animationTimer = (this.animationTimer + WAVE_SPEED*event.tick) % (Math.PI*2);
-            this.pos.y = this.startY + Math.sin(this.animationTimer)*AMPLITUDE;
+            this.pos.y = this.startY + Math.sin(this.animationTimer)*8.0;
             break;
 
         case 1:
@@ -114,6 +133,24 @@ export class Enemy extends GameObject {
                 this.speed.x = -BASE_SPEED*1.25;
                 this.target.x = this.speed.x;
             }
+            break;
+
+        case 2:
+
+            if (this.animationFlag == 0) {
+
+                this.speed.x = -BASE_SPEED/4;
+                if (this.pos.x < event.screenWidth) {
+
+                    this.speed.zeros();
+                    ++ this.animationFlag;
+                }
+                break;
+            }
+            this.target.x = -BASE_SPEED*2.0; 
+
+            this.animationTimer = (this.animationTimer + WAVE_SPEED*2*event.tick) % (Math.PI*2);
+            this.pos.y = this.startY + Math.sin(this.animationTimer)*4.0;
 
             break;
 
@@ -150,23 +187,21 @@ export class Enemy extends GameObject {
             return;
         }
 
-
         // Propeller
         if (this.id != 1) {
-            // TODO: Different place for different enemies
-            const frame : number = (this.propellerTimer*4) | 0; 
-            canvas.drawBitmap("ro", Flip.None, this.pos.x - 8, this.pos.y - 25, frame*16, 0, 16, 16);
+            
+            this.drawPropeller(canvas);
         }
 
         // Body
         canvas.drawBitmap("e", Flip.None, this.pos.x - 12, this.pos.y - 12, this.id*24, 0, 24, 24);
-
-        // Face for ball 2
+        // Face
+        let faceY : number = 0;
         if (this.id == 1) {
 
-            let faceY : number = clamp(Math.round(this.speed.y), -3, 3);
-            canvas.drawBitmap("g", Flip.None, this.pos.x - 7, this.pos.y - 4 + faceY, 40, 48, 8, 8);
+            faceY = clamp(Math.round(this.speed.y), -3, 3);
         }
+        canvas.drawBitmap("e", Flip.None, this.pos.x - 12, this.pos.y - 12 + faceY, this.id*24, 24, 24, 24);
     }
 
 
@@ -178,8 +213,7 @@ export class Enemy extends GameObject {
 
         this.target.x = -BASE_SPEED;
         this.speed.x = this.target.x;
-
-        this.startY = y;
+        this.friction.x = id == 2 ? 0.05 : 0.15;
 
         this.id = id;
 
@@ -192,15 +226,26 @@ export class Enemy extends GameObject {
 
         this.health = 2; // 3;
 
+        this.animationTimer = 0.0;
         switch (this.id) {
 
         case 1:
             this.animationTimer = JUMP_TIME; // 120*shift;
             break;
 
+        case 2: {
+
+            this.pos.x += shift*16;
+            this.pos.y += shift*(y < 96 ? 1 : -1)*24;
+            break;
+        }
+
         default:
             break;
         }
+        this.animationFlag = 0;
+
+        this.startY = this.pos.y;
     }
 
 
@@ -209,7 +254,7 @@ export class Enemy extends GameObject {
         const HURT_TIME : number = 30;
         const KNOCKBACK : number = 2.0;
 
-        if (!this.isActive() || !p.isActive())
+        if (!this.isActive() || !p.isActive() || !this.isInsideScreen(event))
             return false;
 
         if (this.overlay(p)) {
@@ -232,11 +277,11 @@ export class Enemy extends GameObject {
     }
 
 
-    public enemyCollision(e : Enemy) : void {
+    public enemyCollision(e : Enemy, event : ProgramEvent) : void {
 
         const RADIUS : number = 10;
 
-        if (!this.isActive() || !e.isActive())
+        if (!this.isActive() || !e.isActive() || !this.isInsideScreen(event) || !e.isInsideScreen(event))
             return;
 
         const dist : number = RADIUS*2 - this.pos.distanceFrom(e.pos);
@@ -274,4 +319,7 @@ export class Enemy extends GameObject {
         this.dying = true;
         this.deathTimer = 0.0;
     }
+
+
+    public isInsideScreen = (event : ProgramEvent) : boolean => this.pos.x < event.screenWidth + 12;
 }

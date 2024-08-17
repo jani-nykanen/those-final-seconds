@@ -30,7 +30,7 @@ export class EnemyGenerator {
         const XOFF : number = 32;
 
         const ground : number = event.screenHeight - GROUND_LEVEL;
-        const id : number = (Math.random()*2) | 0;
+        const id : number = (Math.random()*3) | 0;
 
         const dx : number = event.screenWidth + 16;
         const dy : number = id == 1 ? ground : Math.random()*(ground - 32);
@@ -81,7 +81,7 @@ export class EnemyGenerator {
 
                 for (let j = i + 1; j < this.enemies.length; ++ j) {
 
-                    e.enemyCollision(this.enemies[j]);
+                    e.enemyCollision(this.enemies[j], event);
                 }
                 e.playerCollision(player, event);
             }

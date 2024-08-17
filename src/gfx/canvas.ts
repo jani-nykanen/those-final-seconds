@@ -326,7 +326,6 @@ export class Canvas {
         dx : number = 0, dy : number = 0,
         sx : number = 0, sy : number = 0,
         sw? : number, sh? : number,
-        dw? : number, dh? : number,
         centerx? : number, centery? : number,
         rotation? : number) : void {
 
@@ -338,9 +337,6 @@ export class Canvas {
 
         sw ??= bmp?.width ?? 0;
         sh ??= bmp?.height ?? 0;
-
-        dw ??= sw;
-        dh ??= sh;
 
         centerx ??= sw!/2;
         centery ??= sh!/2;
@@ -379,13 +375,13 @@ export class Canvas {
         if (rotation !== undefined) {
 
             ctx.translate((centerx! + dx) | 0, (centery! + dy) | 0);
-            ctx.rotate(-rotation + Math.PI/2);
+            ctx.rotate(-rotation);
             
             dx = -centerx;
             dy = -centery;
         }
 
-        ctx.drawImage(bmp, sx, sy, sw!, sh!, dx, dy, dw!, dh!);
+        ctx.drawImage(bmp, sx, sy, sw!, sh!, dx, dy, sw!, sh!);
 
         if (transform) {
 
