@@ -38,10 +38,16 @@ export class EnemyGenerator {
         const XOFF : number = 32;
 
         const ground : number = event.screenHeight - GROUND_LEVEL;
-        const id : number = (Math.random()*3) | 0;
+        const id : number = (Math.random()*4) | 0;
 
         const dx : number = event.screenWidth + 16;
         const dy : number = id == 1 ? ground : Math.random()*(ground - 32);
+
+        // Always create four ghosts
+        if (id == 3) {
+
+            count = 4;
+        }
 
         for (let i = 0; i < count; ++ i) {
 
@@ -51,7 +57,7 @@ export class EnemyGenerator {
                 e = new Enemy(this.projectiles, this.gasSupply);
                 this.enemies.push(e);
             }
-            e.spawn(dx + i*XOFF, dy, id, i);
+            e.spawn(dx + (id != 3 ? i*XOFF : 0), dy, id, i);
         }
     }
 

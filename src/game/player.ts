@@ -280,4 +280,5 @@ export class Player extends GameObject {
     public getLevel = () : number => this.level;
     public getExperienceCount = () : number => this.experienceCurrent;
     public getHealth = () : number => this.health;
+    public isShooting = () : boolean => this.shootRecoverTimer > 0;
 }

@@ -160,7 +160,10 @@ export class Game implements Scene {
         this.updateCamera(event);
         this.background.update(this.globalSpeed, event);
 
-        this.time += this.frameCount == 0 ? 16 : 17;
+        if (this.player.isShooting()) {
+            
+            this.time += this.frameCount == 0 ? 16 : 17;
+        }
         if (this.time >= 13*1000) {
 
             this.time = 13*1000;
