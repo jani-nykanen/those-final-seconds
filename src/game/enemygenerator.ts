@@ -29,8 +29,11 @@ export class EnemyGenerator {
 
         const XOFF : number = 32;
 
+        const ground : number = event.screenHeight - GROUND_LEVEL;
+        const id : number = (Math.random()*2) | 0;
+
         const dx : number = event.screenWidth + 16;
-        const dy : number = Math.random()*(event.screenHeight - GROUND_LEVEL - 32);
+        const dy : number = id == 1 ? ground : Math.random()*(ground - 32);
 
         for (let i = 0; i < count; ++ i) {
 
@@ -40,7 +43,7 @@ export class EnemyGenerator {
                 e = new Enemy();
                 this.enemies.push(e);
             }
-            e.spawn(dx + i*32, dy, 0, i, projectiles);
+            e.spawn(dx + i*XOFF, dy, id, i, projectiles);
         }
     }
 

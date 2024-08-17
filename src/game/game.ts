@@ -169,6 +169,8 @@ export class Game implements Scene {
         canvas.moveTo();
 
         // Note: camera is activated in this function
+        // TODO: Now that's a bad idea, do it elsewhere to 
+        // make shaking screen work.
         this.background.draw(canvas, this.cameraPos);
 
         // Shadows
@@ -182,7 +184,7 @@ export class Game implements Scene {
         this.player.draw(canvas);
         this.projectiles.draw(canvas);
 
-        // canvas.drawBitmap("ro", Flip.None, 64, 16);
+        // canvas.drawBitmap("e", Flip.None, 64, 16);
         // canvas.drawBitmap("p", Flip.None, 64, 80);
         // canvas.drawBitmap("s", Flip.None, 128, 80);
 

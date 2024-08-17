@@ -49,6 +49,11 @@ const PALETTE_LOOKUP : string[] = [
     // Bullets
     "b649dbff", // L Darker purple
     "db92ffff", // M Brighter, pinkish purple
+
+    // Shades of blue
+    "2492dbff", // N Dark blue
+    "6ddbffff", // O Blue
+    "dbffffff", // P Bright blue 
 ];
 
 
@@ -60,8 +65,8 @@ const GAME_ART_PALETTE_TABLE : string[] = [
     "J0B5", "J0B5", "J0B5", "J0B5", "J0B5", "J0B5", "10H2", "00GD",
     "10IH", "10IH", "1034", "1034", "1034", "1024", "10LM", "1000",
     "10IH", "10IH", "1034", "1034", "1034", "1034", "1084", "1000",
-    "0000", "0000", "0000", "1056", "1056", "1056", "0000", "0000",
-    "0000", "0000", "0000", "1056", "1056", "1056", "0000", "0000",
+    "0000", "0000", "0000", "1056", "1056", "1002", "0000", "0000",
+    "0000", "0000", "0000", "1056", "1056", "10EG", "0000", "0000",
     "0000", "0000", "0000", "0000", "0000", "0000", "0000", "0000",
 ];
 
@@ -333,37 +338,29 @@ const generateHUD = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt : Bitma
 
 const generateEnemyBodies = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt : Bitmap) : void => {
  
-    const bmpBallBodiesRaw : Canvas = new Canvas(null, 24, 24);
+    const bmpBallBodiesRaw : Canvas = new Canvas(null, 48, 24);
 
     for (let i = 0; i < 4; ++ i) {
 
         bmpBallBodiesRaw.drawBitmap(bmpRawGameArt, Flip.None, i*24, 0, 0, 48, 24, 24);
     }
 
+    // TODO: Generate in code to save bytes
     const colors : string[] = [
-        "10DH", "10DH", "10FH", 
-        "10DH", "10DH", "10FH", 
-        "10FH", "10FH", "10FH", 
+        "10DH", "10DH", "10FH",  "10PO", "10PO", "10NO", 
+        "10DH", "10DH", "10FH",  "10PO", "10PO", "10NO", 
+        "10FH", "10FH", "10FH",  "10NO", "10NO", "10NO", 
     ];
 
     const canvas : Canvas = new Canvas(
         applyPalette(bmpBallBodiesRaw.toBitmap(), colors, PALETTE_LOOKUP) as HTMLCanvasElement);
 
-    // const bmpNose : Bitmap = applyPalette(cropBitmap(bmpRawGameArt, 48, 32, 8, 8), ["10EF"], PALETTE_LOOKUP);
-    // Faces
-    /*
-    canvas.setColor("#ffb600");
-    for (let i = 0; i < 2; ++ i) {
+    // Face for ball 1
+    canvas.drawBitmap(bmpGameArt, Flip.None, 5, 8, 40, 48, 8, 4);
+    canvas.drawBitmap(bmpGameArt, Flip.None, 7, 11, 40, 56, 4, 4);
+    // Mouth (for ball 2)
+    // canvas.drawBitmap(bmpGameArt, Flip.None, 24 + 5, 12, 40, 52, 8, 4);
 
-        // Eyes
-        canvas.drawBitmap(bmpGameArt, Flip.None, 
-            2 + i*8, 7,
-            48, 24, 8, 8);
-        // Nose
-        canvas.drawBitmap(bmpNose, Flip.None, 6, 11);
-        canvas.fillRect(8, 13, 2, 2);
-    }
-*/
     assets.addBitmap("e", canvas.toBitmap());
 }
 

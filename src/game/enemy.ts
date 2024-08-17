@@ -8,10 +8,18 @@ import { Rectangle } from "../math/rectangle.js";
 import { Projectile } from "./projectile.js";
 import { ProjectileGenerator } from "./projectilegenerator.js";
 import { Player } from "./player.js";
+import { clamp } from "../math/utility.js";
 
 
-const DEATH_TIME : number = 10;
+const DEATH_TIME : number = 12;
 const BASE_SPEED : number = 1.5;
+const JUMP_TIME : number = 30;
+
+
+const DEATH_COLORS : string[][] = [
+    ["#ff6d00", "#ffdb00"],
+    ["#2492db", "#6ddbff"],
+]
 
 
 export class Enemy extends GameObject {
@@ -28,6 +36,8 @@ export class Enemy extends GameObject {
 
     private health : number = 0;
 
+    private touchSurface : boolean = false;
+
     private projectiles : ProjectileGenerator | undefined = undefined;
     
 
@@ -38,6 +48,8 @@ export class Enemy extends GameObject {
         this.hitbox = new Rectangle(0, 0, 18, 18);
 
         this.shadowWidth = 20;
+
+        this.friction = new Vector(0.15, 0.15);
     }
 
 
@@ -49,8 +61,7 @@ export class Enemy extends GameObject {
 
     protected groundCollisionEvent(event : ProgramEvent) : void {
         
-        this.dying = true;
-        this.deathTimer = 0.0;
+        this.touchSurface = true;
     }
 
 
@@ -59,10 +70,16 @@ export class Enemy extends GameObject {
         const WAVE_SPEED : number = Math.PI*2/120.0;
         const PROPELLER_SPEED : number = 1.0/16.0;
         const AMPLITUDE : number = 8.0;
+        const GRAVITY : number = 4.0;
 
         if (this.pos.x < -24) {
 
             this.exist = false;
+            return;
+        }
+        
+        if (this.pos.x >= event.screenWidth + 16) {
+
             return;
         }
 
@@ -80,9 +97,31 @@ export class Enemy extends GameObject {
             this.pos.y = this.startY + Math.sin(this.animationTimer)*AMPLITUDE;
             break;
 
+        case 1:
+
+            this.target.y = GRAVITY;
+            if (this.touchSurface) {
+
+                this.animationTimer -= event.tick;
+                this.target.x = -BASE_SPEED;
+            }
+
+            if (this.animationTimer <= 0) {
+
+                this.speed.y = -(4.5 + Math.random()*1.5); 
+                this.animationTimer += JUMP_TIME;
+
+                this.speed.x = -BASE_SPEED*1.25;
+                this.target.x = this.speed.x;
+            }
+
+            break;
+
         default:
             break;
         }
+
+        this.touchSurface = false;
     }
 
 
@@ -96,12 +135,13 @@ export class Enemy extends GameObject {
         if (this.dying) {
 
             const t : number = this.deathTimer/DEATH_TIME;
-            const r1 : number = (1 + t)*12;
-            const r2 : number = 23*t;
+            
+            canvas.setColor(DEATH_COLORS[this.id][0]);
+            canvas.fillRing(this.pos.x, this.pos.y, 19*t, (1 + t)*10);
 
-            // TODO: Different colors for different enemies
-            canvas.setColor("#ffdb00");
-            canvas.fillRing(this.pos.x, this.pos.y, r2, r1);
+            canvas.setColor(DEATH_COLORS[this.id][1]);
+            canvas.fillRing(this.pos.x - 1, this.pos.y - 1, 18*t, (1 + t)*9);
+
             return;
         }
 
@@ -112,12 +152,21 @@ export class Enemy extends GameObject {
 
 
         // Propeller
-        // TODO: Different place for different enemies
-        const frame : number = (this.propellerTimer*4) | 0; 
-        canvas.drawBitmap("ro", Flip.None, this.pos.x - 8, this.pos.y - 25, frame*16, 0, 16, 16);
+        if (this.id != 1) {
+            // TODO: Different place for different enemies
+            const frame : number = (this.propellerTimer*4) | 0; 
+            canvas.drawBitmap("ro", Flip.None, this.pos.x - 8, this.pos.y - 25, frame*16, 0, 16, 16);
+        }
 
         // Body
         canvas.drawBitmap("e", Flip.None, this.pos.x - 12, this.pos.y - 12, this.id*24, 0, 24, 24);
+
+        // Face for ball 2
+        if (this.id == 1) {
+
+            let faceY : number = clamp(Math.round(this.speed.y), -3, 3);
+            canvas.drawBitmap("g", Flip.None, this.pos.x - 7, this.pos.y - 4 + faceY, 40, 48, 8, 8);
+        }
     }
 
 
@@ -137,12 +186,21 @@ export class Enemy extends GameObject {
         this.dying = false;
         this.exist = true;
 
-        this.animationTimer = Math.PI/3*shift;
         this.hurtTimer = 0.0;
 
         this.projectiles = projectiles;
 
         this.health = 2; // 3;
+
+        switch (this.id) {
+
+        case 1:
+            this.animationTimer = JUMP_TIME; // 120*shift;
+            break;
+
+        default:
+            break;
+        }
     }
 
 
