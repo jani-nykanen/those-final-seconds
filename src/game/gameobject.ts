@@ -79,6 +79,9 @@ export class GameObject implements ExistingObject {
     }
 
 
+    public draw?(canvas : Canvas, bmp? : Bitmap) : void;
+
+
     public update(event : ProgramEvent) : void {
 
         if (!this.exist) 

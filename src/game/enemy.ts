@@ -6,9 +6,10 @@ import { Bitmap } from "../gfx/bitmap.js";
 import { Flip } from "../gfx/flip.js";
 import { Rectangle } from "../math/rectangle.js";
 import { Projectile } from "./projectile.js";
-import { ProjectileGenerator } from "./projectilegenerator.js";
+import { ObjectGenerator } from "./objectgenerator.js";
 import { Player } from "./player.js";
 import { clamp } from "../math/utility.js";
+import { GasParticle } from "./gasparticle.js";
 
 
 const DEATH_TIME : number = 12;
@@ -35,6 +36,7 @@ export class Enemy extends GameObject {
     private animationTimer : number = 0;
     private animationFlag : number = 0;
 
+    private gasTimer : number = 0.0;
     private propellerTimer : number = 0;
     private deathTimer : number = 0.0;
     private hurtTimer : number = 0.0;
@@ -43,10 +45,12 @@ export class Enemy extends GameObject {
 
     private touchSurface : boolean = false;
 
-    private projectiles : ProjectileGenerator | undefined = undefined;
+    private readonly projectiles : ObjectGenerator<Projectile>;
+    private readonly gasSupply : ObjectGenerator<GasParticle>;
     
 
-    constructor() {
+    constructor(projectiles : ObjectGenerator<Projectile>,
+        gasSupply : ObjectGenerator<GasParticle>) {
 
         super(0, 0, false);
 
@@ -55,6 +59,9 @@ export class Enemy extends GameObject {
         this.shadowWidth = 20;
 
         this.friction = new Vector(0.15, 0.15);
+
+        this.projectiles = projectiles;
+        this.gasSupply = gasSupply;
     }
 
 
@@ -86,6 +93,7 @@ export class Enemy extends GameObject {
         
         const WAVE_SPEED : number = Math.PI*2/120.0;
         const PROPELLER_SPEED : number = 1.0/16.0;
+        const GAS_TIME : number = 6.0;
         const GRAVITY : number = 4.0;
 
         if (this.pos.x < -24) {
@@ -152,6 +160,12 @@ export class Enemy extends GameObject {
             this.animationTimer = (this.animationTimer + WAVE_SPEED*2*event.tick) % (Math.PI*2);
             this.pos.y = this.startY + Math.sin(this.animationTimer)*4.0;
 
+            if ((this.gasTimer += event.tick) >= GAS_TIME) {
+
+                this.gasTimer -= GAS_TIME;
+                this.gasSupply.next().spawn(this.pos.x + 12, this.pos.y, 0.0, 0.0, 0);
+            }
+
             break;
 
         default:
@@ -205,7 +219,7 @@ export class Enemy extends GameObject {
     }
 
 
-    public spawn(x : number, y : number, id : number, shift : number, projectiles : ProjectileGenerator) : void {
+    public spawn(x : number, y : number, id : number, shift : number) : void {
 
         this.pos = new Vector(x, y);
         this.speed.y = 0.0;
@@ -221,12 +235,12 @@ export class Enemy extends GameObject {
         this.exist = true;
 
         this.hurtTimer = 0.0;
-
-        this.projectiles = projectiles;
-
         this.health = 2; // 3;
 
+        this.gasTimer = 0.0;
         this.animationTimer = 0.0;
+
+        // Enemy-specific "settings"
         switch (this.id) {
 
         case 1:

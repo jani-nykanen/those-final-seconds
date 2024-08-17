@@ -338,11 +338,11 @@ const generateHUD = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt : Bitma
 
 const generateEnemyBodies = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt : Bitmap) : void => {
  
-    const bmpBallBodiesRaw : Canvas = new Canvas(null, 72, 48);
+    const bmpBallBodiesRaw : Canvas = new Canvas(null, 96, 48);
 
     // This is required to get alpha background behind the balls.
     bmpBallBodiesRaw.setColor("#555555");
-    bmpBallBodiesRaw.fillRect(0, 0, 72, 24);
+    bmpBallBodiesRaw.fillRect(0, 0, 96, 24);
     for (let i = 0; i < 4; ++ i) {
 
         const dx : number = i*24;
@@ -356,25 +356,32 @@ const generateEnemyBodies = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt
             bmpBallBodiesRaw.drawBitmap(bmpRawGameArt, Flip.None, dx + 9, dy + 17, 0, 68, 9, 4);
         }
     }
+    // Bottom for ball 4
+    for (let i = 0; i < 4; ++ i) {
+
+        bmpBallBodiesRaw.drawBitmap(bmpRawGameArt, Flip.None, 72 + 8, 9 + i, 20, 48, i == 3 ? 4 : 1, 20, 4, 10, -Math.PI/2);
+    }
 
     // TODO: Generate in code to save bytes
     const colors : string[] = [
-        "10DH", "10DH", "10FH",  "10PO", "10PO", "10NO",  "1024", "1024", "1034",
-        "10DH", "10DH", "10FH",  "10PO", "10PO", "10NO",  "1024", "1024", "1034", 
-        "10FH", "10FH", "10FH",  "10NO", "10NO", "10NO",  "1034", "1034", "1034", 
+        "10DH", "10DH", "10FH",  "10PO", "10PO", "10NO",  "1024", "1024", "1034",  "102M", "102M", "10LM",
+        "10DH", "10DH", "10FH",  "10PO", "10PO", "10NO",  "1024", "1024", "1034",  "102M", "102M", "10LM", 
+        "10FH", "10FH", "10FH",  "10NO", "10NO", "10NO",  "1034", "1034", "1034",  "10LM", "10LM", "10LM", 
     ];
 
     const canvas : Canvas = new Canvas(
         applyPalette(bmpBallBodiesRaw.toBitmap(), colors, PALETTE_LOOKUP) as HTMLCanvasElement);
 
     // Faces
-    for (let i = 0; i < 3; ++ i) {
+    for (let i = 0; i < 4; ++ i) {
 
         canvas.drawBitmap(bmpGameArt, Flip.None, i*24 + 5, 32, 40, 48, 8, i == 1 ? 8 : 4);
     }
-    // Noses for balls 1 & 2
+    // Noses for balls 1 & 3
     canvas.drawBitmap(bmpGameArt, Flip.None, 7, 35, 40, 56, 4, 4);
     canvas.drawBitmap(bmpGameArt, Flip.None, 54, 35, 44, 56, 4, 8);
+    // Upside-down mouth for ball 4
+    canvas.drawBitmap(bmpGameArt, Flip.Vertical, 72 + 5, 37, 40, 52, 12, 4);
 
     assets.addBitmap("e", canvas.toBitmap());
 }

@@ -10,7 +10,8 @@ import { CAMERA_MIN_Y } from "./constants.js";
 import { next } from "./existingobject.js";
 import { GameObject, updateSpeedAxis } from "./gameobject.js";
 import { GasParticle } from "./gasparticle.js";
-import { ProjectileGenerator } from "./projectilegenerator.js";
+import { ObjectGenerator } from "./objectgenerator.js";
+import { Projectile } from "./projectile.js";
 
 
 const ANGLE_MAX : number = 4.0;
@@ -23,7 +24,6 @@ export class Player extends GameObject {
     private angle : number = 0.0;
     private angleTarget : number = 0.0;
 
-    private gasSupply : GasParticle[];
     private gasTimer : number = 0.0;
 
     private shootRecoverTimer : number = 0.0;
@@ -34,12 +34,15 @@ export class Player extends GameObject {
     private health : number = 3;
     private hurtTimer : number = 0.0;
     
-    private readonly projectiles : ProjectileGenerator;
+    private readonly projectiles : ObjectGenerator<Projectile>;
+    private readonly gasSupply : ObjectGenerator<GasParticle>;
 
     public readonly maxHealth : number = 3;
 
 
-    constructor(x : number, y : number, projectiles : ProjectileGenerator) {
+    constructor(x : number, y : number, 
+        projectiles : ObjectGenerator<Projectile>,
+        gasSupply : ObjectGenerator<GasParticle>) {
 
         super(x, y, true);
 
@@ -47,7 +50,7 @@ export class Player extends GameObject {
 
         this.friction = new Vector(0.15, 0.15);
     
-        this.gasSupply = new Array<GasParticle> ();
+        this.gasSupply = gasSupply;
         this.projectiles = projectiles;
     }
 
@@ -139,22 +142,10 @@ export class Player extends GameObject {
 
         const GAS_TIME : number = 6.0;
 
-        for (let o of this.gasSupply) {
-
-            o.update(event);
-        }
-
         if ((this.gasTimer -= event.tick) <= 0) {
 
             this.gasTimer += GAS_TIME;
-
-            let o : GasParticle | undefined = next<GasParticle> (this.gasSupply);
-            if (o === undefined) {
-
-                o = new GasParticle();
-                this.gasSupply.push(o);
-            }
-            o.spawn(this.pos.x - 16, this.pos.y + 4 + this.angle, -2.0 + this.speed.x, this.speed.y/2, 1.0/32.0, 0);
+            this.gasSupply.next().spawn(this.pos.x - 16, this.pos.y + 4 + this.angle, -2.0 + this.speed.x, this.speed.y/2, 0);
         }
     }
 
@@ -215,10 +206,6 @@ export class Player extends GameObject {
     public preDraw(canvas : Canvas) : void {
 
         const bmpGasParticle : Bitmap = canvas.getBitmap("gp");
-        for (let o of this.gasSupply) {
-
-            o.draw(canvas, bmpGasParticle);
-        }
     }
 
 

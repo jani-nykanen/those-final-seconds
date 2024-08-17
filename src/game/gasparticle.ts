@@ -6,11 +6,13 @@ import { Bitmap } from "../gfx/bitmap.js";
 import { Flip } from "../gfx/flip.js";
 
 
+const ANIMATION_SPEED : number[] = [1.0/32.0];
+
+
 export class GasParticle extends GameObject {
 
 
     private timer : number = 0;
-    private animationSpeed : number = 0;
     private id : number = 0;
     
 
@@ -22,7 +24,7 @@ export class GasParticle extends GameObject {
 
     protected updateEvent(event : ProgramEvent) : void {
         
-        if ((this.timer += this.animationSpeed*event.tick) >= 1.0) {
+        if ((this.timer += ANIMATION_SPEED[this.id]*event.tick) >= 1.0) {
 
             this.exist = false;
         }
@@ -41,12 +43,11 @@ export class GasParticle extends GameObject {
     }
 
 
-    public spawn(x : number, y : number, speedx : number, speedy : number, animationSpeed : number, id : number) : void {
+    public spawn(x : number, y : number, speedx : number, speedy : number, id : number) : void {
 
         this.pos = new Vector(x, y);
         this.speed = new Vector(speedx, speedy);
         this.target = this.speed.clone();
-        this.animationSpeed = animationSpeed;
         this.timer = 0.0;
 
         this.id = id;
