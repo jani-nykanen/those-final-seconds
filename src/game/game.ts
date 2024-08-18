@@ -37,8 +37,8 @@ export class Game implements Scene {
 
     private time : number = 0.0;
     private frameCount : number = 0;
-    
 
+    
     constructor(event : ProgramEvent) {
 
         this.background = new Background();

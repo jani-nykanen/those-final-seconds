@@ -77,6 +77,11 @@ export class Enemy extends GameObject {
 
     private shoot(count : number, shootAngle : number, speed : number, event : ProgramEvent) : void {
 
+        if (!this.canShoot) {
+
+            return;
+        }
+
         const startAngle : number = -(count - 1)*shootAngle/2;
         for (let i = 0; i < count; ++ i) {
 
@@ -89,22 +94,6 @@ export class Enemy extends GameObject {
                 this.speed.x + speedx, speedy, 1);
         }
         this.mouthTimer = MOUTH_TIME;
-    }
-
-
-    private updateShooting(event : ProgramEvent) : void {
-
-        if (this.mouthTimer > 0) {
-
-            this.mouthTimer -= event.tick;
-            return;
-        }
-
-        if (this.id != 1 && (this.shootWaitTimer -= event.tick) <= 0) {
-
-            this.shootWaitTimer = SHOOT_WAIT_MIN + Math.random()*SHOOT_WAIT_VARY;
-            this.shoot(1, 0.0, 3.5, event);
-        }
     }
 
 
@@ -154,16 +143,16 @@ export class Enemy extends GameObject {
             return;
         }
 
+        if (this.mouthTimer > 0) {
+
+            this.mouthTimer -= event.tick;
+        }
+
         this.propellerTimer = (this.propellerTimer + PROPELLER_SPEED*event.tick) % 1.0;
         const animationSpeed : number | undefined = ANIMATION_SPEED[this.id];
         if (animationSpeed !== undefined) {
 
             this.animationTimer = (this.animationTimer + animationSpeed*event.tick) % (Math.PI*2);
-        }
-
-        if (this.canShoot) {
-        
-            this.updateShooting(event);
         }
 
         switch (this.id) {
@@ -172,6 +161,11 @@ export class Enemy extends GameObject {
         case 0:
 
             this.pos.y = this.startY + Math.sin(this.animationTimer)*8.0;
+            if (this.mouthTimer <= 0 && (this.shootWaitTimer -= event.tick) <= 0) {
+
+                this.shootWaitTimer = SHOOT_WAIT_MIN + Math.random()*SHOOT_WAIT_VARY;
+                this.shoot(1, 0.0, 3.0, event);
+            }
             break;
 
         // Jumping ball
@@ -203,7 +197,7 @@ export class Enemy extends GameObject {
             if (this.canShoot && this.speed.y > 0.0 &&
                 this.animationFlag != 2) {
 
-                this.shoot(3, Math.PI/8, 3.0, event);
+                this.shoot(3, Math.PI/8, 2.5, event);
                 this.animationFlag = 2;
 
                 this.speed.x = 2.0;
@@ -221,6 +215,10 @@ export class Enemy extends GameObject {
 
                     this.speed.zeros();
                     ++ this.animationFlag;
+                    for (let i = 0; i < 3; ++ i) {
+                        
+                        this.shoot(1, 0.0, 3.5 + i*0.5, event);
+                    }
                 }
                 break;
             }
@@ -235,12 +233,20 @@ export class Enemy extends GameObject {
             break;
             
         // Ghost
-        case 3: 
+        case 3: {
+
+            const oldY : number = this.pos.y;
 
             this.centerX -= BASE_SPEED*event.tick;
             this.pos.x = this.centerX + Math.cos(-this.animationTimer)*ORBIT_DISTANCE;
             this.pos.y = this.startY + Math.sin(-this.animationTimer)*ORBIT_DISTANCE;
-            break;
+
+            if (oldY < this.startY - 12 && this.pos.y >= this.startY - 12) {
+
+                this.shoot(1, 0.0, 3.0, event);
+            }
+        }
+        break;
 
         default:
             break;
@@ -271,6 +277,8 @@ export class Enemy extends GameObject {
 
     public draw(canvas : Canvas) : void {
         
+        const MUZZLE_FLASH_TIME : number = 12;
+
         if (!this.exist) {
 
             return;
@@ -302,6 +310,14 @@ export class Enemy extends GameObject {
 
             canvas.drawBitmap("g", Flip.None, this.pos.x - 11, this.pos.y - 4, 
                 48 - 16*Number(this.mouthTimer > 0), 64, 16, 8);
+
+            //Muzzle flash
+            if (this.mouthTimer > MOUTH_TIME - MUZZLE_FLASH_TIME) {
+
+                const t : number = 1.0 - (this.mouthTimer - MOUTH_TIME + MUZZLE_FLASH_TIME )/MUZZLE_FLASH_TIME;
+                canvas.setColor("#ffb6b6");
+                canvas.fillRing(this.pos.x - 12, this.pos.y, 8*t, 4 + 5*t);
+            }
             return;
         }
         // Face otherwise
