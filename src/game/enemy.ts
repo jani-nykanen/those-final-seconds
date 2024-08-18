@@ -75,6 +75,23 @@ export class Enemy extends GameObject {
     }
 
 
+    private shoot(count : number, shootAngle : number, speed : number, event : ProgramEvent) : void {
+
+        const startAngle : number = -(count - 1)*shootAngle/2;
+        for (let i = 0; i < count; ++ i) {
+
+            const angle : number = startAngle + i*shootAngle;
+
+            const speedx : number = -Math.cos(angle)*speed;
+            const speedy : number = Math.sin(angle)*speed;
+
+            this.projectiles.next().spawn(this.pos.x - 10, this.pos.y, 
+                this.speed.x + speedx, speedy, 1);
+        }
+        this.mouthTimer = MOUTH_TIME;
+    }
+
+
     private updateShooting(event : ProgramEvent) : void {
 
         if (this.mouthTimer > 0) {
@@ -83,12 +100,10 @@ export class Enemy extends GameObject {
             return;
         }
 
-        if ((this.shootWaitTimer -= event.tick) <= 0) {
+        if (this.id != 1 && (this.shootWaitTimer -= event.tick) <= 0) {
 
             this.shootWaitTimer = SHOOT_WAIT_MIN + Math.random()*SHOOT_WAIT_VARY;
-            this.mouthTimer = MOUTH_TIME;
-
-            this.projectiles.next().spawn(this.pos.x - 10, this.pos.y, -3.5 + this.speed.x, 0.0, 1);
+            this.shoot(1, 0.0, 3.5, event);
         }
     }
 
@@ -113,7 +128,7 @@ export class Enemy extends GameObject {
 
     protected groundCollisionEvent(event : ProgramEvent) : void {
         
-        if (this.id == 1 && this.animationFlag == 1) {
+        if (this.id == 1 && this.animationFlag > 0) {
 
             this.animationFlag = 0;
             this.animationTimer = JUMP_TIME;
@@ -182,6 +197,16 @@ export class Enemy extends GameObject {
             if ((this.animationTimer -= event.tick) > 0) {
 
                 this.speed.y = JUMP_SPEED;
+                break;
+            }
+            
+            if (this.canShoot && this.speed.y > 0.0 &&
+                this.animationFlag != 2) {
+
+                this.shoot(3, Math.PI/8, 3.0, event);
+                this.animationFlag = 2;
+
+                this.speed.x = 2.0;
             }
             break;
 
