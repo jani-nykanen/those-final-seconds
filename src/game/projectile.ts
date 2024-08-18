@@ -15,8 +15,6 @@ export class Projectile extends GameObject {
 
 
     private id : number = 0;
-    private friendly : boolean = true;
-
     private deathTimer : number = 0.0;
 
 
@@ -64,7 +62,7 @@ export class Projectile extends GameObject {
             const r1 : number = (1 + t)*(6 + this.id*2);
             const r2 : number = (11 + 4*this.id)*t;
 
-            canvas.setColor("#ffdbff");
+            canvas.setColor(this.id == 0 ? "#ffdbff" : "#ff9292");
             canvas.fillRing(this.pos.x, this.pos.y, r2, r1);
             return;
         }
@@ -73,14 +71,13 @@ export class Projectile extends GameObject {
     }
 
 
-    public spawn(x : number, y : number, speedx : number, speedy : number, id : number, friendly : boolean = true) : void {
+    public spawn(x : number, y : number, speedx : number, speedy : number, id : number) : void {
 
         this.pos = new Vector(x, y);
         this.speed = new Vector(speedx, speedy);
         this.target = this.speed.clone();
 
         this.id = id;
-        this.friendly = friendly;
 
         this.dying = false;
         this.exist = true;
@@ -92,4 +89,7 @@ export class Projectile extends GameObject {
         this.dying = true;
         this.deathTimer = 0.0;
     }
+
+
+    public isFriendly = () : boolean => this.id == 0;
 }

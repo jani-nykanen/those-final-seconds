@@ -17,6 +17,10 @@ const JUMP_TIME : number = 30;
 
 const ORBIT_DISTANCE : number = 32;
 
+const SHOOT_WAIT_MIN : number = 30;
+const SHOOT_WAIT_VARY : number = 90;
+const MOUTH_TIME : number = 20;
+
 
 const DEATH_COLORS : string[][] = [
     ["#ff6d00", "#ffdb00"],
@@ -48,6 +52,9 @@ export class Enemy extends GameObject {
     private canBeMoved : boolean = true;
     private canShoot : boolean = false;
 
+    private shootWaitTimer : number = 0.0;
+    private mouthTimer : number = 0.0;
+
     private readonly projectiles : ObjectGenerator<Projectile>;
     private readonly gasSupply : ObjectGenerator<GasParticle>;
     
@@ -65,6 +72,24 @@ export class Enemy extends GameObject {
 
         this.projectiles = projectiles;
         this.gasSupply = gasSupply;
+    }
+
+
+    private updateShooting(event : ProgramEvent) : void {
+
+        if (this.mouthTimer > 0) {
+
+            this.mouthTimer -= event.tick;
+            return;
+        }
+
+        if ((this.shootWaitTimer -= event.tick) <= 0) {
+
+            this.shootWaitTimer = SHOOT_WAIT_MIN + Math.random()*SHOOT_WAIT_VARY;
+            this.mouthTimer = MOUTH_TIME;
+
+            this.projectiles.next().spawn(this.pos.x - 10, this.pos.y, -3.5 + this.speed.x, 0.0, 1);
+        }
     }
 
 
@@ -120,7 +145,12 @@ export class Enemy extends GameObject {
 
             this.animationTimer = (this.animationTimer + animationSpeed*event.tick) % (Math.PI*2);
         }
+
+        if (this.canShoot) {
         
+            this.updateShooting(event);
+        }
+
         switch (this.id) {
 
         // Flying default ball
@@ -245,7 +275,8 @@ export class Enemy extends GameObject {
         // Mouth (if shooting)
         if (this.canShoot) {
 
-            canvas.drawBitmap("g", Flip.None, this.pos.x - 11, this.pos.y - 4, 48, 64, 16, 8);
+            canvas.drawBitmap("g", Flip.None, this.pos.x - 11, this.pos.y - 4, 
+                48 - 16*Number(this.mouthTimer > 0), 64, 16, 8);
             return;
         }
         // Face otherwise
@@ -275,6 +306,9 @@ export class Enemy extends GameObject {
         this.exist = true;
         this.canBeMoved = id != 3;
         this.canShoot = canShoot;
+
+        this.shootWaitTimer = SHOOT_WAIT_MIN + Math.random()*SHOOT_WAIT_VARY;
+        this.mouthTimer = 0.0;
 
         this.gasTimer = 0.0;
         this.animationTimer = 0.0;
@@ -312,11 +346,10 @@ export class Enemy extends GameObject {
     }
 
 
-    public projectileCollision(player : Player, p : Projectile, event : ProgramEvent) : boolean {
+    public projectileCollision(player : Player, p : Projectile, event : ProgramEvent) : void {
 
-
-        if (!this.isActive() || !p.isActive() || !this.isInsideScreen(event))
-            return false;
+        if (!this.isActive() || !p.isActive() || !this.isInsideScreen(event) || !p.isFriendly())
+            return;
 
         if (this.overlay(p)) {
 
@@ -326,7 +359,6 @@ export class Enemy extends GameObject {
             player.addExperience(1.0);
 
         }
-        return false;
     }
 
 

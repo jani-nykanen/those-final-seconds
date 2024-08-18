@@ -72,7 +72,7 @@ export class Player extends GameObject {
 
             this.projectiles.next().spawn(
                 this.pos.x + 14, this.pos.y + 4 + this.angleTarget,
-                speedx + this.speed.x/2, speedy + this.speed.y/2, 0, true);
+                speedx + this.speed.x/2, speedy + this.speed.y/2, 0);
         }
 
         this.shootRecoverTimer = SHOOT_RECOVER_TIME;
@@ -274,6 +274,19 @@ export class Player extends GameObject {
         }
 
         this.hurtTimer = HURT_TIME;
+    }
+
+
+    public projectileCollision(p : Projectile, event : ProgramEvent) : void {
+
+        if (!this.isActive() || !p.isActive() || p.isFriendly())
+            return;
+
+        if (this.overlay(p)) {
+
+            this.hurt(event);
+            p.kill(event);
+        }
     }
 
 

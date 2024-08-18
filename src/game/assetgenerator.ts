@@ -267,26 +267,34 @@ const generateGasParticles = (assets : Assets) : void => {
 }
 
 
-const generateProjectiles = (assets : Assets, bmpGameArt : Bitmap) : void => {
+const generateProjectiles = (assets : Assets, bmpGameArt : Bitmap, bmpGameArtRaw : Bitmap) : void => {
 
-    const canvas : Canvas = new Canvas(null, 16, 16);
+    const canvas : Canvas = new Canvas(null, 32, 16);
 
-    // White outlines
-    canvas.setColor("#ffffff");
-    for (let i = 0; i < 4; ++ i) {
+    // Outlines
+    for (let j = 0; j < 2; ++ j) {
 
-        const w : number = 10 - i*2;
-        const dy : number = 6 - i;
+        canvas.setColor(j == 0 ? "#ffffff" : "#ff9292");
+        for (let i = 0; i < 4; ++ i) {
 
-        canvas.fillRect(9 - dy, dy, w, 14 - w);
+            const w : number = 10 - i*2;
+            const dy : number = 6 - i;
+
+            canvas.fillRect(j*16 + 9 - dy, dy, w, 14 - w);
+        }
     }
 
     // Projectile body
+    const bmpBody2 : Bitmap = applyPalette(cropBitmap(bmpGameArtRaw, 48, 32, 8, 8), ["10EF"], PALETTE_LOOKUP);
     canvas.drawBitmap(bmpGameArt, Flip.None, 4, 4, 48, 32, 8, 8);
+    canvas.drawBitmap(bmpBody2, Flip.None, 20, 4);
 
-    // Reflection
+    // Reflections
     canvas.setColor("#ffdbff");
     canvas.fillRect(6, 6, 2, 2);
+
+    canvas.setColor("#ffb66d");
+    canvas.fillRect(22, 6, 2, 2);
 
     assets.addBitmap("pr", canvas.toBitmap());
 }
@@ -470,7 +478,7 @@ export const generateAssets = (assets : Assets, audio : AudioPlayer) : void => {
     generateSun(assets, bmpGameArt);
     generatePlayer(assets, bmpGameArt);
     generateGasParticles(assets);
-    generateProjectiles(assets, bmpGameArt);
+    generateProjectiles(assets, bmpGameArt, bmpGameArtRaw);
     generateHUD(assets, bmpGameArtRaw, bmpGameArt);
     generateEnemyBodies(assets, bmpGameArtRaw, bmpGameArt);
     generatePropeller(assets, bmpGameArt);
