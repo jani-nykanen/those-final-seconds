@@ -49,6 +49,7 @@ export class EnemyGenerator {
             count = 4;
         }
 
+        const canShoot : boolean = Math.random() > 0.5;
         for (let i = 0; i < count; ++ i) {
 
             let e : Enemy | undefined = next<Enemy> (this.enemies);
@@ -57,7 +58,7 @@ export class EnemyGenerator {
                 e = new Enemy(this.projectiles, this.gasSupply);
                 this.enemies.push(e);
             }
-            e.spawn(dx + (id != 3 ? i*XOFF : 0), dy, id, i);
+            e.spawn(dx + (id != 3 ? i*XOFF : 0), dy, id, i, canShoot);
         }
     }
 
@@ -106,8 +107,11 @@ export class EnemyGenerator {
     public preDraw(canvas : Canvas) : void {
 
         for (let e of this.enemies) {
-
+            
             e.drawShadow(canvas);
+            // TODO: This might overlap with shadows, so maybe draw
+            // in a different loop? 
+            e.preDraw(canvas);
         }
     }
 

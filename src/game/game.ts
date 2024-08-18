@@ -194,7 +194,7 @@ export class Game implements Scene {
         this.player.draw(canvas);
         this.projectiles.draw(canvas, canvas.getBitmap("pr"));
 
-        // canvas.drawBitmap("e", Flip.None, 64, 16);
+        // canvas.drawBitmap("g", Flip.None, 64, 16);
         // canvas.drawBitmap("p", Flip.None, 64, 80);
         // canvas.drawBitmap("s", Flip.None, 128, 80);
 
