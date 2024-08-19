@@ -108,10 +108,16 @@ export class EnemyGenerator {
 
         for (let e of this.enemies) {
             
-            e.drawShadow(canvas);
-            // TODO: This might overlap with shadows, so maybe draw
-            // in a different loop? 
             e.preDraw(canvas);
+        }
+    }
+
+
+    public drawShadows(canvas : Canvas) : void {
+
+        for (let e of this.enemies) {
+            
+            e.drawShadow(canvas);
         }
     }
 

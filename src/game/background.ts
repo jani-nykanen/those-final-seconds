@@ -76,15 +76,12 @@ export class Background {
     }
 
 
-    private drawGround(canvas : Canvas) : void {
+    public drawGround(canvas : Canvas) : void {
 
         const LINE_DISTANCE : number = 24;
 
         const xpos : number = this.layerPositions[0];
         const ypos : number = canvas.height - GROUND_HEIGHT;
-
-        this.drawRepeatingBitmap(canvas, canvas.getBitmap("f"), xpos, ypos - 36);
-        this.drawGrass(canvas, xpos, ypos - 3);
         
         // Green bottom
         canvas.setColor("#6db600");
@@ -102,7 +99,6 @@ export class Background {
 
             canvas.drawPixelatedLine(topX, ypos, bottomX, canvas.height);
         }
-
 
         // Vertical lines
         let dy = ypos;
@@ -128,7 +124,10 @@ export class Background {
     }
 
 
-    public draw(canvas : Canvas, camPos : number) : void {
+    public drawBackground(canvas : Canvas, camPos : number) : void {
+
+        const xpos : number = this.layerPositions[0];
+        const ypos : number = canvas.height - GROUND_HEIGHT;
 
         canvas.clear("#6db6ff");
 
@@ -139,7 +138,7 @@ export class Background {
         this.drawMushrooms(canvas, canvas.getBitmap("m"), this.layerPositions[2], 44 - camPos/2);
         this.drawRepeatingBitmap(canvas, canvas.getBitmap("b"), this.layerPositions[1], 96 - camPos/1.5);
 
-        canvas.moveTo(0, -camPos);
-        this.drawGround(canvas);
+        this.drawRepeatingBitmap(canvas, canvas.getBitmap("f"), xpos, ypos - 36 - camPos);
+        this.drawGrass(canvas, xpos, ypos - 3 - camPos);
     }
 }

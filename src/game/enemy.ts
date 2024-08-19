@@ -11,7 +11,7 @@ import { clamp } from "../math/utility.js";
 import { GasParticle } from "./gasparticle.js";
 
 
-const DEATH_TIME : number = 12;
+const DEATH_TIME : number = 16;
 const BASE_SPEED : number = 1.5;
 const JUMP_TIME : number = 30;
 
@@ -22,16 +22,9 @@ const SHOOT_WAIT_VARY : number = 90;
 const MOUTH_TIME : number = 20;
 
 
-const DEATH_COLORS : string[][] = [
-    ["#ff6d00", "#ffdb00"],
-    ["#2492db", "#6ddbff"],
-    ["#6d6d6d", "#b6b6b6"],
-    ["#b649db", "#db92ff"],
-];
-
 const PROPELLER_ANGLE : number[] = [0, 0, -Math.PI/2, Math.PI, 0];
 
-const ANIMATION_SPEED : number[] = [Math.PI*2/120.0, undefined, Math.PI*2/60.0, Math.PI*2/180.0, undefined];
+const ANIMATION_SPEED : number[] = [Math.PI*2/120.0, undefined, Math.PI*2/60.0, Math.PI*2/240.0, undefined];
 
 
 export class Enemy extends GameObject {
@@ -66,7 +59,7 @@ export class Enemy extends GameObject {
 
         this.hitbox = new Rectangle(0, 0, 18, 18);
 
-        this.shadowWidth = 22;
+        this.shadowWidth = 6;
 
         this.friction = new Vector(0.15, 0.15);
 
@@ -286,14 +279,8 @@ export class Enemy extends GameObject {
 
         if (this.dying) {
 
-            const t : number = this.deathTimer/DEATH_TIME;
-            
-            canvas.setColor(DEATH_COLORS[this.id][0]);
-            canvas.fillRing(this.pos.x, this.pos.y, 19*t, (1 + t)*10);
-
-            canvas.setColor(DEATH_COLORS[this.id][1]);
-            canvas.fillRing(this.pos.x - 1, this.pos.y - 1, 18*t, (1 + t)*9);
-
+            const t : number = ((this.deathTimer/DEATH_TIME)*4) | 0;
+            canvas.drawBitmap("r2", Flip.None, this.pos.x - 24, this.pos.y - 24, t*48, 0, 48, 48);
             return;
         }
 
@@ -311,12 +298,11 @@ export class Enemy extends GameObject {
             canvas.drawBitmap("g", Flip.None, this.pos.x - 11, this.pos.y - 4, 
                 48 - 16*Number(this.mouthTimer > 0), 64, 16, 8);
 
-            //Muzzle flash
+            // Muzzle flash
             if (this.mouthTimer > MOUTH_TIME - MUZZLE_FLASH_TIME) {
 
                 const t : number = 1.0 - (this.mouthTimer - MOUTH_TIME + MUZZLE_FLASH_TIME )/MUZZLE_FLASH_TIME;
-                canvas.setColor("#ffb6b6");
-                canvas.fillRing(this.pos.x - 12, this.pos.y, 8*t, 4 + 5*t);
+                canvas.drawBitmap("r1", Flip.None, this.pos.x - 24, this.pos.y - 12, ((t*4) | 0)*24, 24, 24, 24);
             }
             return;
         }

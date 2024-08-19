@@ -59,11 +59,7 @@ export class Projectile extends GameObject {
         if (this.dying) {
 
             const t : number = this.deathTimer/DEATH_TIME;
-            const r1 : number = (1 + t)*(6 + this.id*2);
-            const r2 : number = (11 + 4*this.id)*t;
-
-            canvas.setColor(this.id == 0 ? "#ffdbff" : "#ff9292");
-            canvas.fillRing(this.pos.x, this.pos.y, r2, r1);
+            canvas.drawBitmap("r1", Flip.None, this.pos.x - 12, this.pos.y - 12, ((t*4) | 0)*24, 48 + this.id*24, 24, 24);
             return;
         }
 

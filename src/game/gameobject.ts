@@ -5,6 +5,7 @@ import { ProgramEvent } from "../core/event.js";
 import { Bitmap } from "../gfx/bitmap.js";
 import { Canvas } from "../gfx/canvas.js";
 import { GROUND_LEVEL } from "./background.js";
+import { Flip } from "../gfx/flip.js";
 
 
 export const updateSpeedAxis = (speed : number, target : number, step : number) : number => {
@@ -31,7 +32,7 @@ export class GameObject implements ExistingObject {
 
     protected hitbox : Rectangle;
 
-    protected shadowWidth : number = 16;
+    protected shadowWidth : number = 8;
 
 
     constructor(x : number = 0, y : number = 0, exist : boolean = false) {
@@ -45,8 +46,6 @@ export class GameObject implements ExistingObject {
         this.hitbox = new Rectangle(0, 0, 16, 16)
 
         this.exist = exist;
-
-        this.shadowWidth = 32;
     }
 
 
@@ -106,19 +105,19 @@ export class GameObject implements ExistingObject {
 
     public drawShadow(canvas: Canvas) : void {
 
-        const DISAPPEAR_HEIGHT : number = 576;
+        const DISAPPEAR_HEIGHT : number = 512;
 
         if (!this.isActive()) {
 
             return;
         }
 
-        const dx : number = this.pos.x;
         const dy : number = canvas.height - GROUND_LEVEL;
-
-        const shadowSize : number = this.shadowWidth*(1.0 - Math.max(0.0, dy - (this.pos.y + this.hitbox.y + this.hitbox.h/2))/DISAPPEAR_HEIGHT);
-
-        canvas.fillEllipse(dx, dy, shadowSize/2, shadowSize/6);
+        const frameShift : number = 8 - this.shadowWidth;
+        const factor : number = Math.max(0.0, dy - (this.pos.y + this.hitbox.y + this.hitbox.h/2))/DISAPPEAR_HEIGHT;
+        const frame : number = frameShift + ((factor*this.shadowWidth) | 0);
+    
+        canvas.drawBitmap("sh", Flip.None, this.pos.x - 16, dy - 16, frame*32, 0, 32, 32);
     }
 
     

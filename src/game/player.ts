@@ -17,6 +17,8 @@ import { Projectile } from "./projectile.js";
 const ANGLE_MAX : number = 4.0;
 const SHOOT_RECOVER_TIME : number = 16.0;
 
+const BULLET_COUNT : number[][] = [[1, 1], [2, 1], [2, 2], [3, 2], [3, 3]];
+
 
 export class Player extends GameObject {
 
@@ -26,6 +28,7 @@ export class Player extends GameObject {
 
     private gasTimer : number = 0.0;
 
+    private shootCount : number = 0;
     private shootRecoverTimer : number = 0.0;
     private level : number = 0;
     private experienceTarget : number = 0.0;
@@ -60,7 +63,7 @@ export class Player extends GameObject {
         const BULLET_ANGLE : number = Math.PI/10;
         const BULLET_SPEED : number = 4.0;
 
-        const count : number = Math.min(5, 1 + this.level);
+        const count : number = BULLET_COUNT[this.level][this.shootCount];
         const startAngle: number = -BULLET_ANGLE*(count - 1)/2;
 
         for (let i = 0; i < count; ++ i) {
@@ -76,6 +79,8 @@ export class Player extends GameObject {
         }
 
         this.shootRecoverTimer = SHOOT_RECOVER_TIME;
+
+        this.shootCount = (this.shootCount + 1) % 2;
     }
 
 
@@ -145,7 +150,7 @@ export class Player extends GameObject {
         if ((this.gasTimer -= event.tick) <= 0) {
 
             this.gasTimer += GAS_TIME;
-            this.gasSupply.next().spawn(this.pos.x - 16, this.pos.y + 4 + this.angle, -2.0 + this.speed.x, this.speed.y/2, 0);
+            this.gasSupply.next().spawn(this.pos.x - 16, this.pos.y + 4 - this.angle, -2.0 + this.speed.x, this.speed.y/2, 0);
         }
     }
 
@@ -244,8 +249,7 @@ export class Player extends GameObject {
         if (this.shootRecoverTimer > SHOOT_RECOVER_TIME - MUZZLE_FLASH_TIME) {
 
             const t : number = 1.0 - (this.shootRecoverTimer - SHOOT_RECOVER_TIME + MUZZLE_FLASH_TIME )/MUZZLE_FLASH_TIME;
-            canvas.setColor("#ffdb00");
-            canvas.fillRing(this.pos.x + 15, this.pos.y + 4 + angleStep, 8*t, 4 + 5*t);
+            canvas.drawBitmap("r1", Flip.None, this.pos.x + 2, this.pos.y - 8 + angleStep, ((t*4) | 0)*24, 0, 24, 24);
             return;
         }
     }
@@ -274,6 +278,12 @@ export class Player extends GameObject {
         }
 
         this.hurtTimer = HURT_TIME;
+
+        if (this.level == 0) {
+
+            this.experienceTarget = 0;
+        }
+        this.level = Math.max(0, this.level - 1);
     }
 
 

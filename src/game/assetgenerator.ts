@@ -418,6 +418,59 @@ const generatePropeller = (assets : Assets, bmpGameArt : Bitmap) : void => {
 }
 
 
+const generateRings = (assets : Assets) : void => {
+
+    const SMALL_RING_COLORS : string[] = ["#ffdb00", "#ffb6b6", "#ffdbff", "#ff9292"];
+
+    // Small rings
+    const canvas1 : Canvas = new Canvas(null, 96, 96);
+    const canvas2 : Canvas = new Canvas(null, 48*4, 48);
+
+    for (let j = 0; j < 4; ++ j) {
+
+        const dy : number = j*24 + 12;
+        canvas1.setColor(SMALL_RING_COLORS[j]);
+        for (let i = 0; i < 4; ++ i) {
+
+            const t : number = i*0.25;
+
+            // Small rings
+            const radiusFactor : number = j < 2 ? 5 : 6;
+            canvas1.fillRing(i*24 + 12, dy, (radiusFactor*2 - 1)*t, (1 + t)*radiusFactor);
+
+            // Big rings
+            if (j == 0) {
+
+                canvas2.setColor("#ffb649");
+                canvas2.fillRing(i*48 + 24, 24, 19*t, (1 + t)*10);
+
+                canvas2.setColor("#ffffb6");
+                canvas2.fillRing(i*48 + 24 - 1, 24 - 1, 18*t, (1 + t)*9);
+            }
+        }
+    }
+    assets.addBitmap("r1", canvas1.toBitmap());
+    assets.addBitmap("r2", canvas2.toBitmap());
+}
+
+
+const generateShadows = (assets : Assets) : void => {
+
+    const COUNT : number = 8;
+
+    const canvas : Canvas = new Canvas(null, COUNT*32, 32);
+
+    canvas.setColor("#000000");
+    for (let i = 0; i < COUNT; ++ i) {
+
+        const r : number = 16 - i*2;
+        canvas.fillEllipse(i*32 + 16, 16, r, r/3);
+    }
+
+    assets.addBitmap("sh", canvas.toBitmap());
+}
+
+
 const generateFonts = (assets : Assets) : void => {
 
     const bmpFontRaw : Bitmap = assets.getBitmap("_f");
@@ -458,7 +511,6 @@ const generateFonts = (assets : Assets) : void => {
 }
 
 
-
 const generateSamples = (assets : Assets, audio : AudioPlayer) : void => {
 
     // ...
@@ -482,6 +534,8 @@ export const generateAssets = (assets : Assets, audio : AudioPlayer) : void => {
     generateHUD(assets, bmpGameArtRaw, bmpGameArt);
     generateEnemyBodies(assets, bmpGameArtRaw, bmpGameArt);
     generatePropeller(assets, bmpGameArt);
+    generateRings(assets);
+    generateShadows(assets);
     generateFonts(assets);
 
     // Audio

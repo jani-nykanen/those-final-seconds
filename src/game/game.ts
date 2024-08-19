@@ -13,6 +13,7 @@ import { Align } from "../gfx/align.js";
 import { EnemyGenerator } from "./enemygenerator.js";
 import { Projectile } from "./projectile.js";
 import { GasParticle } from "./gasparticle.js";
+import { InputState } from "../core/inputstate.js";
 
 
 const EXPRIENCE_BAR_BACKGROUND_COLORS : string[] = ["#ffffff", "#000000", "#6d6d6d"];
@@ -37,6 +38,8 @@ export class Game implements Scene {
 
     private time : number = 0.0;
     private frameCount : number = 0;
+
+    private paused : boolean = false;
 
     
     constructor(event : ProgramEvent) {
@@ -152,6 +155,15 @@ export class Game implements Scene {
             return;
         }
 
+        if (event.input.getAction("p") == InputState.Pressed) {
+
+            this.paused = !this.paused;
+        }
+        if (this.paused) {
+
+            return;
+        }
+
         this.player.update(event);
         this.projectiles.iterate((p : Projectile) : void => {
 
@@ -182,24 +194,29 @@ export class Game implements Scene {
         
         canvas.moveTo();
 
-        // Note: camera is activated in this function
-        // TODO: Now that's a bad idea, do it elsewhere to 
-        // make shaking screen work.
-        this.background.draw(canvas, this.cameraPos);
+        this.background.drawBackground(canvas, this.cameraPos);
 
+        canvas.moveTo(0, -this.cameraPos);
+        this.background.drawGround(canvas);
+        
         // Shadows
-        canvas.setColor("rgba(0, 0, 0, 0.33)");
         this.player.drawShadow(canvas);
+        this.enemies.drawShadows(canvas);
+
+        canvas.setAlpha(0.67);
+        this.background.drawGround(canvas);
+        canvas.setAlpha();
 
         // Objects
         this.gasSupply.draw(canvas, canvas.getBitmap("gp"));
+
         this.player.preDraw(canvas);
         this.enemies.preDraw(canvas);
         this.enemies.draw(canvas);
         this.player.draw(canvas);
         this.projectiles.draw(canvas, canvas.getBitmap("pr"));
 
-        // canvas.drawBitmap("g", Flip.None, 64, 16);
+        // canvas.drawBitmap("sh", Flip.None, 64, 16);
         // canvas.drawBitmap("pr", Flip.None, 64, 80);
         // canvas.drawBitmap("s", Flip.None, 128, 80);
 
