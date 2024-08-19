@@ -31,7 +31,7 @@ export class Collectible extends GameObject {
         this.friction.x = 0.05;
         this.friction.y = 0.075;
 
-        this.bounceFactor = 1.15;
+        this.bounceFactor = 1.25;
 
         this.shadowWidth = 4;
     }
@@ -39,7 +39,7 @@ export class Collectible extends GameObject {
 
     protected groundCollisionEvent(event : ProgramEvent) : void {
         
-        const MIN_SPEED : number = -2.0;
+        const MIN_SPEED : number = -2.5;
 
         this.speed.y = Math.min(MIN_SPEED, this.speed.y);
     }
@@ -113,4 +113,7 @@ export class Collectible extends GameObject {
         this.dying = true;
         this.deathTimer = 0.0;
     }
+
+    
+    public getID = () : number => this.id;
 }

@@ -13,6 +13,7 @@ import { GameObject, updateSpeedAxis } from "./gameobject.js";
 import { GasParticle } from "./gasparticle.js";
 import { ObjectGenerator } from "./objectgenerator.js";
 import { Projectile } from "./projectile.js";
+import { Stats } from "./stats.js";
 
 
 const ANGLE_MAX : number = 4.0;
@@ -31,31 +32,29 @@ export class Player extends GameObject {
 
     private shootCount : number = 0;
     private shootRecoverTimer : number = 0.0;
-    private level : number = 0;
-    private experienceTarget : number = 0.0;
-    private experienceCurrent : number = 0.0;
 
-    private health : number = 3;
     private hurtTimer : number = 0.0;
     
     private readonly projectiles : ObjectGenerator<Projectile>;
     private readonly gasSupply : ObjectGenerator<GasParticle>;
 
-    public readonly maxHealth : number = 3;
+    public readonly stats : Stats;
 
 
     constructor(x : number, y : number, 
         projectiles : ObjectGenerator<Projectile>,
-        gasSupply : ObjectGenerator<GasParticle>) {
+        gasSupply : ObjectGenerator<GasParticle>,
+        stats : Stats) {
 
         super(x, y, true);
 
         this.hitbox = new Rectangle(0, 2, 24, 16);
 
-        this.friction = new Vector(0.15, 0.15);
+        this.friction = new Vector(0.2, 0.2);
     
         this.gasSupply = gasSupply;
         this.projectiles = projectiles;
+        this.stats = stats;
     }
 
 
@@ -64,7 +63,7 @@ export class Player extends GameObject {
         const BULLET_ANGLE : number = Math.PI/10;
         const BULLET_SPEED : number = 4.0;
 
-        const count : number = BULLET_COUNT[this.level][this.shootCount];
+        const count : number = BULLET_COUNT[this.stats.level][this.shootCount];
         const startAngle: number = -BULLET_ANGLE*(count - 1)/2;
 
         for (let i = 0; i < count; ++ i) {
@@ -87,7 +86,7 @@ export class Player extends GameObject {
 
     private control(event : ProgramEvent) : void {
 
-        const MOVE_SPEED : number = 2.0;
+        const MOVE_SPEED : number = 2.5;
         const dir : Vector = new Vector();
 
         if ((event.input.getAction("l") & InputState.DownOrPressed) != 0) {
@@ -156,31 +155,10 @@ export class Player extends GameObject {
     }
 
 
-    private updateExperience(event : ProgramEvent) : void {
-
-        if (this.level == 4) {
-
-            this.experienceCurrent = 0.0;
-            this.experienceTarget = 0.0;
-            return;
-        }
-
-        this.experienceCurrent = updateSpeedAxis(this.experienceCurrent, this.experienceTarget, 1.0/60.0*event.tick);
-        if (this.experienceCurrent >= 1.0 && 
-            this.experienceTarget >= 1.0) {
-
-            ++ this.level;
-            this.experienceTarget -= 1.0;
-            this.experienceCurrent -= 1.0;
-        }
-    }
-
-
     protected updateEvent(event : ProgramEvent) : void {
 
         this.control(event);
         this.updateGas(event);
-        this.updateExperience(event);
 
         if (this.shootRecoverTimer > 0) {
 
@@ -206,12 +184,6 @@ export class Player extends GameObject {
     protected groundCollisionEvent(event : ProgramEvent) : void {
         
         this.angleTarget = 0.0
-    }
-
-
-    public preDraw(canvas : Canvas) : void {
-
-        const bmpGasParticle : Bitmap = canvas.getBitmap("gp");
     }
 
 
@@ -256,11 +228,13 @@ export class Player extends GameObject {
     }
 
 
-    public addExperience(multiplier : number = 1.0) : void {
+    public scoreKill(points : number) : void {
 
         const BASE_EXPERIENCE : number = 1.0;
 
-        this.experienceTarget += (BASE_EXPERIENCE/(4*(this.level + 1)))*multiplier;
+        this.stats.experienceTarget += (BASE_EXPERIENCE/(4*(this.stats.level + 1)));
+        this.stats.addPoints(points);
+        this.stats.bonus += 0.1;
     }
 
 
@@ -273,18 +247,20 @@ export class Player extends GameObject {
             return;
         }
 
-        if ((-- this.health) <= 0) {
+        if ((-- this.stats.health) <= 0) {
 
             // TODO: Kill
         }
 
         this.hurtTimer = HURT_TIME;
 
-        if (this.level == 0) {
+        if (this.stats.level == 0) {
 
-            this.experienceTarget = 0;
+            this.stats.experienceTarget = 0;
         }
-        this.level = Math.max(0, this.level - 1);
+        this.stats.level = Math.max(0, this.stats.level - 1);
+
+        this.stats.bonus = 0.0;
     }
 
 
@@ -308,13 +284,18 @@ export class Player extends GameObject {
 
         if (this.overlay(c)) {
 
+            if (c.getID() == 0) {
+
+                this.stats.addTimeFreeze(2.0);
+            }
+            else {
+
+                this.stats.addHealth(1);
+            }
             c.kill(event);
         }
     }
 
 
-    public getLevel = () : number => this.level;
-    public getExperienceCount = () : number => this.experienceCurrent;
-    public getHealth = () : number => this.health;
     public isShooting = () : boolean => this.shootRecoverTimer > 0;
 }

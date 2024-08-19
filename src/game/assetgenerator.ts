@@ -462,7 +462,7 @@ const generateShadows = (assets : Assets) : void => {
 
     const canvas : Canvas = new Canvas(null, COUNT*32, 32);
 
-    canvas.setColor("#000000");
+    canvas.setColor("#499200");
     for (let i = 0; i < COUNT; ++ i) {
 
         const r : number = 16 - i*2;

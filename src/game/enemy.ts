@@ -10,6 +10,7 @@ import { Player } from "./player.js";
 import { clamp } from "../math/utility.js";
 import { GasParticle } from "./gasparticle.js";
 import { Collectible } from "./collectible.js";
+import { Stats } from "./stats.js";
 
 
 const DEATH_TIME : number = 16;
@@ -385,9 +386,9 @@ export class Enemy extends GameObject {
         if (this.overlay(p)) {
 
             p.kill(event);
-            this.kill(event);
+            this.kill(player.stats, event);
             
-            player.addExperience(1.0);
+            player.scoreKill(100);
         }
     }
 
@@ -442,12 +443,20 @@ export class Enemy extends GameObject {
     }
 
 
-    public kill(event : ProgramEvent) : void {
+    public kill(stats : Stats, event : ProgramEvent) : void {
+
+        const COLLECTIBLE_PROBABILITY : number = 0.33;
 
         this.dying = true;
         this.deathTimer = 0.0;
 
-        this.collectibles.next().spawn(this.pos.x, this.pos.y, 1.5, -1.0, Math.random() < 0.5 ? 1 : 0);
+        if (Math.random() > COLLECTIBLE_PROBABILITY) {
+
+            return;
+        }
+
+        const isHeart : boolean = Math.random() < 0.30 - 0.10*stats.health;
+        this.collectibles.next().spawn(this.pos.x, this.pos.y, 1.5, -1.0, Number(isHeart));
     }
 
 

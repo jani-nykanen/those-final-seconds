@@ -23,6 +23,8 @@ export class EnemyGenerator {
     private readonly gasSupply : ObjectGenerator<GasParticle>;
     private readonly collectibles : ObjectGenerator<Collectible>;
 
+    private lastEnemy : number = -1;
+
 
     constructor(projectiles : ObjectGenerator<Projectile>,
         gasSupply : ObjectGenerator<GasParticle>,
@@ -33,7 +35,7 @@ export class EnemyGenerator {
         this.collectibles = collectibles;
 
         this.enemies = new Array<Enemy> ();
-        this.timers = (new Array<number> (3)).fill(0).map((_ : number, i : number) => i*300);
+        this.timers = (new Array<number> (3)).fill(0).map((_ : number, i : number) => 0); // i*300);
     }
 
 
@@ -41,9 +43,15 @@ export class EnemyGenerator {
 
         const XOFF : number = 32;
 
-        const ground : number = event.screenHeight - GROUND_LEVEL;
-        const id : number = (Math.random()*4) | 0;
+        let id : number = (Math.random()*4) | 0;
+        if (id == this.lastEnemy) {
 
+            id = (id + 1) % 4;
+        }
+        this.lastEnemy = id;
+
+        const ground : number = event.screenHeight - GROUND_LEVEL - (id == 3 ? 16 : 0);
+        
         const dx : number = event.screenWidth + 16;
         const dy : number = id == 1 ? ground : Math.random()*(ground - 32);
 
@@ -53,7 +61,7 @@ export class EnemyGenerator {
             count = 4;
         }
 
-        const canShoot : boolean = Math.random() > 0.5;
+        const canShoot : boolean = Math.random() < 0.25; // i.e "has mouth"
         for (let i = 0; i < count; ++ i) {
 
             let e : Enemy | undefined = next<Enemy> (this.enemies);
@@ -75,8 +83,16 @@ export class EnemyGenerator {
 
                 const count : number = 1 + ( (Math.random()*3) | 0); 
 
-                this.timers[i] += count*60 + Math.random()*120;
+                this.timers[i] += count*30 + Math.random()*90;
                 this.spawnEnemy(count, event);
+
+                // Avoid spawning too many enemies at the same time
+                for (let j = 0; j < this.timers.length; ++ j) {
+
+                    if (i == j) continue;
+
+                    this.timers[j] += 30;
+                }
             }
         }
     }

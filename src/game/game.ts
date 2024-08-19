@@ -14,12 +14,15 @@ import { Projectile } from "./projectile.js";
 import { GasParticle } from "./gasparticle.js";
 import { InputState } from "../core/inputstate.js";
 import { Collectible } from "./collectible.js";
+import { Stats } from "./stats.js";
 
 
-const EXPRIENCE_BAR_BACKGROUND_COLORS : string[] = ["#ffffff", "#000000", "#6d6d6d"];
-const EXPERIENCE_BAR_PIECES_HEIGHTS : number[] = [9, 7, 3];
+// For all kind of bars
+const BAR_BACKGROUND_COLORS : string[] = ["#ffffff", "#000000", "#6d6d6d"];
+
+const EXPERIENCE_BAR_PIECES_HEIGHTS : number[] = [11, 9, 4];
 const EXPERIENCE_BAR_PIECES_Y : number[] = [0, 0, 1];
-const EXPERIENCE_BAR_COLORS : string[] = ["#246db6", "#6db6ff", "#92dbff"]; 
+const EXPERIENCE_BAR_COLORS : string[] = ["#006db6", "#6db6ff", "#92dbff"]; 
 
 
 export class Game implements Scene {
@@ -27,6 +30,7 @@ export class Game implements Scene {
 
     private background : Background;
 
+    private stats : Stats;
     private player : Player;
     private projectiles : ObjectGenerator<Projectile>;
     private gasSupply : ObjectGenerator<GasParticle>;
@@ -37,9 +41,6 @@ export class Game implements Scene {
     private cameraTarget : number = 0.0;
     private globalSpeed : number = 1.0;
 
-    private time : number = 0.0;
-    private frameCount : number = 0;
-
     private paused : boolean = false;
 
     
@@ -47,11 +48,11 @@ export class Game implements Scene {
 
         this.background = new Background();
 
+        this.stats = new Stats();
         this.projectiles = new ObjectGenerator<Projectile> (Projectile);
         this.gasSupply = new ObjectGenerator<GasParticle> (GasParticle);
         this.collectibles = new ObjectGenerator<Collectible> (Collectible);
-
-        this.player = new Player(96, 96, this.projectiles, this.gasSupply);
+        this.player = new Player(96, 96, this.projectiles, this.gasSupply, this.stats);
         this.enemies = new EnemyGenerator(this.projectiles, this.gasSupply, this.collectibles);
     }
 
@@ -83,53 +84,81 @@ export class Game implements Scene {
     private drawExperienceBar(canvas : Canvas) : void {
 
         const EXPERIENCE_BAR_WIDTH : number = 96;
-        const EXPERIENCE_BAR_HEIGHT : number = 13;
+        const EXPERIENCE_BAR_HEIGHT : number = 15;
 
         const cx : number = canvas.width/2;
         const by : number = canvas.height;
-
-        const level : number = this.player.getLevel();
 
         // Experience bar background
         const dx : number = cx - EXPERIENCE_BAR_WIDTH/2;
         const dy : number = by - 10 - EXPERIENCE_BAR_HEIGHT/2;
         for (let i = 0; i < 3; ++ i) {
 
-            canvas.setColor(EXPRIENCE_BAR_BACKGROUND_COLORS[i]);
+            canvas.setColor(BAR_BACKGROUND_COLORS[i]);
             canvas.fillRect(dx + i, dy + i, EXPERIENCE_BAR_WIDTH - i*2, EXPERIENCE_BAR_HEIGHT - i*2);
         }
 
         // Bar colors
-        const activeBarWidth : number = this.player.getExperienceCount()*(EXPERIENCE_BAR_WIDTH - 4);
+        const activeBarWidth : number = this.stats.experienceCurrent*(EXPERIENCE_BAR_WIDTH - 4);
         for (let i = 0; i < 3; ++ i) {
 
             const y : number = dy + 2 + EXPERIENCE_BAR_PIECES_Y[i];
             canvas.setColor(EXPERIENCE_BAR_COLORS[i]);
             canvas.fillRect(dx + 2, y, activeBarWidth, EXPERIENCE_BAR_PIECES_HEIGHTS[i]);
         }
-        canvas.drawText("fw", "LEVEL " + String(level + 1), cx, by - 14, -1, 0, Align.Center);
+        canvas.drawText("fo", "LEVEL " + String(this.stats.level + 1), cx, by - 20, -8, 0, Align.Center);
     }
 
 
     private drawTime(canvas : Canvas) : void {
 
-        const milliseconds : number = ((this.time % 1000)/10) | 0;
-        const seconds : number = (this.time/1000) | 0;
+        const FREEZE_BAR_WIDTH : number = 40;
+
+        const milliseconds : number = ((this.stats.time % 1000)/10) | 0;
+        const seconds : number = (this.stats.time/1000) | 0;
 
         canvas.drawText("fo", 
             "#" + String(seconds) + ":" + ( (milliseconds < 10 ? "0" : "") + String(milliseconds)), 
-            canvas.width/2, -2, -7, 0, Align.Center);
+            canvas.width/2 - 5, -2, -7, 0, Align.Center);
+
+        if (this.stats.timeFreeze <= 0)
+            return;
+
+        const t : number = this.stats.timeFreeze/this.stats.maxTimeFreeze;
+        const dx : number = canvas.width/2 - FREEZE_BAR_WIDTH/2;
+        const dy : number = 14;
+        for (let i = 0; i < 3; ++ i) {
+
+            canvas.setColor(BAR_BACKGROUND_COLORS[i]);
+            canvas.fillRect(dx + i, dy + i, FREEZE_BAR_WIDTH - i*2, 6 - i*2);
+        }
+        
+        canvas.setColor("#ffffff");
+        canvas.fillRect(dx + 2, dy + 2, t*(FREEZE_BAR_WIDTH - 4), 2);
     }
 
 
     private drawHealth(canvas : Canvas) : void {
 
-        const count : number = this.player.getHealth();
+        for (let i = 0; i < this.stats.maxHealth; ++ i) {
 
-        for (let i = 0; i < this.player.maxHealth; ++ i) {
-
-            canvas.drawBitmap("h", Flip.None, 2 + 16*i, 2, i < count ? 0 : 16, 0, 16, 16);
+            canvas.drawBitmap("h", Flip.None, 2 + 16*i, 2, i < this.stats.health ? 0 : 16, 0, 16, 16);
         }
+    }
+
+
+    private drawScore(canvas : Canvas) : void {
+
+        // Score
+        canvas.drawText("fo", "SCORE:", canvas.width - 8, -4, -8, 0, Align.Right);
+
+        const scoreStr : string = String(this.stats.score);
+        const finalScoreStr : string = "0".repeat(7 - scoreStr.length) + scoreStr;
+        canvas.drawText("fo", finalScoreStr, canvas.width - 44, 6, -7, 0, Align.Center);
+
+        // Score bonus
+        const bonusStr : string = (1.0 + this.stats.bonus).toFixed(1);
+        canvas.drawText("fo", "BONUS: $" + bonusStr, canvas.width, canvas.height - 18, -8, 0, Align.Right);
     }
 
 
@@ -138,9 +167,7 @@ export class Game implements Scene {
         this.drawExperienceBar(canvas);
         this.drawTime(canvas);
         this.drawHealth(canvas);
-
-        // A lonely phase text on the top-right corner
-        canvas.drawText("fo", "PHASE 1", canvas.width + 2, -2, -7, 0, Align.Right);
+        this.drawScore(canvas);
     }
 
     
@@ -184,16 +211,7 @@ export class Game implements Scene {
         this.updateCamera(event);
         this.background.update(this.globalSpeed, event);
 
-        if (this.player.isShooting()) {
-            
-            this.time += this.frameCount == 0 ? 16 : 17;
-        }
-        if (this.time >= 13*1000) {
-
-            this.time = 13*1000;
-            // TODO: Kill the player
-        }
-        this.frameCount = (this.frameCount + 1) % 3;
+        this.stats.update(event);
     }
 
 
@@ -211,14 +229,13 @@ export class Game implements Scene {
         this.enemies.drawShadows(canvas);
         this.collectibles.drawShadows(canvas);
 
-        canvas.setAlpha(0.67);
-        this.background.drawGround(canvas);
+        canvas.setAlpha(0.25);
+        this.background.drawGround(canvas, false);
         canvas.setAlpha();
 
         // Objects
         this.gasSupply.draw(canvas, canvas.getBitmap("gp"));
 
-        this.player.preDraw(canvas);
         this.enemies.preDraw(canvas);
         this.enemies.draw(canvas);
         this.player.draw(canvas);

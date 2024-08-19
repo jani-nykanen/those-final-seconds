@@ -76,7 +76,7 @@ export class Background {
     }
 
 
-    public drawGround(canvas : Canvas) : void {
+    public drawGround(canvas : Canvas, drawGround : boolean = true) : void {
 
         const LINE_DISTANCE : number = 24;
 
@@ -84,8 +84,11 @@ export class Background {
         const ypos : number = canvas.height - GROUND_HEIGHT;
         
         // Green bottom
-        canvas.setColor("#6db600");
-        canvas.fillRect(0, ypos + 4, canvas.width, GROUND_HEIGHT - 4);
+        if (drawGround) {
+
+            canvas.setColor("#6db600");
+            canvas.fillRect(0, ypos + 4, canvas.width, GROUND_HEIGHT - 4);
+        }
         canvas.setColor("#dbff00");
 
         // Horizontal lines
