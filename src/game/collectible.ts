@@ -19,12 +19,14 @@ export class Collectible extends GameObject {
     private deathTimer : number = 0.0;
     private animationTimer : number = 0.0;
 
+    private startY : number = 0.0;
+
 
     constructor() {
 
         super(0, 0, false);
 
-        this.hitbox = new Rectangle(0, 2, 12, 12);
+        this.hitbox = new Rectangle(0, 0, 16, 16);
 
         this.friction.x = 0.05;
         this.friction.y = 0.075;
@@ -56,9 +58,13 @@ export class Collectible extends GameObject {
         if (this.pos.x + 8 < 0) {
 
             this.exist = false;
-            console.log("Poof!");
         }
         this.animationTimer = (this.animationTimer + ANIMATION_SPEED*event.tick) % 1.0;
+
+        if (this.id == 1) {
+
+            this.pos.y = this.startY + Math.sin(this.animationTimer*Math.PI*2)*4;
+        }
     }
 
 
@@ -72,10 +78,16 @@ export class Collectible extends GameObject {
         if (this.dying) {
 
             const t : number = this.deathTimer/DEATH_TIME;
-            canvas.drawBitmap("r1", Flip.None, this.pos.x - 12, this.pos.y - 12, ((t*4) | 0)*24, 48 + this.id*24, 24, 24);
+            canvas.drawBitmap("r1", Flip.None, this.pos.x - 12, this.pos.y - 12, ((t*4) | 0)*24, 96 + this.id*24, 24, 24);
             return;
         }
         
+        if (this.id == 1) {
+
+            canvas.drawBitmap("g", Flip.None, this.pos.x - 8, this.pos.y - 8, 48, 48, 16, 16);
+            canvas.drawBitmap("fo", Flip.None, this.pos.x - 5, this.pos.y - 7, 11*16, 0, 16, 16);
+            return;
+        }
         canvas.drawBitmap(bmp, Flip.None, this.pos.x - 8, this.pos.y - 8, ((this.animationTimer*8) | 0)*16, 0, 16, 16);
     }
 
@@ -83,9 +95,11 @@ export class Collectible extends GameObject {
     public spawn(x : number, y : number, speedx : number, speedy : number, id : number) : void {
 
         this.pos = new Vector(x, y);
-        this.speed = new Vector(speedx, speedy);
+        this.speed = new Vector(speedx*(1 - id), speedy*(1 - id),);
         this.target.x = -BASE_SPEED;
-        this.target.y = GRAVITY;
+        this.target.y = GRAVITY*(1 - id);
+
+        this.startY = y;
 
         this.id = id;
 

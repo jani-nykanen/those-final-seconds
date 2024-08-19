@@ -65,8 +65,8 @@ const GAME_ART_PALETTE_TABLE : string[] = [
     "J0B5", "J0B5", "J0B5", "J0B5", "J0B5", "J0B5", "10H2", "00GD",
     "10IH", "10IH", "1034", "1034", "1034", "1024", "10LM", "1000",
     "10IH", "10IH", "1034", "1034", "1034", "1034", "1084", "1000",
-    "0000", "0000", "0000", "1056", "1056", "1002", "0000", "0000",
-    "0000", "0000", "0000", "1056", "1056", "10EG", "0000", "0000",
+    "0000", "0000", "0000", "1056", "1056", "1002", "10FG", "10FE",
+    "0000", "0000", "0000", "1056", "1056", "10EG", "10FE", "10FE",
     "0000", "0000", "1000", "1042", "10EF", "10EF", "10EF", "10EF",
     "10I9", "10I9", "10I9", "10I9", "0000", "0000", "0000", "0000",
     "10ID", "10I7", "10I7", "10I7", "0000", "0000", "0000", "0000",
@@ -391,7 +391,7 @@ const generateEnemyBodies = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt
     canvas.drawBitmap(bmpGameArt, Flip.None, 7, 35, 40, 56, 4, 4);
     canvas.drawBitmap(bmpGameArt, Flip.None, 54, 35, 44, 56, 4, 8);
     // Upside-down mouth for ball 4
-    canvas.drawBitmap(bmpGameArt, Flip.Vertical, 72 + 5, 37, 40, 52, 12, 4);
+    canvas.drawBitmap(bmpGameArt, Flip.Vertical, 72 + 5, 37, 40, 52, 8, 4);
 
     assets.addBitmap("e", canvas.toBitmap());
 }
@@ -422,13 +422,13 @@ const generatePropeller = (assets : Assets, bmpGameArt : Bitmap) : void => {
 
 const generateRings = (assets : Assets) : void => {
 
-    const SMALL_RING_COLORS : string[] = ["#ffdb00", "#ffb6b6", "#ffdbff", "#ff9292"];
+    const SMALL_RING_COLORS : string[] = ["#ffdb00", "#ffb6b6", "#ffdbff", "#ff9292", "#db9200", "#ff6d00"];
 
     // Small rings
-    const canvas1 : Canvas = new Canvas(null, 96, 96);
+    const canvas1 : Canvas = new Canvas(null, 96, 144);
     const canvas2 : Canvas = new Canvas(null, 48*4, 48);
 
-    for (let j = 0; j < 4; ++ j) {
+    for (let j = 0; j < 6; ++ j) {
 
         const dy : number = j*24 + 12;
         canvas1.setColor(SMALL_RING_COLORS[j]);

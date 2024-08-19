@@ -171,6 +171,10 @@ export class Game implements Scene {
 
             this.player.projectileCollision(p, event);
         });
+        this.collectibles.iterate((c : Collectible) : void => {
+
+            this.player.collectibleCollision(c, event);
+        })
 
         this.gasSupply.update(event);
         this.projectiles.update(event);
@@ -221,7 +225,7 @@ export class Game implements Scene {
         this.collectibles.draw(canvas, canvas.getBitmap("cl"))
         this.projectiles.draw(canvas, canvas.getBitmap("pr"));
 
-        // canvas.drawBitmap("cl", Flip.None, 64, 16);
+        // canvas.drawBitmap("g", Flip.None, 64, 16);
         // canvas.drawBitmap("pr", Flip.None, 64, 80);
         // canvas.drawBitmap("s", Flip.None, 128, 80);
 

@@ -388,7 +388,6 @@ export class Enemy extends GameObject {
             this.kill(event);
             
             player.addExperience(1.0);
-
         }
     }
 
@@ -448,7 +447,7 @@ export class Enemy extends GameObject {
         this.dying = true;
         this.deathTimer = 0.0;
 
-        this.collectibles.next().spawn(this.pos.x, this.pos.y, 2.0, -1.0, 0);
+        this.collectibles.next().spawn(this.pos.x, this.pos.y, 1.5, -1.0, Math.random() < 0.5 ? 1 : 0);
     }
 
 

@@ -308,7 +308,6 @@ export class Player extends GameObject {
 
         if (this.overlay(c)) {
 
-            this.hurt(event);
             c.kill(event);
         }
     }
