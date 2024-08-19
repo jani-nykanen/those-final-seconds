@@ -9,6 +9,7 @@ import { CAMERA_MIN_Y } from "./constants.js";
 import { GROUND_LEVEL } from "./background.js";
 import { next } from "./existingobject.js";
 import { GasParticle } from "./gasparticle.js";
+import { Collectible } from "./collectible.js";
 
 
 export class EnemyGenerator {
@@ -20,13 +21,16 @@ export class EnemyGenerator {
 
     private readonly projectiles : ObjectGenerator<Projectile>;
     private readonly gasSupply : ObjectGenerator<GasParticle>;
+    private readonly collectibles : ObjectGenerator<Collectible>;
 
 
     constructor(projectiles : ObjectGenerator<Projectile>,
-        gasSupply : ObjectGenerator<GasParticle>) {
+        gasSupply : ObjectGenerator<GasParticle>,
+        collectibles : ObjectGenerator<Collectible>) {
 
         this.projectiles = projectiles;
         this.gasSupply = gasSupply;
+        this.collectibles = collectibles;
 
         this.enemies = new Array<Enemy> ();
         this.timers = (new Array<number> (3)).fill(0).map((_ : number, i : number) => i*300);
@@ -55,7 +59,7 @@ export class EnemyGenerator {
             let e : Enemy | undefined = next<Enemy> (this.enemies);
             if (e === undefined) {
 
-                e = new Enemy(this.projectiles, this.gasSupply);
+                e = new Enemy(this.projectiles, this.gasSupply, this.collectibles);
                 this.enemies.push(e);
             }
             e.spawn(dx + (id != 3 ? i*XOFF : 0), dy, id, i, canShoot);

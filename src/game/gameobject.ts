@@ -29,11 +29,12 @@ export class GameObject implements ExistingObject {
     protected speed : Vector;
     protected target : Vector;
     protected friction : Vector;
+    protected bounceFactor : number = 0.0;
 
     protected hitbox : Rectangle;
 
     protected shadowWidth : number = 8;
-
+    
 
     constructor(x : number = 0, y : number = 0, exist : boolean = false) {
 
@@ -55,7 +56,7 @@ export class GameObject implements ExistingObject {
         if (this.speed.y > 0 && this.pos.y + this.hitbox.y + this.hitbox.h/2 > ground) {
 
             this.pos.y = ground - this.hitbox.y - this.hitbox.h/2;
-            this.speed.y = 0.0;
+            this.speed.y *= -this.bounceFactor;
 
             this.groundCollisionEvent?.(event);
         }

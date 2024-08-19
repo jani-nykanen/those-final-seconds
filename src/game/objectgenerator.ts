@@ -40,6 +40,15 @@ export class ObjectGenerator<T extends GameObject> {
     }
 
 
+    public drawShadows(canvas : Canvas) : void {
+
+        for (let o of this.objects) {
+
+            o.drawShadow(canvas);
+        }
+    }
+
+
     public draw(canvas : Canvas, bmp : Bitmap) : void {
 
         for (let o of this.objects) {

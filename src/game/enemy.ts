@@ -9,6 +9,7 @@ import { ObjectGenerator } from "./objectgenerator.js";
 import { Player } from "./player.js";
 import { clamp } from "../math/utility.js";
 import { GasParticle } from "./gasparticle.js";
+import { Collectible } from "./collectible.js";
 
 
 const DEATH_TIME : number = 16;
@@ -50,10 +51,12 @@ export class Enemy extends GameObject {
 
     private readonly projectiles : ObjectGenerator<Projectile>;
     private readonly gasSupply : ObjectGenerator<GasParticle>;
+    private readonly collectibles : ObjectGenerator<Collectible>;
     
 
     constructor(projectiles : ObjectGenerator<Projectile>,
-        gasSupply : ObjectGenerator<GasParticle>) {
+        gasSupply : ObjectGenerator<GasParticle>,
+        collectibles : ObjectGenerator<Collectible>) {
 
         super(0, 0, false);
 
@@ -65,6 +68,7 @@ export class Enemy extends GameObject {
 
         this.projectiles = projectiles;
         this.gasSupply = gasSupply;
+        this.collectibles = collectibles;
     }
 
 
@@ -443,6 +447,8 @@ export class Enemy extends GameObject {
 
         this.dying = true;
         this.deathTimer = 0.0;
+
+        this.collectibles.next().spawn(this.pos.x, this.pos.y, 2.0, -1.0, 0);
     }
 
 

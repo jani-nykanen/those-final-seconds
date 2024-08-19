@@ -6,6 +6,7 @@ import { Flip } from "../gfx/flip.js";
 import { Rectangle } from "../math/rectangle.js";
 import { clamp } from "../math/utility.js";
 import { Vector } from "../math/vector.js";
+import { Collectible } from "./collectible.js";
 import { CAMERA_MIN_Y } from "./constants.js";
 import { next } from "./existingobject.js";
 import { GameObject, updateSpeedAxis } from "./gameobject.js";
@@ -296,6 +297,19 @@ export class Player extends GameObject {
 
             this.hurt(event);
             p.kill(event);
+        }
+    }
+
+
+    public collectibleCollision(c : Collectible, event : ProgramEvent) : void {
+
+        if (!this.isActive() || !c.isActive())
+            return;
+
+        if (this.overlay(c)) {
+
+            this.hurt(event);
+            c.kill(event);
         }
     }
 

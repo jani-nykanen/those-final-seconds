@@ -8,12 +8,12 @@ import { clamp } from "../math/utility.js";
 import { updateSpeedAxis } from "./gameobject.js";
 import { CAMERA_MIN_Y } from "./constants.js";
 import { ObjectGenerator } from "./objectgenerator.js";
-import { Bitmap } from "../gfx/bitmap.js";
 import { Align } from "../gfx/align.js";
 import { EnemyGenerator } from "./enemygenerator.js";
 import { Projectile } from "./projectile.js";
 import { GasParticle } from "./gasparticle.js";
 import { InputState } from "../core/inputstate.js";
+import { Collectible } from "./collectible.js";
 
 
 const EXPRIENCE_BAR_BACKGROUND_COLORS : string[] = ["#ffffff", "#000000", "#6d6d6d"];
@@ -30,6 +30,7 @@ export class Game implements Scene {
     private player : Player;
     private projectiles : ObjectGenerator<Projectile>;
     private gasSupply : ObjectGenerator<GasParticle>;
+    private collectibles : ObjectGenerator<Collectible>;
     private enemies : EnemyGenerator;
 
     private cameraPos : number = 0.0;
@@ -48,9 +49,10 @@ export class Game implements Scene {
 
         this.projectiles = new ObjectGenerator<Projectile> (Projectile);
         this.gasSupply = new ObjectGenerator<GasParticle> (GasParticle);
+        this.collectibles = new ObjectGenerator<Collectible> (Collectible);
 
         this.player = new Player(96, 96, this.projectiles, this.gasSupply);
-        this.enemies = new EnemyGenerator(this.projectiles, this.gasSupply);
+        this.enemies = new EnemyGenerator(this.projectiles, this.gasSupply, this.collectibles);
     }
 
 
@@ -172,6 +174,7 @@ export class Game implements Scene {
 
         this.gasSupply.update(event);
         this.projectiles.update(event);
+        this.collectibles.update(event);
         this.enemies.update(this.player, event);
 
         this.updateCamera(event);
@@ -202,6 +205,7 @@ export class Game implements Scene {
         // Shadows
         this.player.drawShadow(canvas);
         this.enemies.drawShadows(canvas);
+        this.collectibles.drawShadows(canvas);
 
         canvas.setAlpha(0.67);
         this.background.drawGround(canvas);
@@ -214,9 +218,10 @@ export class Game implements Scene {
         this.enemies.preDraw(canvas);
         this.enemies.draw(canvas);
         this.player.draw(canvas);
+        this.collectibles.draw(canvas, canvas.getBitmap("cl"))
         this.projectiles.draw(canvas, canvas.getBitmap("pr"));
 
-        // canvas.drawBitmap("sh", Flip.None, 64, 16);
+        // canvas.drawBitmap("cl", Flip.None, 64, 16);
         // canvas.drawBitmap("pr", Flip.None, 64, 80);
         // canvas.drawBitmap("s", Flip.None, 128, 80);
 

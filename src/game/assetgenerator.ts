@@ -67,7 +67,9 @@ const GAME_ART_PALETTE_TABLE : string[] = [
     "10IH", "10IH", "1034", "1034", "1034", "1034", "1084", "1000",
     "0000", "0000", "0000", "1056", "1056", "1002", "0000", "0000",
     "0000", "0000", "0000", "1056", "1056", "10EG", "0000", "0000",
-    "0000", "0000", "0000", "1042", "10EF", "10EF", "10EF", "10EF",
+    "0000", "0000", "1000", "1042", "10EF", "10EF", "10EF", "10EF",
+    "10I9", "10I9", "10I9", "10I9", "0000", "0000", "0000", "0000",
+    "10ID", "10I7", "10I7", "10I7", "0000", "0000", "0000", "0000",
 ];
 
 
@@ -471,6 +473,47 @@ const generateShadows = (assets : Assets) : void => {
 }
 
 
+const generateClock = (assets : Assets, bmpGameArt : Bitmap) : void => {
+
+    const SX : number[] = [0, 16, 28, 16, 0, 16, 28, 16];
+    const SW : number[] = [16, 11, 4, 11, 16, 11, 4, 11];
+
+    const canvas : Canvas = new Canvas(null, 8*32, 16);
+
+    for (let i = 0; i < 8; ++ i) {
+
+        // This is a mess.
+
+        const backFace : boolean = i >= 3 && i <= 6;
+
+        const flip1 : Flip = Number(i == 3 || i == 7) as Flip;
+        const flip2 : Flip = Number(backFace) as Flip;
+        const sw : number = SW[i];
+        const shiftx : number = Number(i == 1 || i == 7);
+        const dx : number = (i*16 + 8 - (sw/2) | 0) + shiftx;
+
+        // canvas.setColor(i % 2 == 0 ? "#db9200" : "#ffffdb");
+        // canvas.fillRect(i*16, 0, 16, 16);
+
+        // Face
+        canvas.setColor(backFace ? "#db9200" : "#ffffdb");
+       
+        canvas.fillRect(dx + 2, 3, sw - 4, 10);
+        canvas.drawBitmap(bmpGameArt, flip1, dx, 0, SX[i], 72, sw, 16);
+        // Hands
+        if (i < 2 || i == 7) {
+
+            canvas.drawBitmap(bmpGameArt, flip2, 
+                i*16 + 7 + (i % 2)*(i == 7 ? 2 : -1), 
+                6, 16, 68, 3 - (i % 2), 4);
+        }
+    }
+
+    assets.addBitmap("cl", canvas.toBitmap());
+}
+
+
+
 const generateFonts = (assets : Assets) : void => {
 
     const bmpFontRaw : Bitmap = assets.getBitmap("_f");
@@ -536,6 +579,7 @@ export const generateAssets = (assets : Assets, audio : AudioPlayer) : void => {
     generatePropeller(assets, bmpGameArt);
     generateRings(assets);
     generateShadows(assets);
+    generateClock(assets, bmpGameArt);
     generateFonts(assets);
 
     // Audio
