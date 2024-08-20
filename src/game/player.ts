@@ -263,38 +263,5 @@ export class Player extends GameObject {
     }
 
 
-    public projectileCollision(p : Projectile, event : ProgramEvent) : void {
-
-        if (!this.isActive() || !p.isActive() || p.isFriendly())
-            return;
-
-        if (this.overlay(p)) {
-
-            this.hurt(event);
-            p.kill(event);
-        }
-    }
-
-
-    public collectibleCollision(c : Collectible, event : ProgramEvent) : void {
-
-        if (!this.isActive() || !c.isActive())
-            return;
-
-        if (this.overlay(c)) {
-
-            if (c.getID() == 0) {
-
-                this.stats.addTimeFreeze(2.0);
-            }
-            else {
-
-                this.stats.addHealth(1);
-            }
-            c.kill(event);
-        }
-    }
-
-
     public isShooting = () : boolean => this.shootRecoverTimer > 0;
 }

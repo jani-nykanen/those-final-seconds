@@ -20,9 +20,14 @@ import { Stats } from "./stats.js";
 // For all kind of bars
 const BAR_BACKGROUND_COLORS : string[] = ["#ffffff", "#000000", "#6d6d6d"];
 
-const EXPERIENCE_BAR_PIECES_HEIGHTS : number[] = [11, 9, 4];
-const EXPERIENCE_BAR_PIECES_Y : number[] = [0, 0, 1];
-const EXPERIENCE_BAR_COLORS : string[] = ["#006db6", "#6db6ff", "#92dbff"]; 
+
+const drawBar = (canvas : Canvas, dx : number, dy : number, dw : number, dh : number) : void => {
+
+    for (let i = 0; i < 3; ++ i) {
+
+        canvas.fillRect(dx + i, dy + i, dw - i*2, dh - i*2, BAR_BACKGROUND_COLORS[i]);
+    }
+}
 
 
 export class Game implements Scene {
@@ -92,18 +97,11 @@ export class Game implements Scene {
         // Experience bar background
         const dx : number = cx - EXPERIENCE_BAR_WIDTH/2;
         const dy : number = by - 10 - EXPERIENCE_BAR_HEIGHT/2;
-        for (let i = 0; i < 3; ++ i) {
-
-            canvas.fillRect(dx + i, dy + i, EXPERIENCE_BAR_WIDTH - i*2, EXPERIENCE_BAR_HEIGHT - i*2, BAR_BACKGROUND_COLORS[i]);
-        }
+        drawBar(canvas, dx, dy, EXPERIENCE_BAR_WIDTH, EXPERIENCE_BAR_HEIGHT);
 
         // Bar colors
         const activeBarWidth : number = this.stats.experienceCurrent*(EXPERIENCE_BAR_WIDTH - 4);
-        for (let i = 0; i < 3; ++ i) {
-
-            const y : number = dy + 2 + EXPERIENCE_BAR_PIECES_Y[i];
-            canvas.fillRect(dx + 2, y, activeBarWidth, EXPERIENCE_BAR_PIECES_HEIGHTS[i], EXPERIENCE_BAR_COLORS[i]);
-        }
+        canvas.fillRect(dx + 2, by - 16, activeBarWidth, EXPERIENCE_BAR_HEIGHT - 4, "#6db6ff");
         canvas.drawText("fo", "LEVEL " + String(this.stats.level + 1), cx, by - 20, -8, 0, Align.Center);
     }
 
@@ -122,14 +120,11 @@ export class Game implements Scene {
         if (this.stats.timeFreeze <= 0)
             return;
 
-        const t : number = this.stats.timeFreeze/this.stats.maxTimeFreeze;
         const dx : number = canvas.width/2 - FREEZE_BAR_WIDTH/2;
         const dy : number = 14;
-        for (let i = 0; i < 3; ++ i) {
+        drawBar(canvas, dx, dy, FREEZE_BAR_WIDTH, 6);
 
-            canvas.fillRect(dx + i, dy + i, FREEZE_BAR_WIDTH - i*2, 6 - i*2, BAR_BACKGROUND_COLORS[i]);
-        }
-        
+        const t : number = this.stats.timeFreeze/this.stats.maxTimeFreeze;
         canvas.fillRect(dx + 2, dy + 2, t*(FREEZE_BAR_WIDTH - 4), 2, "#ffffff");
     }
 
@@ -190,18 +185,9 @@ export class Game implements Scene {
         }
 
         this.player.update(event);
-        this.projectiles.iterate((p : Projectile) : void => {
-
-            this.player.projectileCollision(p, event);
-        });
-        this.collectibles.iterate((c : Collectible) : void => {
-
-            this.player.collectibleCollision(c, event);
-        })
-
-        this.gasSupply.update(event);
-        this.projectiles.update(event);
-        this.collectibles.update(event);
+        this.gasSupply.update(this.player, event);
+        this.projectiles.update(this.player, event);
+        this.collectibles.update(this.player, event);
         this.enemies.update(this.player, event);
 
         this.updateCamera(event);

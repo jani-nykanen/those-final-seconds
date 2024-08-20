@@ -5,6 +5,7 @@ import { Canvas } from "../gfx/canvas.js";
 import { Bitmap } from "../gfx/bitmap.js";
 import { Flip } from "../gfx/flip.js";
 import { Rectangle } from "../math/rectangle.js";
+import { Player } from "./player.js";
 
 
 const DEATH_TIME : number = 10;
@@ -108,12 +109,24 @@ export class Collectible extends GameObject {
     }
 
 
-    public kill(event : ProgramEvent) : void {
+    public playerCollision(player : Player, event : ProgramEvent) : void {
 
-        this.dying = true;
-        this.deathTimer = 0.0;
+        if (!this.isActive() || !player.isActive())
+            return;
+
+        if (this.overlay(player)) {
+
+            if (this.id == 0) {
+
+                player.stats.addTimeFreeze(2.0);
+            }
+            else {
+
+                player.stats.addHealth(1);
+            }
+
+            this.dying = true;
+            this.deathTimer = 0.0;
+        }
     }
-
-    
-    public getID = () : number => this.id;
 }

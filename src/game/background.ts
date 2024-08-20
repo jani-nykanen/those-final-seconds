@@ -8,10 +8,6 @@ const LAYER_MODULO : number[] = [192, 48, 192, 192];
 const LAYER_SPEED : number[] = [1, 0.5, 0.25, 0.33];
 
 
-const SKY_COLORS : string[] = ["#004992", "#246db6", "#4992db", "#6db6ff"];
-const SKY_COLOR_HEIGHT : number[] = [2, 8, 16, -1];
-
-
 const GROUND_HEIGHT : number = 48;
 // Yes it's a constant now
 export const GROUND_LEVEL : number = GROUND_HEIGHT/2;
@@ -31,7 +27,7 @@ export class Background {
 
     private drawRepeatingBitmap(canvas : Canvas, bmp : Bitmap, xpos : number, ypos : number) : void {
 
-        const w : number = bmp?.width ?? 0;
+        const w : number = bmp.width;
         const count : number = ((canvas.width/w) | 0) + 2;
 
         for (let i = 0; i < count; ++ i) {
@@ -86,8 +82,7 @@ export class Background {
         // Green bottom
         if (drawGround) {
 
-            canvas.setColor("#6db600");
-            canvas.fillRect(0, ypos + 4, canvas.width, GROUND_HEIGHT - 4);
+            canvas.fillRect(0, ypos + 4, canvas.width, GROUND_HEIGHT - 4, "#6db600");
         }
         canvas.setColor("#dbff00");
 
@@ -108,7 +103,6 @@ export class Background {
         for (let i = 0; i < 5; ++ i) {
 
             dy += (i + 1)*5.5;
-
             canvas.fillRect(0, dy, canvas.width, 1);
         }
 
@@ -137,11 +131,11 @@ export class Background {
         // Sun
         canvas.drawBitmap("s", Flip.None, canvas.width - 96, 16);
 
-        this.drawRepeatingBitmap(canvas, canvas.getBitmap("c"), this.layerPositions[3], 48 - camPos/4);
-        this.drawMushrooms(canvas, canvas.getBitmap("m"), this.layerPositions[2], 44 - camPos/2);
-        this.drawRepeatingBitmap(canvas, canvas.getBitmap("b"), this.layerPositions[1], 96 - camPos/1.5);
+        this.drawRepeatingBitmap(canvas, canvas.getBitmap("c")!, this.layerPositions[3], 48 - camPos/4);
+        this.drawMushrooms(canvas, canvas.getBitmap("m")!, this.layerPositions[2], 44 - camPos/2);
+        this.drawRepeatingBitmap(canvas, canvas.getBitmap("b")!, this.layerPositions[1], 96 - camPos/1.5);
 
-        this.drawRepeatingBitmap(canvas, canvas.getBitmap("f"), xpos, ypos - 36 - camPos);
+        this.drawRepeatingBitmap(canvas, canvas.getBitmap("f")!, xpos, ypos - 36 - camPos);
         this.drawGrass(canvas, xpos, ypos - 3 - camPos);
     }
 }

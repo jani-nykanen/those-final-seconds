@@ -66,12 +66,8 @@ export const applyPalette = (image : Bitmap,
     }
 
     const canvas : HTMLCanvasElement = createEmptyCanvas(image.width, image.height);
+    const ctx : CanvasRenderingContext2D = canvas.getContext("2d")!;
 
-    const ctx : CanvasRenderingContext2D | null = canvas.getContext("2d");
-    if (ctx === null) {
-
-        return undefined;
-    }
     ctx.drawImage(image, 0, 0);
 
     const imageData : ImageData = ctx.getImageData(0, 0, image.width, image.height);
@@ -107,11 +103,7 @@ export const createBitmapFromUint8Array = (array : Uint8Array,
     width : number, height : number) : Bitmap => {
 
     const canvas : HTMLCanvasElement = createEmptyCanvas(width, height);
-    const ctx : CanvasRenderingContext2D | null = canvas.getContext("2d");
-    if (ctx === null) {
-
-        return undefined;
-    }
+    const ctx : CanvasRenderingContext2D | null = canvas.getContext("2d")!;
 
     const imageData : ImageData = ctx.getImageData(0, 0, width, height);
     for (let i = 0; i < array.length; ++ i) {
@@ -127,7 +119,7 @@ export const createBitmapFromUint8Array = (array : Uint8Array,
 export const cropBitmap = (source : Bitmap, sx : number, sy : number, sw : number, sh : number) : Bitmap => {
 
     const canvas : HTMLCanvasElement = createEmptyCanvas(sw, sh);
-    const ctx : CanvasRenderingContext2D = canvas.getContext("2d");
+    const ctx : CanvasRenderingContext2D = canvas.getContext("2d")!;
 
     ctx.drawImage(source, sx, sy, sw, sh, 0, 0, sw, sh);
 

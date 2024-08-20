@@ -29,20 +29,16 @@ export class Program {
 
     private initialized : boolean = false;
 
-    private animationRequest : number | undefined = undefined;
-
 
     constructor(canvasMinWidth : number,  canvasMaxWidth : number,
         canvasMinHeight : number,  canvasMaxHeight : number,
-        audioCtx : AudioContext, audioMaxVolume : number = 0.60) {
+        audioMaxVolume : number = 0.60) {
         
         this.input = new Input();
         // this.scenes = new SceneManager();
         this.assets = new Assets();
         this.transition = new Transition();
-        this.audio = new AudioPlayer(audioCtx, 
-            (name : string) : Sample | undefined => this.assets.getSample(name), 
-            audioMaxVolume);
+        this.audio = new AudioPlayer((name : string) : Sample | undefined => this.assets.getSample(name), audioMaxVolume);
 
         this.canvas = new Canvas(null,
             canvasMinWidth, canvasMinHeight,
@@ -52,6 +48,7 @@ export class Program {
     }
 
 
+    /*
     private drawLoadingScreen(canvas : Canvas) : void {
 
         const OUTLINE : number = 1;
@@ -59,7 +56,6 @@ export class Program {
         const HEIGHT : number  = 12;
 
         canvas.clear("#000000");
-/*
         const p : number = this.assets.loadedRatio();
 
         const dx : number = canvas.width/2 - WIDTH/2;
@@ -71,11 +67,14 @@ export class Program {
         canvas.fillRect(dx + OUTLINE, dy + OUTLINE, WIDTH - OUTLINE*2, HEIGHT - OUTLINE*2);
         canvas.setColor("#ffffff");
         canvas.fillRect(dx + OUTLINE*2, dy + OUTLINE*2, (WIDTH - OUTLINE*4)*p, HEIGHT - OUTLINE*4);
-        */
+        
     }
+    */
 
 
-    private loop(ts : number, onLoad? : (event : ProgramEvent) => void) : void {
+    private loop(ts : number, 
+        initialScreen? : (canvas : Canvas) => void, 
+        onLoad? : (event : ProgramEvent) => void) : void {
 
         const MAX_REFRESH_COUNT : number = 5; 
         const BASE_FRAME_TIME : number = 1000.0/60.0;
@@ -86,64 +85,65 @@ export class Program {
         this.timeSum = Math.min(this.timeSum + (ts - this.oldTime), MAX_REFRESH_COUNT*frameTime);
         this.oldTime = ts;
 
-        try {
+        let firstFrame : boolean = true;
+        for (; this.timeSum >= frameTime; this.timeSum -= frameTime) {
 
-            if (loaded && !this.initialized) {
+            if (this.initialized) {
 
-                onLoad?.(this.event);
-                // this.scenes.activeScene?.onChange?.(undefined, this.event);
-                this.initialized = true;
+                // this.scenes.activeScene?.update(this.event);
+                this.activeScene.update(this.event);
+                this.transition.update(this.event);
             }
 
-            let firstFrame : boolean = true;
-            for (; this.timeSum >= frameTime; this.timeSum -= frameTime) {
-
-                if (loaded) {
-
-                    // this.scenes.activeScene?.update(this.event);
-                    this.activeScene.update(this.event);
-                    this.transition.update(this.event);
-                }
+            if (!this.initialized) {
                 
-                if (firstFrame) {
+                if (this.input.anyPressed) {
 
+                    this.initialized = true;
+                    this.audio.initialize();
+                    onLoad(this.event);
                     this.event.input.update();
-                    firstFrame = false;
+                    break;
                 }
             }
-            
-            if (loaded) {
                 
+            if (firstFrame) {
+
+                this.event.input.update();
+                firstFrame = false;
+            }
+        }
+            
+        if (loaded) {
+                
+            if (!this.initialized) {
+
+                initialScreen(this.canvas);
+            }
+            else {
+
                 // this.scenes.activeScene?.redraw(this.canvas);
                 this.activeScene.redraw(this.canvas);
                 this.transition.draw(this.canvas);
             }
-            else {
-
-                this.drawLoadingScreen(this.canvas);
-            }
         }
-        catch (e : any) {
+        else {
 
-            if (this.animationRequest !== undefined) {
-
-                window.cancelAnimationFrame(this.animationRequest);
-            }
-            console.log(e.stack);
-            return;
+            // this.drawLoadingScreen(this.canvas);
+            this.canvas.clear("#055AA");
         }
-
-        this.animationRequest = window.requestAnimationFrame(ts => this.loop(ts, onLoad));
+        window.requestAnimationFrame(ts => this.loop(ts, initialScreen, onLoad));
     }
 
 
     public run(sceneType : Function,
-        initialEvent? : (event : ProgramEvent) => void,
-        onLoad? : (event : ProgramEvent) => void) : void {
+        initialEvent : (event : ProgramEvent) => void,
+        initialScreen : (canvas : Canvas) => void,
+        onLoad : (event : ProgramEvent) => void) : void {
 
         this.activeScene = new sceneType.prototype.constructor(this.event);
 
-        initialEvent?.(this.event);
-        this.loop(0.0, onLoad);
+        initialEvent(this.event);
+        this.loop(0.0, initialScreen, onLoad);
     }
 }

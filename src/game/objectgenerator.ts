@@ -2,10 +2,11 @@ import { ProgramEvent } from "../core/event.js";
 import { next } from "./existingobject.js";
 import { Bitmap } from "../gfx/bitmap.js";
 import { Canvas } from "../gfx/canvas.js";
-import { GameObject } from "./gameobject.js";
+import { Spawnable } from "./spawnable.js";
+import { Player } from "./player.js";
 
 
-export class ObjectGenerator<T extends GameObject> {
+export class ObjectGenerator<T extends Spawnable> {
 
 
     private objects : T[];
@@ -31,11 +32,12 @@ export class ObjectGenerator<T extends GameObject> {
     }
 
 
-    public update(event : ProgramEvent) : void {
+    public update(player : Player, event : ProgramEvent) : void {
 
         for (let o of this.objects) {
 
             o.update(event);
+            o.playerCollision?.(player, event);
         }
     }
 

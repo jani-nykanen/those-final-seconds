@@ -202,9 +202,9 @@ const generateSun = (assets : Assets, bmpGameArt : Bitmap) : void => {
 
     // "Body"
     canvas.setColor("#ffdb00");
-    canvas.fillCircle(RADIUS, RADIUS, RADIUS);
+    canvas.fillEllipse(RADIUS, RADIUS, RADIUS);
     canvas.setColor("#ffff92");
-    canvas.fillCircle(RADIUS - 2, RADIUS - 2, RADIUS - 2);
+    canvas.fillEllipse(RADIUS - 2, RADIUS - 2, RADIUS - 2);
 
     // Eyes & mouth
     /*
@@ -256,10 +256,10 @@ const generateGasParticles = (assets : Assets) : void => {
         const radius : number = 5 - i;
 
         canvas.setColor("#b6b6b6");
-        canvas.fillCircle(cx, 8, radius);
+        canvas.fillEllipse(cx, 8, radius);
 
         canvas.setColor("#ffffff");
-        canvas.fillCircle(cx - 1, 8 - 1, radius - 1);
+        canvas.fillEllipse(cx - 1, 8 - 1, radius - 1);
     }
 
     assets.addBitmap("gp", canvas.toBitmap());
@@ -273,7 +273,7 @@ const generateProjectiles = (assets : Assets, bmpGameArt : Bitmap, bmpGameArtRaw
     // Outlines
     for (let j = 0; j < 2; ++ j) {
 
-        canvas.setColor(j == 0 ? "#ffffff" : "#ff9292");
+        canvas.setColor(j == 0 ? "#ffffff" : "#ffb649");
         for (let i = 0; i < 4; ++ i) {
 
             const w : number = 10 - i*2;
@@ -289,8 +289,8 @@ const generateProjectiles = (assets : Assets, bmpGameArt : Bitmap, bmpGameArtRaw
     canvas.drawBitmap(bmpBody2, Flip.None, 20, 4);
 
     // Reflections
-    canvas.fillRect(6, 6, 2, 2, "#ffdbff");
-    canvas.fillRect(22, 6, 2, 2, "#ffb66d");
+    // canvas.fillRect(6, 6, 2, 2, "#ffdbff");
+    // canvas.fillRect(22, 6, 2, 2, "#ffb66d");
 
     assets.addBitmap("pr", canvas.toBitmap());
 }
@@ -300,7 +300,7 @@ const generateHUD = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt : Bitma
 
     const bmpHeartRaw : Bitmap = cropBitmap(bmpRawGameArt, 48, 48, 16, 16);
 
-    const bmpHeart1 : Bitmap = applyPalette(bmpHeartRaw, ["10FG", "10FE", "10FE", "10FE"], PALETTE_LOOKUP);
+    // const bmpHeart1 : Bitmap = applyPalette(bmpHeartRaw, ["10FG", "10FE", "10FE", "10FE"], PALETTE_LOOKUP);
     const bmpHeart2 : Bitmap = applyPalette(bmpHeartRaw, ["1042", "1043", "1043", "1043"], PALETTE_LOOKUP);
     // const bmpHeart3 : Bitmap = applyPalette(bmpHeartRaw, ["2022", "2022", "2022", "2022"], PALETTE_LOOKUP);
 
@@ -327,7 +327,7 @@ const generateHUD = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt : Bitma
     */
 
     // Hearts
-    canvas.drawBitmap(bmpHeart1, Flip.None, 0, 0);
+    canvas.drawBitmap(bmpGameArt, Flip.None, 0, 0, 48, 48, 16, 16);
     canvas.drawBitmap(bmpHeart2, Flip.None, 16, 0);
 
     // Faces
@@ -365,7 +365,7 @@ const generateEnemyBodies = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt
         bmpBallBodiesRaw.drawBitmap(bmpRawGameArt, Flip.None, 72 + 8, 9 + i, 20, 48, i == 3 ? 4 : 1, 20, 4, 10, -Math.PI/2);
     }
 
-    // TODO: Generate in code to save bytes
+    // TODO: Generate in code to save bytes ?
     const colors : string[] = [
         "10DH", "10DH", "10FH",  "10PO", "10PO", "10NO",  "1024", "1024", "1034",  "102M", "102M", "10LM",
         "10DH", "10DH", "10FH",  "10PO", "10PO", "10NO",  "1024", "1024", "1034",  "102M", "102M", "10LM", 

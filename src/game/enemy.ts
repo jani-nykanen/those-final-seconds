@@ -147,12 +147,8 @@ export class Enemy extends GameObject {
         }
 
         this.propellerTimer = (this.propellerTimer + PROPELLER_SPEED*event.tick) % 1.0;
-        const animationSpeed : number | undefined = ANIMATION_SPEED[this.id];
-        if (animationSpeed !== undefined) {
-
-            this.animationTimer = (this.animationTimer + animationSpeed*event.tick) % (Math.PI*2);
-        }
-
+        this.animationTimer = (this.animationTimer + (ANIMATION_SPEED[this.id] ?? 0)*event.tick) % (Math.PI*2);
+        
         switch (this.id) {
 
         // Flying default ball
@@ -312,7 +308,7 @@ export class Enemy extends GameObject {
             return;
         }
         // Face otherwise
-        let faceY : number = 0;
+        let faceY : number = this.id == 1 ? clamp(Math.round(this.speed.y), -3, 3) : 0;
         if (this.id == 1) {
 
             faceY = clamp(Math.round(this.speed.y), -3, 3);

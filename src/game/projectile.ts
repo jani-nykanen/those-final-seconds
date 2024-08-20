@@ -6,6 +6,7 @@ import { Bitmap } from "../gfx/bitmap.js";
 import { Flip } from "../gfx/flip.js";
 import { Rectangle } from "../math/rectangle.js";
 import { CAMERA_MIN_Y } from "./constants.js";
+import { Player } from "./player.js";
 
 
 const DEATH_TIME : number = 10;
@@ -84,6 +85,16 @@ export class Projectile extends GameObject {
 
         this.dying = true;
         this.deathTimer = 0.0;
+    }
+
+
+    public playerCollision(player : Player, event : ProgramEvent) : void {
+
+        if (!this.isActive() || !player.isActive() || this.id == 0 || !this.overlay(player))
+            return;
+
+        player.hurt(event);
+        this.kill(event);
     }
 
 

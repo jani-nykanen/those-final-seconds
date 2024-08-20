@@ -179,9 +179,7 @@ export class Canvas {
         const sy : number = y1 < y2 ? 1 : -1; 
         let error : number = dx + dy;
 
-        let i : number = 0;
-        // TODO: Check if "do-while" gets stuck in a loop
-        // if the points are the same.
+        // let i : number = 0;
         while ((x1 != x2 || y1 != y2)) {
 
             this.ctx.fillRect(x1, y1, 1, 1);
@@ -222,13 +220,7 @@ export class Canvas {
     }
 
 
-    public fillCircle(cx : number, cy : number, radius : number) : void {
-
-        this.fillEllipse(cx, cy, radius, radius);
-    }
-
-
-    public fillEllipse(cx : number, cy : number, hradius : number, vradius : number) : void {
+    public fillEllipse(cx : number, cy : number, hradius : number, vradius : number = hradius) : void {
 
         cx = (cx + this.translation.x) | 0;
         cy = (cy + this.translation.y) | 0;
@@ -297,8 +289,9 @@ export class Canvas {
         innerRadius |= 0;
         outerRadius |= 0;
 
-        if (innerRadius >= outerRadius)
-            return;
+        // Let's pretend this never happens!
+        // if (innerRadius >= outerRadius)
+        //    return;
 
         cx = (cx + this.translation.x) | 0;
         cy = (cy + this.translation.y) | 0;
