@@ -11,7 +11,7 @@ export class Stats {
     public experienceCurrent : number = 0;
     public experienceTarget : number = 0;
 
-    public time : number = 0;
+    public time : number = 13*1000;
     public timeFreeze : number = 5.0;
     public frameCount : number = 0;
 
@@ -38,10 +38,10 @@ export class Stats {
         }
         else {
 
-            this.time += this.frameCount == 0 ? 16 : 17;
-            if (this.time >= 13*1000) {
+            this.time -= this.frameCount == 0 ? 16 : 17;
+            if (this.time <= 0) {
 
-                this.time = 13*1000;
+                this.time = 0;
                 // TODO: GAME OVER!
             }
         }
