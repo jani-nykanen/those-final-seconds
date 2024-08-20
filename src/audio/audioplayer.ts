@@ -1,5 +1,4 @@
-import { Sample } from "./sample.js";
-import { Ramp } from "./ramp.js";
+import { Ramp, Sample } from "./sample.js";
 
 
 export class AudioPlayer {

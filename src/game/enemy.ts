@@ -380,16 +380,12 @@ export class Enemy extends GameObject {
 
     public projectileCollision(player : Player, p : Projectile, event : ProgramEvent) : void {
 
-        if (!this.isActive() || !p.isActive() || !this.isInsideScreen(event) || !p.isFriendly())
+        if (!this.isActive() || !p.isActive() || !this.isInsideScreen(event) || !p.isFriendly() || !this.overlay(p))
             return;
-
-        if (this.overlay(p)) {
-
-            p.kill(event);
-            this.kill(player.stats, event);
-            
-            player.scoreKill(100);
-        }
+        
+        p.kill(event);
+        this.kill(player.stats, event);
+        player.scoreKill(100);
     }
 
 
@@ -431,15 +427,11 @@ export class Enemy extends GameObject {
 
     public playerCollision(p : Player, event : ProgramEvent) : void {
 
-        if (!this.isActive() || !p.isActive()) {
+        if (!this.isActive() || !p.isActive() || !this.overlay(p)) {
 
             return;
         }
-
-        if (this.overlay(p)) {
-
-            p.hurt(event);
-        }
+        p.hurt(event);
     }
 
 

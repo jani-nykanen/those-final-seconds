@@ -94,8 +94,7 @@ export class Game implements Scene {
         const dy : number = by - 10 - EXPERIENCE_BAR_HEIGHT/2;
         for (let i = 0; i < 3; ++ i) {
 
-            canvas.setColor(BAR_BACKGROUND_COLORS[i]);
-            canvas.fillRect(dx + i, dy + i, EXPERIENCE_BAR_WIDTH - i*2, EXPERIENCE_BAR_HEIGHT - i*2);
+            canvas.fillRect(dx + i, dy + i, EXPERIENCE_BAR_WIDTH - i*2, EXPERIENCE_BAR_HEIGHT - i*2, BAR_BACKGROUND_COLORS[i]);
         }
 
         // Bar colors
@@ -103,8 +102,7 @@ export class Game implements Scene {
         for (let i = 0; i < 3; ++ i) {
 
             const y : number = dy + 2 + EXPERIENCE_BAR_PIECES_Y[i];
-            canvas.setColor(EXPERIENCE_BAR_COLORS[i]);
-            canvas.fillRect(dx + 2, y, activeBarWidth, EXPERIENCE_BAR_PIECES_HEIGHTS[i]);
+            canvas.fillRect(dx + 2, y, activeBarWidth, EXPERIENCE_BAR_PIECES_HEIGHTS[i], EXPERIENCE_BAR_COLORS[i]);
         }
         canvas.drawText("fo", "LEVEL " + String(this.stats.level + 1), cx, by - 20, -8, 0, Align.Center);
     }
@@ -129,12 +127,10 @@ export class Game implements Scene {
         const dy : number = 14;
         for (let i = 0; i < 3; ++ i) {
 
-            canvas.setColor(BAR_BACKGROUND_COLORS[i]);
-            canvas.fillRect(dx + i, dy + i, FREEZE_BAR_WIDTH - i*2, 6 - i*2);
+            canvas.fillRect(dx + i, dy + i, FREEZE_BAR_WIDTH - i*2, 6 - i*2, BAR_BACKGROUND_COLORS[i]);
         }
         
-        canvas.setColor("#ffffff");
-        canvas.fillRect(dx + 2, dy + 2, t*(FREEZE_BAR_WIDTH - 4), 2);
+        canvas.fillRect(dx + 2, dy + 2, t*(FREEZE_BAR_WIDTH - 4), 2, "#ffffff");
     }
 
 
@@ -171,10 +167,10 @@ export class Game implements Scene {
     }
 
     
-    public onChange(param : SceneParameter, event : ProgramEvent): void {
+    // public onChange(param : SceneParameter, event : ProgramEvent): void {
 
         // event.transition.activate(false, TransitionType.Fade, 1.0/30.0);
-    }
+    // }
 
 
     public update(event : ProgramEvent) : void {

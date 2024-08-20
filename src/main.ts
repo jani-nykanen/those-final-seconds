@@ -21,16 +21,13 @@ const onloadEvent = (event : ProgramEvent) : void => {
     event.input.addAction("c", ["Space", "KeyZ", "Enter"]);
     event.input.addAction("p", ["Escape", "Enter"]);
 
-    event.scenes.addScene("g", new Game(event), true);
-
     generateAssets(event.assets, event.audio);
 }
 
 
-const printError = (e : Error) : void => {
-
-    console.log(e.stack);
-
+const printError = (e : Error) : void => console.log(e.stack);
+    /*
+    {
     document.getElementById("d")?.remove();
 
     const textOut : HTMLElement = document.createElement("b");
@@ -39,6 +36,8 @@ const printError = (e : Error) : void => {
 
     document.body.appendChild(textOut);
 }
+    */
+
 
 
 function waitForInitialEvent() : Promise<AudioContext> {
@@ -65,10 +64,10 @@ window.onload = () => (async () => {
     const ctx : AudioContext = await waitForInitialEvent();
     try {
 
-        (new Program(256, 576, 192, 192, ctx, 0.60)).run(printError, initialEvent, onloadEvent);
+        (new Program(256, 576, 192, 192, ctx, 0.60)).run(Game, initialEvent, onloadEvent);
     }
     catch (e : any) {
 
-        printError(e);
+        console.log(e.stack);
     }
 }) ();

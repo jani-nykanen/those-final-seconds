@@ -209,13 +209,12 @@ export class Player extends GameObject {
         const dir : number = Math.sign(angleStep);
         const shifty : number = -(dir < 0 ? Math.floor : Math.ceil)(angleStep/2);
 
-        const bmp : Bitmap = canvas.getBitmap("p");
         let y : number = 0;
         for (let x : number = 0; x < 32; x += angleRamp) {
             
             y += Math.sign(angleStep);
 
-            canvas.drawBitmap(bmp, Flip.None, dx + x, dy + shifty + y, x, 0, angleRamp, 24);
+            canvas.drawBitmap("p", Flip.None, dx + x, dy + shifty + y, x, 0, angleRamp, 24);
         }
 
         // Draw the muzzle flash

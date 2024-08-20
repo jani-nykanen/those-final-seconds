@@ -17,6 +17,12 @@ const unpackPalette = (palette : string[]) : number[][] => {
     const out : number[][] = new Array<number[]> ();
     for (let j = 0; j < palette.length; ++ j) {
 
+        let entry : string = palette[j];
+        if (entry.length <= 6) {
+
+            entry += "ff";
+        }
+
         const len : number = (palette[j].length/2) | 0;
         out.push(new Array<number> (len));
         for (let i = 0; i < len; ++ i) {

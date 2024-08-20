@@ -5,7 +5,7 @@ import { Vector } from "../math/vector.js";
 
 export const enum TransitionType {
     None = 0,
-    Fade = 1,
+    // Fade = 1,
     Circle = 2,
 };
 
@@ -77,7 +77,7 @@ export class Transition {
         const t : number = this.fadeOut ? (1.0 - this.timer) : this.timer;
 
         switch (this.effectType) {
-
+/*
         case TransitionType.Fade:
 
             canvas.setColor(this.color);
@@ -85,7 +85,7 @@ export class Transition {
             canvas.fillRect(0, 0, canvas.width, canvas.height);
             canvas.setAlpha();
             break;
-
+*/
         case TransitionType.Circle: {
 
             const center : Vector = this.center ?? new Vector(canvas.width/2, canvas.height/2);

@@ -1,5 +1,12 @@
 import { clamp } from "../math/utility.js";
-import { getRampFunctionName, Ramp } from "./ramp.js";
+
+
+export const enum Ramp {
+
+    Instant = 0,
+    Linear = 1,
+    Exponential = 2
+};
 
 
 export class Sample {
@@ -38,7 +45,7 @@ export class Sample {
         const time : number = this.ctx.currentTime;
         const osc : OscillatorNode = this.ctx.createOscillator();
         const gain : GainNode = this.ctx.createGain();
-        const func : string = getRampFunctionName(this.ramp);
+        const func : string = functions[this.ramp];
         
         osc.type = this.type;
 

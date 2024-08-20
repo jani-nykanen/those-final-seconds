@@ -2,11 +2,12 @@ import { Assets } from "./assets.js";
 import { ProgramEvent } from "./event.js";
 import { Canvas } from "../gfx/canvas.js";
 import { Input } from "./input.js";
-import { SceneManager } from "./scenemanager.js";
+// import { SceneManager } from "./scenemanager.js";
 import { Transition } from "./transition.js";
 import { AudioPlayer } from "../audio/audioplayer.js";
 import { Bitmap } from "../gfx/bitmap.js";
 import { Sample } from "../audio/sample.js";
+import { Scene } from "./scene.js";
 
 
 export class Program {
@@ -14,7 +15,10 @@ export class Program {
 
     private input : Input;
     private canvas : Canvas;
-    private scenes : SceneManager;
+
+    // private scenes : SceneManager;
+    private activeScene : Scene;
+
     private assets : Assets;
     private transition : Transition;
     private audio : AudioPlayer;
@@ -33,7 +37,7 @@ export class Program {
         audioCtx : AudioContext, audioMaxVolume : number = 0.60) {
         
         this.input = new Input();
-        this.scenes = new SceneManager();
+        // this.scenes = new SceneManager();
         this.assets = new Assets();
         this.transition = new Transition();
         this.audio = new AudioPlayer(audioCtx, 
@@ -44,7 +48,7 @@ export class Program {
             canvasMinWidth, canvasMinHeight,
             canvasMaxWidth, canvasMaxHeight,
             (name : string) : Bitmap => this.assets.getBitmap(name), true);
-        this.event = new ProgramEvent(this.input, this.scenes, this.assets, this.canvas, this.transition, this.audio); 
+        this.event = new ProgramEvent(this.input,  /*this.scenes*/ this.assets, this.canvas, this.transition, this.audio); 
     }
 
 
@@ -54,12 +58,12 @@ export class Program {
         const WIDTH : number  = 80;
         const HEIGHT : number  = 12;
 
+        canvas.clear("#000000");
+/*
         const p : number = this.assets.loadedRatio();
 
         const dx : number = canvas.width/2 - WIDTH/2;
         const dy : number = canvas.height/2 - HEIGHT/2;
-
-        canvas.clear("#000000");
 
         canvas.setColor("#ffffff");
         canvas.fillRect(dx, dy, WIDTH, HEIGHT);
@@ -67,12 +71,11 @@ export class Program {
         canvas.fillRect(dx + OUTLINE, dy + OUTLINE, WIDTH - OUTLINE*2, HEIGHT - OUTLINE*2);
         canvas.setColor("#ffffff");
         canvas.fillRect(dx + OUTLINE*2, dy + OUTLINE*2, (WIDTH - OUTLINE*4)*p, HEIGHT - OUTLINE*4);
+        */
     }
 
 
-    private loop(ts : number, 
-        onError? : (e : Error) => void, 
-        onLoad? : (event : ProgramEvent) => void) : void {
+    private loop(ts : number, onLoad? : (event : ProgramEvent) => void) : void {
 
         const MAX_REFRESH_COUNT : number = 5; 
         const BASE_FRAME_TIME : number = 1000.0/60.0;
@@ -88,7 +91,7 @@ export class Program {
             if (loaded && !this.initialized) {
 
                 onLoad?.(this.event);
-                this.scenes.activeScene?.onChange?.(undefined, this.event);
+                // this.scenes.activeScene?.onChange?.(undefined, this.event);
                 this.initialized = true;
             }
 
@@ -97,7 +100,8 @@ export class Program {
 
                 if (loaded) {
 
-                    this.scenes.activeScene?.update(this.event);
+                    // this.scenes.activeScene?.update(this.event);
+                    this.activeScene.update(this.event);
                     this.transition.update(this.event);
                 }
                 
@@ -110,7 +114,8 @@ export class Program {
             
             if (loaded) {
                 
-                this.scenes.activeScene?.redraw(this.canvas);
+                // this.scenes.activeScene?.redraw(this.canvas);
+                this.activeScene.redraw(this.canvas);
                 this.transition.draw(this.canvas);
             }
             else {
@@ -124,19 +129,21 @@ export class Program {
 
                 window.cancelAnimationFrame(this.animationRequest);
             }
-            onError?.(e);
+            console.log(e.stack);
             return;
         }
 
-        this.animationRequest = window.requestAnimationFrame(ts => this.loop(ts, onError, onLoad));
+        this.animationRequest = window.requestAnimationFrame(ts => this.loop(ts, onLoad));
     }
 
 
-    public run(onError? : (e : Error) => void,
+    public run(sceneType : Function,
         initialEvent? : (event : ProgramEvent) => void,
         onLoad? : (event : ProgramEvent) => void) : void {
 
+        this.activeScene = new sceneType.prototype.constructor(this.event);
+
         initialEvent?.(this.event);
-        this.loop(0.0, onError, onLoad);
+        this.loop(0.0, onLoad);
     }
 }

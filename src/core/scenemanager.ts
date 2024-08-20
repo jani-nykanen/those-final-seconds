@@ -2,6 +2,7 @@ import { ProgramEvent } from "./event.js";
 import { Scene } from "./scene.js";
 
 
+/*
 export class SceneManager {
 
     
@@ -47,3 +48,4 @@ export class SceneManager {
         this.activeSceneRef = scene;
     }
 }
+*/

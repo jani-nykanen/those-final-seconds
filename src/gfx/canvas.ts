@@ -164,7 +164,7 @@ export class Canvas {
 
     public drawPixelatedLine(x1 : number, y1 : number, x2 : number, y2 : number) : void {
 
-        const MAX_ITERATIONS : number = 1000;
+        // const MAX_ITERATIONS : number = 1000;
 
         // It's Bresenham all the way down
 
@@ -197,16 +197,23 @@ export class Canvas {
                 error += dx; 
                 y1 += sy; 
             }
-
+/*
             if ((i ++) >= MAX_ITERATIONS) {
                 break;
             }
+                */
         }
     }
 
 
     public fillRect(x : number = 0, y : number = 0, 
-        w : number = this.width, h : number = this.height) : void {
+        w : number = this.width, h : number = this.height,
+        color? : string) : void {
+
+        if (color !== undefined) {
+
+            this.setColor(color);
+        }
 
         x = (x + this.translation.x) | 0;
         y = (y + this.translation.y) | 0;

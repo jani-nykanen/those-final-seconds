@@ -11,49 +11,49 @@ const PALETTE_LOOKUP : string[] = [
     "00000000", // 0 Transparent
 
     // Black, white and shades of gray
-    "000000ff", // 1 Black
-    "ffffffff", // 2 White
-    "6d6d6dff", // 3 Dark gray
-    "b6b6b6ff", // 4 Bright gray,
+    "000000", // 1 Black
+    "ffffff", // 2 White
+    "6d6d6d", // 3 Dark gray
+    "b6b6b6", // 4 Bright gray,
 
     // Grass
-    "6db600ff", // 5 Darker green
-    "dbff00ff", // 6 Lighter green
+    "6db600", // 5 Darker green
+    "dbff00", // 6 Lighter green
 
     // Fence
-    "924900ff", // 7 Darker brown
-    "b66d00ff", // 8 Brown
-    "ffb66dff", // 9 Beige?
-    "6d2400ff", // A Darkest reddish brownish thing
+    "924900", // 7 Darker brown
+    "b66d00", // 8 Brown
+    "ffb66d", // 9 Beige?
+    "6d2400", // A Darkest reddish brownish thing
 
     // Bushes
-    "246d00ff", // B Dark green
+    "246d00", // B Dark green
 
     // Mushroom leg
-    "dbb649ff", // C Darker leg color
-    "ffffdbff", // D Very bright yellow
+    "dbb649", // C Darker leg color
+    "ffffdb", // D Very bright yellow
 
     // Mushroom hat
-    "b62400ff", // E Slightly orange-ish red
-    "ff6d00ff", // F Orange
-    "ffb600ff", // G Bright orange
+    "b62400", // E Slightly orange-ish red
+    "ff6d00", // F Orange
+    "ffb600", // G Bright orange
 
     // Cat
-    "ffdb00ff", // H Yellow
-    "db9200ff", // I More yellowish brown
+    "ffdb00", // H Yellow
+    "db9200", // I More yellowish brown
 
     // Misc. outline colors
-    "244900ff", // J Darkest green
-    "492400ff", // K Darkest brown
+    "244900", // J Darkest green
+    "492400", // K Darkest brown
 
     // Bullets
-    "b649dbff", // L Darker purple
-    "db92ffff", // M Brighter, pinkish purple
+    "b649db", // L Darker purple
+    "db92ff", // M Brighter, pinkish purple
 
     // Shades of blue
-    "2492dbff", // N Dark blue
-    "6ddbffff", // O Blue
-    "dbffffff", // P Bright blue 
+    "2492db", // N Dark blue
+    "6ddbff", // O Blue
+    "dbffff", // P Bright blue 
 ];
 
 
@@ -65,11 +65,11 @@ const GAME_ART_PALETTE_TABLE : string[] = [
     "J0B5", "J0B5", "J0B5", "J0B5", "J0B5", "J0B5", "10H2", "00GD",
     "10IH", "10IH", "1034", "1034", "1034", "1024", "10LM", "1000",
     "10IH", "10IH", "1034", "1034", "1034", "1034", "1084", "1000",
-    "0000", "0000", "0000", "1056", "1056", "1002", "10FG", "10FE",
-    "0000", "0000", "0000", "1056", "1056", "10EG", "10FE", "10FE",
-    "0000", "0000", "1000", "1042", "10EF", "10EF", "10EF", "10EF",
-    "10I9", "10I9", "10I9", "10I9", "0000", "0000", "0000", "0000",
-    "10ID", "10I7", "10I7", "10I7", "0000", "0000", "0000", "0000",
+     /**/, /**/, /**/, "1056", "1056", "1002", "10FG", "10FE",
+    /**/, /**/, /**/, "1056", "1056", "10EG", "10FE", "10FE",
+    /**/, /**/, "1000", "1042", "10EF", "10EF", "10EF", "10EF",
+    "10I9", "10I9", "10I9", "10I9", /**/, /**/, /**/, /**/,
+    "10ID", "10I7", "10I7", "10I7", /**/, /**/, /**/, /**/,
 ];
 
 
@@ -157,8 +157,7 @@ const generateBush = (assets : Assets, bmpGameArt : Bitmap) : void => {
     const canvas : Canvas = new Canvas(null, 48, 64);
 
     canvas.drawBitmap(bmpGameArt, Flip.None, 0, 0, 0, 16, 48, 16);
-    canvas.setColor("#246d00");
-    canvas.fillRect(0, 16, 48, 48);
+    canvas.fillRect(0, 16, 48, 48, "#246d00");
 
     assets.addBitmap("b", canvas.toBitmap());
 }
@@ -208,6 +207,7 @@ const generateSun = (assets : Assets, bmpGameArt : Bitmap) : void => {
     canvas.fillCircle(RADIUS - 2, RADIUS - 2, RADIUS - 2);
 
     // Eyes & mouth
+    /*
     let mouthLineRadius : number = 12;
     for (let i = 0; i < 5; ++ i) {
 
@@ -222,14 +222,12 @@ const generateSun = (assets : Assets, bmpGameArt : Bitmap) : void => {
         const dx : number = RADIUS - EYE_SHIFT_X - mouthLineRadius;
         const dy : number = RADIUS + 6 + i - EYE_SHIFT_Y
 
-        canvas.setColor("#ffdb00");
-        canvas.fillRect(dx, dy + 1, mouthLineRadius*2, 1);
-
-        canvas.setColor("#000000");
-        canvas.fillRect(dx, dy, mouthLineRadius*2, 1);
+        canvas.fillRect(dx, dy + 1, mouthLineRadius*2, 1, "#ffdb00");
+        canvas.fillRect(dx, dy, mouthLineRadius*2, 1, "#000000");
 
         mouthLineRadius -= (i + 1);
     }
+        */
 
     assets.addBitmap("s", canvas.toBitmap());
 }
@@ -239,8 +237,7 @@ const generatePlayer = (assets : Assets, bmpGameArt : Bitmap) : void => {
 
     const canvas : Canvas = new Canvas(null, 32, 24);
 
-    canvas.setColor("#ffffff");
-    canvas.fillRect(1, 14, 27, 6);
+    canvas.fillRect(1, 14, 27, 6, "#ffffff");
 
     canvas.drawBitmap(bmpGameArt, Flip.None, 0, 8, 16, 32, 32, 16);
     canvas.drawBitmap(bmpGameArt, Flip.None, 9, 0, 0, 32, 16, 16);
@@ -292,11 +289,8 @@ const generateProjectiles = (assets : Assets, bmpGameArt : Bitmap, bmpGameArtRaw
     canvas.drawBitmap(bmpBody2, Flip.None, 20, 4);
 
     // Reflections
-    canvas.setColor("#ffdbff");
-    canvas.fillRect(6, 6, 2, 2);
-
-    canvas.setColor("#ffb66d");
-    canvas.fillRect(22, 6, 2, 2);
+    canvas.fillRect(6, 6, 2, 2, "#ffdbff");
+    canvas.fillRect(22, 6, 2, 2, "#ffb66d");
 
     assets.addBitmap("pr", canvas.toBitmap());
 }
@@ -351,8 +345,7 @@ const generateEnemyBodies = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt
     const bmpBallBodiesRaw : Canvas = new Canvas(null, 96, 48);
 
     // This is required to get alpha background behind the balls.
-    bmpBallBodiesRaw.setColor("#555555");
-    bmpBallBodiesRaw.fillRect(0, 0, 96, 24);
+    bmpBallBodiesRaw.fillRect(0, 0, 96, 24, "#555555");
     for (let i = 0; i < 4; ++ i) {
 
         const dx : number = i*24;
@@ -496,9 +489,7 @@ const generateClock = (assets : Assets, bmpGameArt : Bitmap) : void => {
         // canvas.fillRect(i*16, 0, 16, 16);
 
         // Face
-        canvas.setColor(backFace ? "#db9200" : "#ffffdb");
-       
-        canvas.fillRect(dx + 2, 3, sw - 4, 10);
+        canvas.fillRect(dx + 2, 3, sw - 4, 10, backFace ? "#db9200" : "#ffffdb");
         canvas.drawBitmap(bmpGameArt, flip1, dx, 0, SX[i], 72, sw, 16);
         // Hands
         if (i < 2 || i == 7) {
