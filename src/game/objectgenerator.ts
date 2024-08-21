@@ -32,11 +32,11 @@ export class ObjectGenerator<T extends Spawnable> {
     }
 
 
-    public update(player : Player, event : ProgramEvent) : void {
+    public update(globalSpeed : number, player : Player, event : ProgramEvent) : void {
 
         for (let o of this.objects) {
 
-            o.update(event);
+            o.update(globalSpeed, event);
             o.playerCollision?.(player, event);
         }
     }

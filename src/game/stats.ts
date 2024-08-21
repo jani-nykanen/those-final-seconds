@@ -32,7 +32,7 @@ export class Stats {
     public readonly maxTimeFreeze : number = 5.0;
 
 
-    public update(event : ProgramEvent) : void {
+    public update(updateTime : boolean, event : ProgramEvent) : void {
 
         // Not gonna split these to smaller functions until I'm certain
         // I have enough spare bytes.
@@ -42,7 +42,7 @@ export class Stats {
 
             this.timeFreeze = Math.max(0, this.timeFreeze - 1.0/60.0*event.tick);
         }
-        else {
+        else if (updateTime) {
 
             this.time -= this.frameCount == 0 ? 16 : 17;
             if (this.time <= 0) {

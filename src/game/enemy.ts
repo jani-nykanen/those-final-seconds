@@ -123,7 +123,7 @@ export class Enemy extends GameObject {
     }
 
 
-    protected updateEvent(event : ProgramEvent) : void {
+    protected updateEvent(globalSpeed : number, event : ProgramEvent) : void {
         
         const PROPELLER_SPEED : number = 1.0/16.0;
         const GAS_TIME : number = 6.0;
@@ -138,6 +138,7 @@ export class Enemy extends GameObject {
         
         if (this.pos.x >= event.screenWidth + 16 && this.id != 3) {
 
+            this.pos.x -= globalSpeed*BASE_SPEED*event.tick;
             return;
         }
 
@@ -147,12 +148,19 @@ export class Enemy extends GameObject {
         }
 
         this.propellerTimer = (this.propellerTimer + PROPELLER_SPEED*event.tick) % 1.0;
-        this.animationTimer = (this.animationTimer + (ANIMATION_SPEED[this.id] ?? 0)*event.tick) % (Math.PI*2);
+
+        if (this.id != 1) {
+
+            this.animationTimer = (this.animationTimer + ANIMATION_SPEED[this.id]*event.tick) % (Math.PI*2);
+        }
         
         switch (this.id) {
 
         // Flying default ball
         case 0:
+
+            this.target.x = -globalSpeed*BASE_SPEED;
+            this.speed.x = this.target.x;
 
             this.pos.y = this.startY + Math.sin(this.animationTimer)*8.0;
             if (this.mouthTimer <= 0 && (this.shootWaitTimer -= event.tick) <= 0) {
@@ -164,16 +172,16 @@ export class Enemy extends GameObject {
 
         // Jumping ball
         case 1:
-
+            
             this.target.y = GRAVITY;
             if (this.animationFlag == 0) {
 
-                this.target.x = -BASE_SPEED;
+                this.target.x = -globalSpeed*BASE_SPEED;
                 if ((this.animationTimer -= event.tick) <= 0) {
 
-                    this.animationTimer = 8 + 8*Math.random();
+                    this.animationTimer = (8 + Number(this.canShoot)*4) + 8*Math.random();
 
-                    this.speed.x = -BASE_SPEED*1.25;
+                    this.speed.x = -globalSpeed*BASE_SPEED - 0.40;
                     this.target.x = this.speed.x;
                     this.speed.y = JUMP_SPEED;
 
@@ -182,7 +190,7 @@ export class Enemy extends GameObject {
                 break;
             }
 
-            if ((this.animationTimer -= event.tick) > 0) {
+            if (this.animationFlag != 0 && (this.animationTimer -= event.tick) > 0) {
 
                 this.speed.y = JUMP_SPEED;
                 break;
@@ -194,7 +202,7 @@ export class Enemy extends GameObject {
                 this.shoot(3, Math.PI/8, 2.5, event);
                 this.animationFlag = 2;
 
-                this.speed.x = 2.0;
+                this.speed.x = -globalSpeed*BASE_SPEED + 3.5;
             }
             break;
 
@@ -216,7 +224,7 @@ export class Enemy extends GameObject {
                 }
                 break;
             }
-            this.target.x = -BASE_SPEED*2.0; 
+            this.target.x = -globalSpeed*BASE_SPEED*2.0; 
             this.pos.y = this.startY + Math.sin(this.animationTimer)*4.0;
             if ((this.gasTimer += event.tick) >= GAS_TIME) {
 
@@ -231,7 +239,7 @@ export class Enemy extends GameObject {
 
             const oldY : number = this.pos.y;
 
-            this.centerX -= BASE_SPEED*event.tick;
+            this.centerX -= globalSpeed*BASE_SPEED*event.tick;
             this.pos.x = this.centerX + Math.cos(-this.animationTimer)*ORBIT_DISTANCE;
             this.pos.y = this.startY + Math.sin(-this.animationTimer)*ORBIT_DISTANCE;
 
@@ -320,12 +328,10 @@ export class Enemy extends GameObject {
     public spawn(x : number, y : number, id : number, shift : number, canShoot : boolean = false) : void {
 
         this.pos = new Vector(x, y);
-        this.speed.y = 0.0;
-        this.target.y = 0.0;
+        this.speed.zeros();
+        this.target.zeros();
         this.startY = y;
 
-        this.target.x = -BASE_SPEED;
-        this.speed.x = this.target.x;
         this.friction.x = id == 2 ? 0.05 : 0.15;
 
         this.id = id;

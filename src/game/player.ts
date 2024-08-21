@@ -18,8 +18,8 @@ import { Stats } from "./stats.js";
 
 const ANGLE_MAX : number = 4.0;
 const SHOOT_RECOVER_TIME : number = 16.0;
-
 const BULLET_COUNT : number[][] = [[1, 1], [2, 1], [2, 2], [3, 2], [3, 3]];
+const DEATH_TIME : number = 90;
 
 
 export class Player extends GameObject {
@@ -35,6 +35,8 @@ export class Player extends GameObject {
 
     private hurtTimer : number = 0.0;
     private shakeTimer : number = 0;
+
+    private deathTimer : number = 0;
     
     private readonly projectiles : ObjectGenerator<Projectile>;
     private readonly gasSupply : ObjectGenerator<GasParticle>;
@@ -162,7 +164,30 @@ export class Player extends GameObject {
     }
 
 
-    protected updateEvent(event : ProgramEvent) : void {
+    private drawDeath(canvas : Canvas) : void {
+
+        const MAX_DISTANCE : number = 96;
+        const COLORS : string[] = ["#ff6d00", "#ffb600" ,"#ffffb6"];
+
+        const distance : number = this.deathTimer/DEATH_TIME*MAX_DISTANCE;
+
+        for (let i = 0; i < 8; ++ i) {
+
+            const angle : number = Math.PI*2/8*i;
+
+            const dx : number = this.pos.x + Math.cos(angle)*distance;
+            const dy : number = this.pos.y + Math.sin(angle)*distance;
+
+            for (let j = 0; j < 3; ++ j) {
+
+                canvas.setColor(COLORS[(j + ((((this.deathTimer/3) | 0)) % 3)) % 3]);
+                canvas.fillEllipse(dx, dy, 8 - j*3);
+            }
+        }   
+    }
+
+
+    protected updateEvent(globalSpeed : number, event : ProgramEvent) : void {
 
         this.control(event);
         this.updateGas(event);
@@ -178,6 +203,18 @@ export class Player extends GameObject {
         }
 
         this.shakeTimer = (this.shakeTimer + event.tick) % 4;
+
+        if (this.stats.health <= 0 || this.stats.time <= 0) {
+
+            this.dying = true;
+            this.deathTimer = 0;
+        }
+    }
+
+
+    protected die(event : ProgramEvent) : boolean {
+
+        return (this.deathTimer += event.tick) >= DEATH_TIME;
     }
 
 
@@ -202,6 +239,12 @@ export class Player extends GameObject {
 
         if (!this.exist) {
 
+            return;
+        }
+
+        if (this.dying) {
+
+            this.drawDeath(canvas);
             return;
         }
 
@@ -262,11 +305,7 @@ export class Player extends GameObject {
             return;
         }
 
-        if ((-- this.stats.health) <= 0) {
-
-            // TODO: Kill
-        }
-
+        -- this.stats.health;
         this.hurtTimer = HURT_TIME;
 
         this.stats.loseLevel();

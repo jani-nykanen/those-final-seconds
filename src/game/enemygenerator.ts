@@ -10,6 +10,12 @@ import { GROUND_LEVEL } from "./background.js";
 import { next } from "./existingobject.js";
 import { GasParticle } from "./gasparticle.js";
 import { Collectible } from "./collectible.js";
+import { sampleDiscreteDistribution, sampleDiscreteDistributionInterpolate } from "./sampling.js";
+
+
+const TERMINAL_TIME : number = 13*60*5;
+
+const ENEMY_WEIGHTS : number[][] = [[0.40, 0.30, 0.20, 0.10], [0.25, 0.25, 0.25, 0.25]];
 
 
 export class EnemyGenerator {
@@ -25,6 +31,9 @@ export class EnemyGenerator {
 
     private lastEnemy : number = -1;
 
+    private stageTimer : number = 0.0;
+    private relativeTime : number = 0.0;
+
 
     constructor(projectiles : ObjectGenerator<Projectile>,
         gasSupply : ObjectGenerator<GasParticle>,
@@ -35,15 +44,18 @@ export class EnemyGenerator {
         this.collectibles = collectibles;
 
         this.enemies = new Array<Enemy> ();
-        this.timers = (new Array<number> (3)).fill(0).map((_ : number, i : number) => i*300);
+        this.timers = (new Array<number> (4)).fill(0).map((_ : number, i : number) => i*120);
     }
 
 
     private spawnEnemy(count : number, event : ProgramEvent) : void {
 
+        const MOUTH_PROB_INITIAL : number = 0.05;
+        const MOUTH_PROB_TERMINAL : number = 0.75;
+
         const XOFF : number = 32;
 
-        let id : number = (Math.random()*4) | 0;
+        let id : number = sampleDiscreteDistributionInterpolate(ENEMY_WEIGHTS[0], ENEMY_WEIGHTS[1], this.relativeTime);
         if (id == this.lastEnemy) {
 
             id = (id + 1) % 4;
@@ -61,7 +73,7 @@ export class EnemyGenerator {
             count = 4;
         }
 
-        const canShoot : boolean = Math.random() < 0.25; // i.e "has mouth"
+        const canShoot : boolean = Math.random() < (MOUTH_PROB_INITIAL*(1.0 - this.relativeTime) + MOUTH_PROB_TERMINAL*this.relativeTime);
         for (let i = 0; i < count; ++ i) {
 
             let e : Enemy | undefined = next<Enemy> (this.enemies);
@@ -75,15 +87,18 @@ export class EnemyGenerator {
     }
 
 
-    private updateTimers(event : ProgramEvent) : void {
+    private updateTimers(globalSpeed : number, event : ProgramEvent) : void {
+
+        this.stageTimer = Math.min(TERMINAL_TIME, this.stageTimer + event.tick);
+        this.relativeTime = this.stageTimer/TERMINAL_TIME;
 
         for (let i = 0; i < this.timers.length; ++ i) {
 
-            if ((this.timers[i] -= event.tick) <= 0) {
+            if ((this.timers[i] -= globalSpeed*event.tick) <= 0) {
 
                 const count : number = 1 + ( (Math.random()*3) | 0); 
 
-                this.timers[i] += count*60 + Math.random()*120;
+                this.timers[i] += count*30 + Math.random()*90;
                 this.spawnEnemy(count, event);
 
                 // Avoid spawning too many enemies at the same time
@@ -98,15 +113,15 @@ export class EnemyGenerator {
     }
 
 
-    public update(player : Player, event : ProgramEvent) : void {
+    public update(globalSpeed : number, player : Player, event : ProgramEvent) : void {
 
-        this.updateTimers(event);
+        this.updateTimers(globalSpeed, event);
 
         for (let i = 0; i < this.enemies.length; ++ i) {
 
             const e : Enemy = this.enemies[i];
 
-            e.update(event);
+            e.update(globalSpeed, event);
             if (e.isActive()) {
 
                 this.projectiles.iterate((p : Projectile) : void => {

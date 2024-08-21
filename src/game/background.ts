@@ -115,14 +115,14 @@ export class Background {
 
         for (let k in this.layerPositions) {
 
-            this.layerPositions[k] = (this.layerPositions[k] + LAYER_SPEED[k]*globalSpeed) % LAYER_MODULO[k];
+            this.layerPositions[k] = (this.layerPositions[k] + LAYER_SPEED[k]*globalSpeed*event.tick) % LAYER_MODULO[k];
         }
     }
 
 
     public drawBackground(canvas : Canvas, camPos : number) : void {
 
-        const xpos : number = this.layerPositions[0];
+        const xpos : number = this.layerPositions[0] | 0;
         const ypos : number = canvas.height - GROUND_HEIGHT;
 
         canvas.clear("#6db6ff");
@@ -130,9 +130,9 @@ export class Background {
         // Sun
         canvas.drawBitmap("s", Flip.None, canvas.width - 96, 16);
 
-        this.drawRepeatingBitmap(canvas, canvas.getBitmap("c")!, this.layerPositions[3], 48 - camPos/4);
-        this.drawMushrooms(canvas, canvas.getBitmap("m")!, this.layerPositions[2], 44 - camPos/2);
-        this.drawRepeatingBitmap(canvas, canvas.getBitmap("b")!, this.layerPositions[1], 96 - camPos/1.5);
+        this.drawRepeatingBitmap(canvas, canvas.getBitmap("c")!, this.layerPositions[3] | 0, 48 - camPos/4);
+        this.drawMushrooms(canvas, canvas.getBitmap("m")!, this.layerPositions[2] | 0, 44 - camPos/2);
+        this.drawRepeatingBitmap(canvas, canvas.getBitmap("b")!, this.layerPositions[1] | 0, 96 - camPos/1.5);
 
         this.drawRepeatingBitmap(canvas, canvas.getBitmap("f")!, xpos, ypos - 36 - camPos);
         this.drawGrass(canvas, xpos, ypos - 3 - camPos);

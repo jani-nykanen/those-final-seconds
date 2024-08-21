@@ -47,9 +47,13 @@ export class Game implements Scene {
 
     private cameraPos : number = 0.0;
     private cameraTarget : number = 0.0;
-    private globalSpeed : number = 1.0;
+    private globalSpeed : number = 0.0;
+    private globalSpeedTarget : number = 1.0;
 
     private paused : boolean = false;
+
+    private phase : number = 0;
+    private phaseTimer : number = 0;
 
     private messageTimer : number = 0;
     private messageText : string = "";
@@ -191,6 +195,9 @@ export class Game implements Scene {
 
     public update(event : ProgramEvent) : void {
 
+        const GLOBAL_SPEED_DELTA : number = 1.0/60.0;
+        const PHASE_LENGTH : number = 13*60;
+
         if (event.transition.isActive()) {
 
             return;
@@ -205,23 +212,42 @@ export class Game implements Scene {
             return;
         }
 
+        if (this.player.isActive()) {
+
+            if ((this.phaseTimer += event.tick) >= PHASE_LENGTH) {
+
+                this.phaseTimer -= PHASE_LENGTH;
+                ++ this.phase;
+
+                this.messageText = "SPEED UP!";
+                this.messageTimer = MESSAGE_TIME;
+            }
+            this.globalSpeedTarget = 1.0 + this.phase*0.25;
+        }
+        this.globalSpeed = updateSpeedAxis(this.globalSpeed, this.globalSpeedTarget, GLOBAL_SPEED_DELTA*event.tick);
+
         this.messageTimer = Math.max(0, this.messageTimer - event.tick);
 
-        this.player.update(event);
-        this.gasSupply.update(this.player, event);
-        this.projectiles.update(this.player, event);
-        this.collectibles.update(this.player, event);
-        this.enemies.update(this.player, event);
+        this.player.update(this.globalSpeed, event);
+        this.gasSupply.update(this.globalSpeed, this.player, event);
+        this.projectiles.update(this.globalSpeed, this.player, event);
+        this.collectibles.update(this.globalSpeed, this.player, event);
+        this.enemies.update(this.globalSpeed, this.player, event);
 
         this.updateCamera(event);
         this.background.update(this.globalSpeed, event);
 
         const oldPanicLevel : number = this.stats.panicLevel;
-        this.stats.update(event);
+        this.stats.update(this.player.isActive(), event);
         if (this.stats.panicLevel != oldPanicLevel) {
 
             this.messageText = "PANIC UP!";
             this.messageTimer = MESSAGE_TIME;
+        }
+
+        if (this.player.isDying()) {
+
+            this.globalSpeedTarget = 0.0;
         }
     }
 

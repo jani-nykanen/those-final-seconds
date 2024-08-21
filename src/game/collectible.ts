@@ -52,7 +52,7 @@ export class Collectible extends GameObject {
     }
 
 
-    protected updateEvent(event : ProgramEvent) : void {
+    protected updateEvent(globalSpeed : number, event : ProgramEvent) : void {
         
         const ANIMATION_SPEED : number = 1.0/64.0;
 

@@ -22,7 +22,7 @@ export class GasParticle extends GameObject {
     }
 
 
-    protected updateEvent(event : ProgramEvent) : void {
+    protected updateEvent(globalSpeed : number, event : ProgramEvent) : void {
         
         if ((this.timer += ANIMATION_SPEED[this.id]*event.tick) >= 1.0) {
 

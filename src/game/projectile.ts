@@ -39,7 +39,7 @@ export class Projectile extends GameObject {
     }
 
 
-    protected updateEvent(event : ProgramEvent) : void {
+    protected updateEvent(globalSpeed : number, event : ProgramEvent) : void {
         
         if (this.pos.x - 8 > event.screenWidth || this.pos.x + 8 < 0 ||
             this.pos.y + 8 < CAMERA_MIN_Y) {
