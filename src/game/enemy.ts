@@ -11,6 +11,7 @@ import { clamp } from "../math/utility.js";
 import { GasParticle } from "./gasparticle.js";
 import { Collectible } from "./collectible.js";
 import { Stats } from "./stats.js";
+import { GROUND_LEVEL } from "./background.js";
 
 
 const DEATH_TIME : number = 16;
@@ -253,6 +254,8 @@ export class Enemy extends GameObject {
         default:
             break;
         }
+
+        // this.pos.y = Math.min(event.screenHeight - GROUND_LEVEL/2 - 9, this.pos.y);
     }
 
 

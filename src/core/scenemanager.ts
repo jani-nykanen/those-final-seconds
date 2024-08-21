@@ -2,7 +2,11 @@ import { ProgramEvent } from "./event.js";
 import { Scene } from "./scene.js";
 
 
-/*
+//
+// Unused since this took way too many bytes
+//
+
+
 export class SceneManager {
 
     
@@ -44,8 +48,7 @@ export class SceneManager {
         }
         
 
-        scene?.onChange(this.activeSceneRef?.dispose?.(), event);
+        scene?.onChange?.(this.activeSceneRef?.dispose?.(), event);
         this.activeSceneRef = scene;
     }
 }
-*/

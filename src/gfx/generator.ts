@@ -128,16 +128,29 @@ export const cropBitmap = (source : Bitmap, sx : number, sy : number, sw : numbe
 
 
 export const createBigText = (text : string, font : string, 
-    width : number, height : number, color : [number, number, number],
+    width : number, height : number, fontHeight : number, depth : number,
+    colors : [[number, number, number], [number, number, number]],
     threshold : number = 127) : Bitmap => {
 
     const canvas : HTMLCanvasElement = createEmptyCanvas(width, height);
     const ctx : CanvasRenderingContext2D = canvas.getContext("2d")!;
 
     ctx.font = font;
-    ctx.fillStyle = "#ffffff";
     ctx.textAlign = "center";
-    ctx.fillText(text, width/2, height/2);
+
+    const lines : string[] = text.split("\n");
+
+    for (let y = depth - 1; y >= 0; -- y) {
+
+        ctx.fillStyle = y == 0 ? "#ffffff" : "#000000";
+
+        let line : number = 0;
+        for (let l of lines) {
+
+            ctx.fillText(l, width/2, y + (line + 1)*fontHeight);
+            ++ line;
+        }
+    }
 
     const imageData : ImageData = ctx.getImageData(0, 0, width, height);
     for (let i = 0; i < width*height; ++ i) {
@@ -148,9 +161,10 @@ export const createBigText = (text : string, font : string,
             continue;
         }
 
+        const colorIndex : number = imageData.data[i*4] > 128 ? 0 : 1;
         for (let j = 0; j < 3; ++ j) {
 
-            imageData.data[i*4 + j] = color[j];
+            imageData.data[i*4 + j] = colors[colorIndex][j];
         }
         imageData.data[i*4 + 3] = 255;
     }

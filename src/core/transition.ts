@@ -3,6 +3,11 @@ import { ProgramEvent } from "./event.js";
 import { Vector } from "../math/vector.js";
 
 
+//
+// Unused since this took way too many bytes
+//
+
+
 export const enum TransitionType {
     None = 0,
     // Fade = 1,

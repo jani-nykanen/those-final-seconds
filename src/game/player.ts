@@ -17,7 +17,7 @@ import { Stats } from "./stats.js";
 
 
 const ANGLE_MAX : number = 4.0;
-const SHOOT_RECOVER_TIME : number = 16.0;
+const SHOOT_RECOVER_TIME : number = 18.0;
 const BULLET_COUNT : number[][] = [[1, 1], [2, 1], [2, 2], [3, 2], [3, 3]];
 const DEATH_TIME : number = 90;
 
@@ -37,6 +37,8 @@ export class Player extends GameObject {
     private shakeTimer : number = 0;
 
     private deathTimer : number = 0;
+
+    private startPositionReached : boolean = false;
     
     private readonly projectiles : ObjectGenerator<Projectile>;
     private readonly gasSupply : ObjectGenerator<GasParticle>;
@@ -189,8 +191,22 @@ export class Player extends GameObject {
 
     protected updateEvent(globalSpeed : number, event : ProgramEvent) : void {
 
-        this.control(event);
+        const INITIAL_SPEED : number = 1.5;
+        const START_POS : number = 96;
+
         this.updateGas(event);
+        if (!this.startPositionReached) {
+
+            if ((this.pos.x += INITIAL_SPEED*event.tick) >= START_POS) {
+
+                this.pos.x = START_POS;
+                this.startPositionReached = true;
+            }
+            return;
+        }
+
+        this.control(event);
+        
 
         if (this.shootRecoverTimer > 0) {
 
@@ -290,7 +306,7 @@ export class Player extends GameObject {
 
         const BASE_EXPERIENCE : number = 1.0;
 
-        this.stats.experienceTarget += (BASE_EXPERIENCE/(4*(this.stats.level + 1)));
+        this.stats.experienceTarget += (BASE_EXPERIENCE/(4*(1 + this.stats.level*2)));
         this.stats.addPoints(points);
         this.stats.bonus += 0.1;
     }
@@ -314,4 +330,5 @@ export class Player extends GameObject {
 
 
     public isShooting = () : boolean => this.shootRecoverTimer > 0;
+    public hasReachedStartPosition = () : boolean => this.startPositionReached;
 }

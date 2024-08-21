@@ -15,6 +15,7 @@ import { GasParticle } from "./gasparticle.js";
 import { InputState } from "../core/inputstate.js";
 import { Collectible } from "./collectible.js";
 import { Stats } from "./stats.js";
+import { Bitmap } from "../gfx/bitmap.js";
 
 
 // For all kind of bars
@@ -65,10 +66,10 @@ export class Game implements Scene {
     private collectibles : ObjectGenerator<Collectible>;
     private enemies : EnemyGenerator;
 
-    private cameraPos : number = 0.0;
+    private cameraPos : number = -84;
     private cameraTarget : number = 0.0;
     private globalSpeed : number = 0.0;
-    private globalSpeedTarget : number = 1.0;
+    private globalSpeedTarget : number = 0.0;
 
     private paused : boolean = false;
 
@@ -83,6 +84,9 @@ export class Game implements Scene {
     private transitionTimer : number = 0;
     private fadingIn : boolean = false;
 
+    private titleScreenActive : boolean = true;
+    private cameraBottomReached : boolean = false;
+
     
     constructor(event : ProgramEvent) {
 
@@ -92,7 +96,7 @@ export class Game implements Scene {
         this.projectiles = new ObjectGenerator<Projectile> (Projectile);
         this.gasSupply = new ObjectGenerator<GasParticle> (GasParticle);
         this.collectibles = new ObjectGenerator<Collectible> (Collectible);
-        this.player = new Player(96, 96, this.projectiles, this.gasSupply, this.stats);
+        this.player = new Player(-16, 96, this.projectiles, this.gasSupply, this.stats);
         this.enemies = new EnemyGenerator(this.projectiles, this.gasSupply, this.collectibles);
 
         this.bestScore = getBestScore();
@@ -120,7 +124,7 @@ export class Game implements Scene {
         // Leaks a lot of memory, but do not happen too often, sooo....
 
         this.stats = new Stats();
-        this.player = new Player(96, 96, this.projectiles, this.gasSupply, this.stats);
+        this.player = new Player(-16, 96, this.projectiles, this.gasSupply, this.stats);
         this.enemies = new EnemyGenerator(this.projectiles, this.gasSupply, this.collectibles);
 
         this.projectiles.flush();
@@ -134,7 +138,7 @@ export class Game implements Scene {
         this.cameraPos = 0.0;
         this.cameraTarget = 0.0;
         this.globalSpeed = 0.0;
-        this.globalSpeedTarget = 1.0;
+        this.globalSpeedTarget = 0.0;
     }
 
 
@@ -142,6 +146,17 @@ export class Game implements Scene {
 
         const Y_THRESHOLD : number = 64;
         const MOVE_FACTOR : number = 8;
+        const INITIAL_MOVE_SPEED : number = 2.0;
+
+        if (!this.cameraBottomReached) {
+
+            if ((this.cameraPos += INITIAL_MOVE_SPEED*event.tick) >= 0) {
+
+                this.cameraPos = 0;
+                this.cameraBottomReached = true;
+            }
+            return;
+        }
 
         const py : number = this.player.getPosition().y;
 
@@ -194,7 +209,7 @@ export class Game implements Scene {
         const seconds : number = (this.stats.time/1000) | 0;
 
         canvas.drawText("fo", 
-            "#" + String(seconds) + ":" + ( (milliseconds < 10 ? "0" : "") + String(milliseconds)), 
+            "#" + (seconds < 10 ? "0" : "") + String(seconds) + "." + ( (milliseconds < 10 ? "0" : "") + String(milliseconds)), 
             canvas.width/2 - 5, -2, -7, 0, Align.Center);
 
         if (this.stats.timeFreeze <= 0)
@@ -260,7 +275,31 @@ export class Game implements Scene {
         canvas.drawText("fo", "SCORE: " + createScoreString(this.stats.score), cx, cy + 16, - 7, 0, Align.Center);
         canvas.drawText("fo", "BEST:  " + createScoreString(this.bestScore), cx, cy + 28, - 7, 0, Align.Center);
 
-        canvas.drawBitmap("go", Flip.None, cx - 128, 32);
+        canvas.drawBitmap("go", Flip.None, cx - 96, 32);
+    }
+
+
+    private drawTitleScreen(canvas : Canvas) : void {
+
+        const cx : number = canvas.width/2;
+
+        // canvas.moveTo();
+        canvas.clear("rgba(0,0,0,0.5)");
+
+        if (this.messageTimer > 0.5) {
+
+            canvas.drawText("fo", "PRESS ANY KEY", cx, canvas.height - 48, -8, 0, Align.Center);
+        }
+        canvas.drawText("fw", "*2024 JANI NYK@NEN", cx, canvas.height - 10, -1, 0, Align.Center);
+
+        const bmpTitleScreen : Bitmap = canvas.getBitmap("ts")!;
+        const left : number = cx - bmpTitleScreen.width/2;
+        for (let i = 0; i < bmpTitleScreen.width; ++ i) {
+
+            const dy : number = 24 + Math.sin(this.messageTimer*Math.PI*2 + i/bmpTitleScreen.width*Math.PI*4)*4;
+
+            canvas.drawBitmap("ts", Flip.None, left + i, dy, i, 0, 1);
+        }
     }
 
     
@@ -274,6 +313,20 @@ export class Game implements Scene {
 
         const GLOBAL_SPEED_DELTA : number = 1.0/60.0;
         const PHASE_LENGTH : number = 13*60;
+
+        // NOTE: This function is way too long, but splitting it to smaller
+        // functions would make me lose too many precious bytes, so...
+
+        if (this.titleScreenActive) {
+
+            this.messageTimer = (this.messageTimer += 1.0/60.0*event.tick) % 1.0;
+            if (event.input.anyPressed) {
+
+                this.titleScreenActive = false;
+                this.messageTimer = 0;
+            }
+            return;
+        }
 
         if (this.transitionTimer > 0) {
 
@@ -299,7 +352,13 @@ export class Game implements Scene {
             return;
         }
 
-        if (event.input.getAction("p") == InputState.Pressed) {
+        const hadReachedPosition : boolean = this.player.hasReachedStartPosition()
+        if (!hadReachedPosition) {
+            
+            this.messageText = "READY?";
+            this.messageTimer = 120;
+        }
+        else if (event.input.getAction("p") == InputState.Pressed) {
 
             this.paused = !this.paused;
         }
@@ -308,7 +367,7 @@ export class Game implements Scene {
             return;
         }
 
-        if (this.player.isActive()) {
+        if (this.cameraBottomReached && this.player.isActive()) {
 
             if ((this.phaseTimer += event.tick) >= PHASE_LENGTH) {
 
@@ -325,6 +384,11 @@ export class Game implements Scene {
         this.messageTimer = Math.max(0, this.messageTimer - event.tick);
 
         this.player.update(this.globalSpeed, event);
+        if (!hadReachedPosition && this.player.hasReachedStartPosition()) {
+
+            this.messageText = "GO!";
+        }
+
         this.gasSupply.update(this.globalSpeed, this.player, event);
         this.projectiles.update(this.globalSpeed, this.player, event);
         this.collectibles.update(this.globalSpeed, this.player, event);
@@ -358,6 +422,12 @@ export class Game implements Scene {
 
         this.background.drawBackground(canvas, this.cameraPos);
 
+        if (this.titleScreenActive) {
+
+            this.drawTitleScreen(canvas);
+            return;
+        }
+
         canvas.moveTo(0, -this.cameraPos);
         this.background.drawGround(canvas);
         
@@ -389,7 +459,14 @@ export class Game implements Scene {
             this.drawGameOver(canvas);
         }
         else {
+
             this.drawHUD(canvas);
+
+            if (this.paused) {
+
+                canvas.clear("rgba(0,0,0,0.5)");
+                canvas.drawText("fo", "PAUSED", canvas.width/2, canvas.height/2 - 4, -7, 0, Align.Center);
+            }
         }
 
         if (this.transitionTimer > 0) {

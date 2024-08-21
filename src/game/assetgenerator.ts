@@ -548,7 +548,13 @@ const generateFonts = (assets : Assets) : void => {
 const generateBigText = (assets : Assets) : void => {
 
     assets.addBitmap("go", 
-        createBigText("GAME OVER!", "bold 24px Arial", 256, 64, [255, 109, 0], 64)
+        createBigText("GAME OVER!", "bold 24px Arial", 192, 32, 24, 4,
+            [[255, 109, 0], [182, 36, 0]], 64)
+    );
+
+    assets.addBitmap("ts", 
+        createBigText("THOSE\nFINAL\nSECONDS", "bold 32px Arial", 160, 96, 28, 4, 
+            [[255, 219, 0], [219, 109, 0]], 64)
     );
 }
 

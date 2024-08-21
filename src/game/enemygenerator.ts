@@ -44,7 +44,7 @@ export class EnemyGenerator {
         this.collectibles = collectibles;
 
         this.enemies = new Array<Enemy> ();
-        this.timers = (new Array<number> (4)).fill(0).map((_ : number, i : number) => i*120);
+        this.timers = (new Array<number> (4)).fill(0).map((_ : number, i : number) => i*60);
     }
 
 
@@ -62,10 +62,10 @@ export class EnemyGenerator {
         }
         this.lastEnemy = id;
 
-        const ground : number = event.screenHeight - GROUND_LEVEL - (id == 3 ? 16 : 0);
+        const ground : number = event.screenHeight - GROUND_LEVEL - (id == 3 ? 32 : 16);
         
         const dx : number = event.screenWidth + 16;
-        const dy : number = id == 1 ? ground : Math.random()*(ground - 32);
+        const dy : number = id == 1 ? ground : Math.random()*ground;
 
         // Always create four ghosts
         if (id == 3) {
@@ -105,8 +105,7 @@ export class EnemyGenerator {
                 for (let j = 0; j < this.timers.length; ++ j) {
 
                     if (i == j) continue;
-
-                    this.timers[j] += 30;
+                    this.timers[j] += 15;
                 }
             }
         }
