@@ -69,4 +69,13 @@ export class ObjectGenerator<T extends Spawnable> {
             func(p);
         }
     }
+
+
+    public flush() : void {
+
+        for (let p of this.objects) {
+
+            p.forceKill();
+        }
+    }
 }

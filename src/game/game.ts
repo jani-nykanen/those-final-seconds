@@ -23,6 +23,8 @@ const BAR_BACKGROUND_COLORS : string[] = ["#ffffff", "#000000", "#6d6d6d"];
 const MESSAGE_TIME : number = 120;
 const MESSAGE_FLICKER_TIME : number = 60;
 
+const TRANSITION_TIME : number = 30;
+
 
 const drawBar = (canvas : Canvas, dx : number, dy : number, dw : number, dh : number) : void => {
 
@@ -30,6 +32,24 @@ const drawBar = (canvas : Canvas, dx : number, dy : number, dw : number, dh : nu
 
         canvas.fillRect(dx + i, dy + i, dw - i*2, dh - i*2, BAR_BACKGROUND_COLORS[i]);
     }
+}
+
+
+const createScoreString = (score : number) : string => {
+
+    const scoreStr : string = String(score);
+    return "0".repeat(7 - scoreStr.length) + scoreStr;
+}
+
+
+const getBestScore = () : number => {
+
+    try {
+
+        return Number(window["localStorage"]["getItem"]("__jn") ?? 0);
+    }
+    catch(e){}
+    return 0;
 }
 
 
@@ -58,6 +78,11 @@ export class Game implements Scene {
     private messageTimer : number = 0;
     private messageText : string = "";
 
+    private bestScore : number = 0;
+
+    private transitionTimer : number = 0;
+    private fadingIn : boolean = false;
+
     
     constructor(event : ProgramEvent) {
 
@@ -69,6 +94,47 @@ export class Game implements Scene {
         this.collectibles = new ObjectGenerator<Collectible> (Collectible);
         this.player = new Player(96, 96, this.projectiles, this.gasSupply, this.stats);
         this.enemies = new EnemyGenerator(this.projectiles, this.gasSupply, this.collectibles);
+
+        this.bestScore = getBestScore();
+    }
+
+
+    private setBestScore() : void {
+
+        if (this.stats.score <= this.bestScore) {
+
+            return;
+        }
+        this.bestScore = this.stats.score;
+
+        try {
+    
+            window["localStorage"]["setItem"]("__jn", String(this.stats.score));
+        }
+        catch(e){}
+    }
+
+
+    private reset() : void {
+
+        // Leaks a lot of memory, but do not happen too often, sooo....
+
+        this.stats = new Stats();
+        this.player = new Player(96, 96, this.projectiles, this.gasSupply, this.stats);
+        this.enemies = new EnemyGenerator(this.projectiles, this.gasSupply, this.collectibles);
+
+        this.projectiles.flush();
+        this.gasSupply.flush();
+        this.collectibles.flush();
+
+        this.messageTimer = 0;
+        this.phase = 0;
+        this.phaseTimer = 0;
+
+        this.cameraPos = 0.0;
+        this.cameraTarget = 0.0;
+        this.globalSpeed = 0.0;
+        this.globalSpeedTarget = 1.0;
     }
 
 
@@ -156,10 +222,7 @@ export class Game implements Scene {
 
         // Score
         canvas.drawText("fo", "SCORE:", canvas.width - 8, -4, -8, 0, Align.Right);
-
-        const scoreStr : string = String(this.stats.score);
-        const finalScoreStr : string = "0".repeat(7 - scoreStr.length) + scoreStr;
-        canvas.drawText("fo", finalScoreStr, canvas.width - 44, 6, -7, 0, Align.Center);
+        canvas.drawText("fo", createScoreString(this.stats.score), canvas.width - 44, 6, -7, 0, Align.Center);
 
         // Score bonus
         const bonusStr : string = (1.0 + this.stats.bonus).toFixed(1);
@@ -186,6 +249,20 @@ export class Game implements Scene {
         this.drawMessage(canvas);
     }
 
+
+    private drawGameOver(canvas : Canvas) : void {
+
+        const cx : number = canvas.width/2;
+        const cy : number = canvas.height/2;
+
+        canvas.clear("rgba(0,0,0,0.5)");
+
+        canvas.drawText("fo", "SCORE: " + createScoreString(this.stats.score), cx, cy + 16, - 7, 0, Align.Center);
+        canvas.drawText("fo", "BEST:  " + createScoreString(this.bestScore), cx, cy + 28, - 7, 0, Align.Center);
+
+        canvas.drawBitmap("go", Flip.None, cx - 128, 32);
+    }
+
     
     // public onChange(param : SceneParameter, event : ProgramEvent): void {
 
@@ -198,8 +275,27 @@ export class Game implements Scene {
         const GLOBAL_SPEED_DELTA : number = 1.0/60.0;
         const PHASE_LENGTH : number = 13*60;
 
-        if (event.transition.isActive()) {
+        if (this.transitionTimer > 0) {
 
+            if ((this.transitionTimer -= event.tick) <= 0) {
+
+                if (this.fadingIn) {
+
+                    this.reset();
+                    this.transitionTimer += TRANSITION_TIME;
+                }
+                this.fadingIn = false;
+            }
+            return;
+        }
+
+        if (!this.player.doesExist()) {
+
+            if (event.input.anyPressed) {
+
+                this.transitionTimer = TRANSITION_TIME;
+                this.fadingIn = true;
+            }
             return;
         }
 
@@ -249,6 +345,10 @@ export class Game implements Scene {
 
             this.globalSpeedTarget = 0.0;
         }
+        if (!this.player.doesExist()) {
+
+            this.setBestScore();
+        }
     }
 
 
@@ -284,7 +384,19 @@ export class Game implements Scene {
         // canvas.drawBitmap("s", Flip.None, 128, 80);
 
         canvas.moveTo();
-        this.drawHUD(canvas);
+        if (!this.player.doesExist()) {
+
+            this.drawGameOver(canvas);
+        }
+        else {
+            this.drawHUD(canvas);
+        }
+
+        if (this.transitionTimer > 0) {
+
+            const t : number = this.transitionTimer/TRANSITION_TIME;
+            canvas.clear("rgba(0,0,0," + String(this.fadingIn ? (1.0 - t) : t) + ")");
+        }
     }
 
 

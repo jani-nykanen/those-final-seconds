@@ -3,7 +3,7 @@ import { ProgramEvent } from "./event.js";
 import { Canvas } from "../gfx/canvas.js";
 import { Input } from "./input.js";
 // import { SceneManager } from "./scenemanager.js";
-import { Transition } from "./transition.js";
+// import { Transition } from "./transition.js";
 import { AudioPlayer } from "../audio/audioplayer.js";
 import { Bitmap } from "../gfx/bitmap.js";
 import { Sample } from "../audio/sample.js";
@@ -20,7 +20,7 @@ export class Program {
     private activeScene : Scene;
 
     private assets : Assets;
-    private transition : Transition;
+    // private transition : Transition;
     private audio : AudioPlayer;
     private event : ProgramEvent;
     
@@ -37,14 +37,20 @@ export class Program {
         this.input = new Input();
         // this.scenes = new SceneManager();
         this.assets = new Assets();
-        this.transition = new Transition();
+        // this.transition = new Transition();
         this.audio = new AudioPlayer((name : string) : Sample | undefined => this.assets.getSample(name), audioMaxVolume);
 
         this.canvas = new Canvas(null,
             canvasMinWidth, canvasMinHeight,
             canvasMaxWidth, canvasMaxHeight,
             (name : string) : Bitmap => this.assets.getBitmap(name), true);
-        this.event = new ProgramEvent(this.input,  /*this.scenes*/ this.assets, this.canvas, this.transition, this.audio); 
+        this.event = new ProgramEvent(
+            this.input,  
+            /*this.scenes*/ 
+            this.assets, 
+            this.canvas, 
+            //this.transition, 
+            this.audio); 
     }
 
 
@@ -92,7 +98,7 @@ export class Program {
 
                 // this.scenes.activeScene?.update(this.event);
                 this.activeScene.update(this.event);
-                this.transition.update(this.event);
+                // this.transition.update(this.event);
             }
 
             if (!this.initialized) {
@@ -124,7 +130,7 @@ export class Program {
 
                 // this.scenes.activeScene?.redraw(this.canvas);
                 this.activeScene.redraw(this.canvas);
-                this.transition.draw(this.canvas);
+                // this.transition.draw(this.canvas);
             }
         }
         else {

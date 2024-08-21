@@ -1,5 +1,5 @@
 import { Assets } from "../core/assets.js";
-import { applyPalette, cropBitmap } from "../gfx/generator.js";
+import { applyPalette, createBigText, cropBitmap } from "../gfx/generator.js";
 import { Bitmap } from "../gfx/bitmap.js";
 import { Canvas } from "../gfx/canvas.js";
 import { Flip } from "../gfx/flip.js";
@@ -545,6 +545,14 @@ const generateFonts = (assets : Assets) : void => {
 }
 
 
+const generateBigText = (assets : Assets) : void => {
+
+    assets.addBitmap("go", 
+        createBigText("GAME OVER!", "bold 24px Arial", 256, 64, [255, 109, 0], 64)
+    );
+}
+
+
 const generateSamples = (assets : Assets, audio : AudioPlayer) : void => {
 
     // ...
@@ -572,6 +580,7 @@ export const generateAssets = (assets : Assets, audio : AudioPlayer) : void => {
     generateShadows(assets);
     generateClock(assets, bmpGameArt);
     generateFonts(assets);
+    generateBigText(assets);
 
     // Audio
     generateSamples(assets, audio);
