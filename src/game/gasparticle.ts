@@ -31,7 +31,7 @@ export class GasParticle extends GameObject {
     }
 
 
-    public draw(canvas : Canvas, bmp : Bitmap) : void {
+    public draw(canvas : Canvas) : void {
         
         if (!this.exist) {
 
@@ -39,7 +39,7 @@ export class GasParticle extends GameObject {
         }
 
         const sx : number = Math.floor(this.timer*4)*16;
-        canvas.drawBitmap(bmp, Flip.None, this.pos.x - 8, this.pos.y - 8, sx, this.id*16, 16, 16);
+        canvas.drawBitmap("gp", Flip.None, this.pos.x - 8, this.pos.y - 8, sx, this.id*16, 16, 16);
     }
 
 

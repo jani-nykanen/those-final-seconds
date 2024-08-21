@@ -69,7 +69,7 @@ export class Collectible extends GameObject {
     }
 
 
-    public draw(canvas : Canvas, bmp : Bitmap) : void {
+    public draw(canvas : Canvas) : void {
         
         if (!this.exist) {
 
@@ -89,7 +89,7 @@ export class Collectible extends GameObject {
             canvas.drawBitmap("fo", Flip.None, this.pos.x - 5, this.pos.y - 7, 11*16, 0, 16, 16);
             return;
         }
-        canvas.drawBitmap(bmp, Flip.None, this.pos.x - 8, this.pos.y - 8, ((this.animationTimer*8) | 0)*16, 0, 16, 16);
+        canvas.drawBitmap("cl", Flip.None, this.pos.x - 8, this.pos.y - 8, ((this.animationTimer*8) | 0)*16, 0, 16, 16);
     }
 
 

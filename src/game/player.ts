@@ -34,6 +34,7 @@ export class Player extends GameObject {
     private shootRecoverTimer : number = 0.0;
 
     private hurtTimer : number = 0.0;
+    private shakeTimer : number = 0;
     
     private readonly projectiles : ObjectGenerator<Projectile>;
     private readonly gasSupply : ObjectGenerator<GasParticle>;
@@ -86,7 +87,7 @@ export class Player extends GameObject {
 
     private control(event : ProgramEvent) : void {
 
-        const MOVE_SPEED : number = 2.5;
+        const BASE_MOVE_SPEED : number = 2.5;
         const dir : Vector = new Vector();
 
         if ((event.input.getAction("l") & InputState.DownOrPressed) != 0) {
@@ -108,8 +109,14 @@ export class Player extends GameObject {
         }
         dir.normalize();
 
-        this.target.x = dir.x*MOVE_SPEED;
-        this.target.y = dir.y*MOVE_SPEED;
+        const moveSpeed : number = BASE_MOVE_SPEED + (this.stats.panicLevel*0.5);
+        const friction : number = 0.2 + this.stats.panicLevel*0.05;
+
+        this.friction.x = friction;
+        this.friction.y = friction;
+
+        this.target.x = dir.x*moveSpeed;
+        this.target.y = dir.y*moveSpeed;
 
         this.angleTarget = dir.y*ANGLE_MAX;
 
@@ -162,13 +169,15 @@ export class Player extends GameObject {
 
         if (this.shootRecoverTimer > 0) {
 
-            this.shootRecoverTimer -= event.tick;
+            this.shootRecoverTimer -= (1.0 + this.stats.panicLevel*0.25)*event.tick;
         }
 
         if (this.hurtTimer > 0) {
 
             this.hurtTimer -= event.tick;
         }
+
+        this.shakeTimer = (this.shakeTimer + event.tick) % 4;
     }
 
 
@@ -201,8 +210,15 @@ export class Player extends GameObject {
             return;
         }
 
-        const dx : number = this.pos.x - 16;
-        const dy : number = this.pos.y - 12;
+        let dx : number = this.pos.x - 16;
+        let dy : number = this.pos.y - 12;
+
+        if (this.stats.panicLevel > 0 &&
+            ((this.shakeTimer/2) | 0) % 2 == 0) {
+
+            dx += -this.stats.panicLevel + ((Math.random()*(1 + this.stats.panicLevel*2)) | 0);
+            dy += -this.stats.panicLevel + ((Math.random()*(1 + this.stats.panicLevel*2)) | 0);
+        }
 
         const angleStep : number = Math.round(this.angle);
         const angleRamp : number = (32/(1.0 + Math.abs(angleStep))) | 0;
@@ -253,12 +269,7 @@ export class Player extends GameObject {
 
         this.hurtTimer = HURT_TIME;
 
-        if (this.stats.level == 0) {
-
-            this.stats.experienceTarget = 0;
-        }
-        this.stats.level = Math.max(0, this.stats.level - 1);
-
+        this.stats.loseLevel();
         this.stats.bonus = 0.0;
     }
 

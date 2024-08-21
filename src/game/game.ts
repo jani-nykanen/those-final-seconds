@@ -20,6 +20,9 @@ import { Stats } from "./stats.js";
 // For all kind of bars
 const BAR_BACKGROUND_COLORS : string[] = ["#ffffff", "#000000", "#6d6d6d"];
 
+const MESSAGE_TIME : number = 120;
+const MESSAGE_FLICKER_TIME : number = 60;
+
 
 const drawBar = (canvas : Canvas, dx : number, dy : number, dw : number, dh : number) : void => {
 
@@ -47,6 +50,9 @@ export class Game implements Scene {
     private globalSpeed : number = 1.0;
 
     private paused : boolean = false;
+
+    private messageTimer : number = 0;
+    private messageText : string = "";
 
     
     constructor(event : ProgramEvent) {
@@ -99,10 +105,14 @@ export class Game implements Scene {
         const dy : number = by - 10 - EXPERIENCE_BAR_HEIGHT/2;
         drawBar(canvas, dx, dy, EXPERIENCE_BAR_WIDTH, EXPERIENCE_BAR_HEIGHT);
 
-        // Bar colors
+        // Color bar
         const activeBarWidth : number = this.stats.experienceCurrent*(EXPERIENCE_BAR_WIDTH - 4);
         canvas.fillRect(dx + 2, by - 16, activeBarWidth, EXPERIENCE_BAR_HEIGHT - 4, "#6db6ff");
-        canvas.drawText("fo", "LEVEL " + String(this.stats.level + 1), cx, by - 20, -8, 0, Align.Center);
+
+        if (Math.floor(this.stats.levelupFlicker/4) % 2 == 0) {
+
+            canvas.drawText("fo", "LEVEL " + String(this.stats.level + 1), cx, by - 20, -8, 0, Align.Center);
+        }
     }
 
 
@@ -153,12 +163,23 @@ export class Game implements Scene {
     }
 
 
+    private drawMessage(canvas : Canvas) : void {
+
+        if (this.messageTimer < MESSAGE_FLICKER_TIME && ((this.messageTimer/4)|0) % 2 == 0) {
+
+            return;
+        } 
+        canvas.drawText("fo", this.messageText, canvas.width/2, canvas.height/2 - 8, -7, 0, Align.Center);
+    }
+
+
     private drawHUD(canvas : Canvas) : void {
 
         this.drawExperienceBar(canvas);
         this.drawTime(canvas);
         this.drawHealth(canvas);
         this.drawScore(canvas);
+        this.drawMessage(canvas);
     }
 
     
@@ -184,6 +205,8 @@ export class Game implements Scene {
             return;
         }
 
+        this.messageTimer = Math.max(0, this.messageTimer - event.tick);
+
         this.player.update(event);
         this.gasSupply.update(this.player, event);
         this.projectiles.update(this.player, event);
@@ -193,7 +216,13 @@ export class Game implements Scene {
         this.updateCamera(event);
         this.background.update(this.globalSpeed, event);
 
+        const oldPanicLevel : number = this.stats.panicLevel;
         this.stats.update(event);
+        if (this.stats.panicLevel != oldPanicLevel) {
+
+            this.messageText = "PANIC UP!";
+            this.messageTimer = MESSAGE_TIME;
+        }
     }
 
 
@@ -216,13 +245,13 @@ export class Game implements Scene {
         canvas.setAlpha();
 
         // Objects
-        this.gasSupply.draw(canvas, canvas.getBitmap("gp"));
+        this.gasSupply.draw(canvas);
 
         this.enemies.preDraw(canvas);
         this.enemies.draw(canvas);
         this.player.draw(canvas);
-        this.collectibles.draw(canvas, canvas.getBitmap("cl"))
-        this.projectiles.draw(canvas, canvas.getBitmap("pr"));
+        this.collectibles.draw(canvas)
+        this.projectiles.draw(canvas);
 
         // canvas.drawBitmap("g", Flip.None, 64, 16);
         // canvas.drawBitmap("pr", Flip.None, 64, 80);

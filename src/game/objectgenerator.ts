@@ -51,11 +51,11 @@ export class ObjectGenerator<T extends Spawnable> {
     }
 
 
-    public draw(canvas : Canvas, bmp : Bitmap) : void {
+    public draw(canvas : Canvas) : void {
 
         for (let o of this.objects) {
 
-            o.draw(canvas, bmp);
+            o.draw(canvas);
         }
     }
 

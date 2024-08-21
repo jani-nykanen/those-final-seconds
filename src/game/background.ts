@@ -62,12 +62,11 @@ export class Background {
 
     private drawGrass(canvas : Canvas, xpos : number, ypos : number) : void {
 
-        const bmpGameArt : Bitmap = canvas.getBitmap("g");
         const count : number = ((canvas.width/16) | 0) + 2;
 
         for (let i = 0; i < count; ++ i) {
 
-            canvas.drawBitmap(bmpGameArt, Flip.None, i*16 - (xpos % 16), ypos, 0, 0, 16, 8);
+            canvas.drawBitmap("g", Flip.None, i*16 - (xpos % 16), ypos, 0, 0, 16, 8);
         }
     }
 

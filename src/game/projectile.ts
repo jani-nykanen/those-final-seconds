@@ -50,7 +50,7 @@ export class Projectile extends GameObject {
     }
 
 
-    public draw(canvas : Canvas, bmp : Bitmap) : void {
+    public draw(canvas : Canvas) : void {
         
         if (!this.exist) {
 
@@ -64,7 +64,7 @@ export class Projectile extends GameObject {
             return;
         }
 
-        canvas.drawBitmap(bmp, Flip.None, this.pos.x - 8, this.pos.y - 8, this.id*16, 0, 16, 16);
+        canvas.drawBitmap("pr", Flip.None, this.pos.x - 8, this.pos.y - 8, this.id*16, 0, 16, 16);
     }
 
 
