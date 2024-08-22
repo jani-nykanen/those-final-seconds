@@ -3,14 +3,14 @@ import { Canvas } from "../gfx/canvas.js";
 
 
 // To avoid "any"
-export type SceneParameter = number | string | undefined;
+// export type SceneParameter = number | string | undefined;
 
 
 export interface Scene {
 
-    onChange?(param : SceneParameter, event : ProgramEvent) : void;
+    // onChange?(param : SceneParameter, event : ProgramEvent) : void;
     update(event : ProgramEvent) : void;
     redraw(canvas : Canvas) : void;
-    dispose?() : SceneParameter;
+    // dispose?() : SceneParameter;
 }
 

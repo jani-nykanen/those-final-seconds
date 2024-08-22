@@ -148,11 +148,13 @@ export class ProgramEvent {
 
     public getAction(name : string) : InputState {
 
-        const keys : string[] | undefined = this.actions.get(name);
+        const keys : string[] | undefined = this.actions.get(name) ?? [];
+        /*
         if (keys === undefined) {
 
             return InputState.Up;
         }
+        */
 
         for (const k of keys) {
             
@@ -176,12 +178,12 @@ export class ProgramEvent {
         this.bitmaps.set(name, bmp);
     }
 
-
+/*
     public addSample(name : string, sample : Sample) : void {
 
         this.samples.set(name, sample);
     }
-
+*/
 
     public getBitmap(name : string) : Bitmap | undefined {
 
@@ -223,14 +225,18 @@ export class ProgramEvent {
     }
 
 
-    public createSample = (sequence : number[], 
+    public createSample(name : string,
+        sequence : number[], 
         baseVolume : number = 1.0,
         type : OscillatorType = "square",
         ramp : Ramp = Ramp.Exponential,
-        attackTime : number = 0.50) : Sample => new Sample(this.ctx!, sequence, baseVolume, type, ramp, attackTime);
+        attackTime : number = 0.50) : void {
+
+        this.samples.set(name, new Sample(this.ctx!, sequence, baseVolume, type, ramp, attackTime))
+    }
 
 
-    public playSample(_sample : Sample | string | undefined, volume : number = 1.0) : void {
+    public playSample(name : string, volume : number = 0.60) : void {
 
         // Didn't have room for a mute button, so it is always enabled now.
         /*
@@ -239,11 +245,9 @@ export class ProgramEvent {
             return;
         }
         */
-
-        const sample : Sample | undefined = typeof(_sample) === "string" ? this.getSample?.(_sample) : _sample;
         try {
 
-            sample?.play(volume*this.globalVolume);
+            this.getSample(name)?.play(volume*this.globalVolume);
         }
         catch (e) {}
     }

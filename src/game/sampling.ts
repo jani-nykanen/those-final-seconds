@@ -1,7 +1,7 @@
 
 
 
-export const sampleDiscreteDistribution = (weights : number[]) : number => sampleDiscreteDistributionInterpolate(weights, weights, 1.0);
+// export const sampleDiscreteDistribution = (weights : number[]) : number => sampleDiscreteDistributionInterpolate(weights, weights, 1.0);
 
 
 export const sampleDiscreteDistributionInterpolate = (weights1 : number[], weights2 : number[], t : number) : number => {

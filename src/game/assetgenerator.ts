@@ -562,15 +562,48 @@ const generateBigText = (event : ProgramEvent) : void => {
 
 const generateSamples = (event : ProgramEvent) : void => {
 
-    event.addSample("s",
-        event.createSample(
-            [128, 10, 1.0,
-             96, 6, 0.20], 
-            0.60,
+    // Start 
+    event.createSample("s",
+        [128, 10, 1.0,
+          96, 6, 0.20], 
+        0.40,
+        "square", 
+        Ramp.Instant,
+        0.40
+    );  
+
+    // Shoot
+    event.createSample("b",
+        [96, 2, 1.0,
+          144, 4, 0.50], 
+        0.60,
+        "square", 
+        Ramp.Exponential,
+        0.40
+    );
+
+    // Kill
+    event.createSample("k",
+            [128, 2, 0.80,
+            192, 3, 1.0,  
+            160, 5, 0.80,
+            96, 8, 0.40],
+            0.70,
+            "sawtooth", 
+            Ramp.Linear, 
+            0.30
+    );
+
+    // Hurt
+    event.createSample("h",
+            [144, 4, 1.0,
+            112, 3, 0.90,
+            96, 12, 0.60], 
+            0.50,
             "square", 
-            Ramp.Instant,
-            0.40
-        ));
+            Ramp.Exponential,
+            0.30
+    );
 }
 
 

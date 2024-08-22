@@ -6,7 +6,7 @@ import { Scene } from "./scene.js";
 // Unused since this took way too many bytes
 //
 
-
+/*
 export class SceneManager {
 
     
@@ -52,3 +52,4 @@ export class SceneManager {
         this.activeSceneRef = scene;
     }
 }
+*/

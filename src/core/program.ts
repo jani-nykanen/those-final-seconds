@@ -6,7 +6,7 @@ import { Canvas } from "../gfx/canvas.js";
 // import { Transition } from "./transition.js";
 // import { AudioPlayer } from "../audio/audioplayer.js";
 import { Bitmap } from "../gfx/bitmap.js";
-import { Sample } from "./sample.js";
+// import { Sample } from "./sample.js";
 import { Scene } from "./scene.js";
 
 

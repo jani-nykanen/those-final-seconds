@@ -1,6 +1,6 @@
 import { ProgramEvent } from "../core/event.js";
 import { Canvas } from "../gfx/canvas.js";
-import { Scene, SceneParameter } from "../core/scene.js";
+import { Scene } from "../core/scene.js";
 import { Background } from "./background.js";
 import { Flip } from "../gfx/flip.js";
 import { Player } from "./player.js";
@@ -396,7 +396,7 @@ export class Game implements Scene {
                 this.titleScreenActive = false;
                 this.messageTimer = 0;
 
-                event.playSample("s", 0.60);
+                event.playSample("s");
             }
             return;
         }
@@ -565,11 +565,5 @@ export class Game implements Scene {
             const t : number = this.transitionTimer/TRANSITION_TIME;
             canvas.clear("rgba(0,0,0," + String(this.fadingIn ? (1.0 - t) : t) + ")");
         }
-    }
-
-
-    public dispose() : SceneParameter {
-
-        return undefined;
     }
 }

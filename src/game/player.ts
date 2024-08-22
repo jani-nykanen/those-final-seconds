@@ -17,7 +17,7 @@ import { Stats } from "./stats.js";
 
 
 const ANGLE_MAX : number = 4.0;
-const SHOOT_RECOVER_TIME : number = 18.0;
+const SHOOT_RECOVER_TIME : number = 17.0;
 const BULLET_COUNT : number[][] = [[1, 1], [2, 1], [2, 2], [3, 2], [3, 3]];
 const DEATH_TIME : number = 90;
 
@@ -73,6 +73,8 @@ export class Player extends GameObject {
 
         const count : number = BULLET_COUNT[this.stats.level][this.shootCount];
         const startAngle: number = -BULLET_ANGLE*(count - 1)/2;
+
+        event.playSample("b");
 
         for (let i = 0; i < count; ++ i) {
 
@@ -213,7 +215,7 @@ export class Player extends GameObject {
 
         if (this.shootRecoverTimer > 0) {
 
-            this.shootRecoverTimer -= (1.0 + this.stats.panicLevel*0.25)*event.tick;
+            this.shootRecoverTimer -= (1.0 + this.stats.panicLevel*0.33)*event.tick;
         }
 
         if (this.hurtTimer > 0) {
@@ -326,6 +328,8 @@ export class Player extends GameObject {
 
             return;
         }
+
+        event.playSample("h");
 
         -- this.stats.health;
         this.hurtTimer = HURT_TIME;

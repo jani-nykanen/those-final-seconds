@@ -352,23 +352,24 @@ export class Enemy extends GameObject {
         // Enemy-specific "settings"
         switch (this.id) {
 
+        // Jumping ball
         case 1:
             this.animationTimer = JUMP_TIME; // 120*shift;
             break;
 
+        // Missile
         case 2: 
-
             this.pos.x += shift*16;
             this.pos.y += shift*(y < 96 ? 1 : -1)*24;
             this.startY = this.pos.y;
             break;
 
+        // Ghost
         case 3: 
-
             this.animationTimer = Math.PI/2*shift;
             this.centerX = x + ORBIT_DISTANCE;
             // this.pos.x = this.centerX + Math.cos(this.animationTimer)*ORBIT_DISTANCE;
-            //this.pos.y = y + Math.sin(this.animationTimer)*ORBIT_DISTANCE;
+            // this.pos.y = y + Math.sin(this.animationTimer)*ORBIT_DISTANCE;
             this.speed.zeros();
             this.target.zeros();
 
@@ -443,6 +444,8 @@ export class Enemy extends GameObject {
 
         this.dying = true;
         this.deathTimer = 0.0;
+
+        event.playSample("k");
 
         const isHeart : boolean = Math.random() < 0.30 - 0.10*stats.health;
         const isClock : boolean = Math.random() < (1.0 - stats.timeFreeze/stats.maxTimeFreeze)*0.40;

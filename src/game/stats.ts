@@ -8,6 +8,11 @@ const LOSE_BONUS_FLICKER_TIME : number = 30;
 
 export class Stats {
     
+    //
+    // These are all public to save bytes. Not gonna
+    // add a horde of getters/setters (unless they do
+    // more than one thing).
+    //
         
     public health : number = 3;
 
