@@ -97,20 +97,20 @@ export class Player extends GameObject {
         const BASE_MOVE_SPEED : number = 2.5;
         const dir : Vector = new Vector();
 
-        if ((event.input.getAction("l") & InputState.DownOrPressed) != 0) {
+        if ((event.getAction("l") & InputState.DownOrPressed) != 0) {
 
             dir.x = -1;
         }
-        else if ((event.input.getAction("r") & InputState.DownOrPressed) != 0) {
+        else if ((event.getAction("r") & InputState.DownOrPressed) != 0) {
 
             dir.x = 1;
         }
 
-        if ((event.input.getAction("u") & InputState.DownOrPressed) != 0) {
+        if ((event.getAction("u") & InputState.DownOrPressed) != 0) {
 
             dir.y = -1;
         }
-        else if ((event.input.getAction("d") & InputState.DownOrPressed) != 0) {
+        else if ((event.getAction("d") & InputState.DownOrPressed) != 0) {
 
             dir.y = 1;
         }
@@ -127,7 +127,7 @@ export class Player extends GameObject {
 
         this.angleTarget = dir.y*ANGLE_MAX;
 
-        if ((event.input.getAction("s") & InputState.DownOrPressed) != 0 && 
+        if ((event.getAction("s") & InputState.DownOrPressed) != 0 && 
             this.shootRecoverTimer <= 0.0) {
 
             this.shoot(event);

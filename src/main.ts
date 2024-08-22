@@ -8,8 +8,8 @@ import { Align } from "./gfx/align.js";
 
 const initialEvent = (event : ProgramEvent) : void => {
 
-    event.assets.loadBitmap("_f", "f.png");
-    event.assets.loadBitmap("_g", "g.png");
+    event.loadBitmap("_f", "f.png");
+    event.loadBitmap("_g", "g.png");
 }
 
 
@@ -22,15 +22,15 @@ const initialScreen = (canvas : Canvas) : void => {
 
 const onloadEvent = (event : ProgramEvent) : void => {
 
-    event.input.addAction("l", ["ArrowLeft", "KeyA"]);
-    event.input.addAction("r", ["ArrowRight", "KeyD"]);
-    event.input.addAction("u", ["ArrowUp", "KeyW"]);
-    event.input.addAction("d", ["ArrowDown", "KeyS"]);
-    event.input.addAction("s", ["Space", "KeyZ", "ControlLeft"]);
-    event.input.addAction("c", ["Space", "KeyZ", "Enter"]);
-    event.input.addAction("p", ["Escape", "Enter"]);
+    event.addAction("l", ["ArrowLeft", "KeyA"]);
+    event.addAction("r", ["ArrowRight", "KeyD"]);
+    event.addAction("u", ["ArrowUp", "KeyW"]);
+    event.addAction("d", ["ArrowDown", "KeyS"]);
+    event.addAction("s", ["Space", "KeyZ", "ControlLeft"]);
+    // event.addAction("c", ["Space", "KeyZ", "Enter"]);
+    event.addAction("p", ["Escape", "Enter"]);
 
-    generateAssets(event.assets, event.audio);
+    generateAssets(event);
 }
 
 

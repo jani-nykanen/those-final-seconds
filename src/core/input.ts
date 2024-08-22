@@ -1,6 +1,11 @@
 import { InputState } from "./inputstate.js";
 
 
+//
+// Merge to ProgramEvent to save bytes (see event.ts)
+//
+
+/*
 export class Input {
 
 
@@ -100,3 +105,4 @@ export class Input {
         return InputState.Up;
     }
 }
+*/

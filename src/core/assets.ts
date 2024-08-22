@@ -1,7 +1,11 @@
 import { Bitmap } from "../gfx/bitmap.js";
 import { Sample } from "../audio/sample.js";
 
+//
+// Merged to event.ts
+// 
 
+/*
 export class Assets {
 
 
@@ -60,3 +64,4 @@ export class Assets {
     public loaded = () : boolean => this.loadCount >= this.assetCount;
     public loadedRatio = () : number => this.assetCount == 0 ? 1.0 : this.loadCount/this.assetCount;
 }
+*/

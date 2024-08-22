@@ -1,27 +1,27 @@
-import { Assets } from "./assets.js";
+// import { Assets } from "./assets.js";
 import { ProgramEvent } from "./event.js";
 import { Canvas } from "../gfx/canvas.js";
-import { Input } from "./input.js";
+// import { Input } from "./input.js";
 // import { SceneManager } from "./scenemanager.js";
 // import { Transition } from "./transition.js";
-import { AudioPlayer } from "../audio/audioplayer.js";
+// import { AudioPlayer } from "../audio/audioplayer.js";
 import { Bitmap } from "../gfx/bitmap.js";
-import { Sample } from "../audio/sample.js";
+import { Sample } from "./sample.js";
 import { Scene } from "./scene.js";
 
 
 export class Program {
 
 
-    private input : Input;
+   // private input : Input;
     private canvas : Canvas;
 
     // private scenes : SceneManager;
     private activeScene : Scene;
 
-    private assets : Assets;
+    // private assets : Assets;
     // private transition : Transition;
-    private audio : AudioPlayer;
+    // private audio : AudioPlayer;
     private event : ProgramEvent;
     
     private timeSum : number = 0.0;
@@ -34,26 +34,27 @@ export class Program {
         canvasMinHeight : number,  canvasMaxHeight : number,
         audioMaxVolume : number = 0.60) {
         
-        this.input = new Input();
+        // this.input = new Input();
         // this.scenes = new SceneManager();
-        this.assets = new Assets();
+        // this.assets = new Assets();
         // this.transition = new Transition();
-        this.audio = new AudioPlayer((name : string) : Sample | undefined => this.assets.getSample(name), audioMaxVolume);
+        // this.audio = new AudioPlayer((name : string) : Sample | undefined => this.event.getSample(name), audioMaxVolume);
 
         this.canvas = new Canvas(null,
             canvasMinWidth, canvasMinHeight,
             canvasMaxWidth, canvasMaxHeight,
-            (name : string) : Bitmap => this.assets.getBitmap(name), true);
+            (name : string) : Bitmap => this.event.getBitmap(name), true);
         this.event = new ProgramEvent(
-            this.input,  
+            // this.input,  
             /*this.scenes*/ 
-            this.assets, 
+            // this.assets, 
             this.canvas, 
             //this.transition, 
-            this.audio); 
+            audioMaxVolume); 
     }
 
 
+    // No room for this
     /*
     private drawLoadingScreen(canvas : Canvas) : void {
 
@@ -86,7 +87,7 @@ export class Program {
         const BASE_FRAME_TIME : number = 1000.0/60.0;
     
         const frameTime : number = BASE_FRAME_TIME*this.event.tick;
-        const loaded : boolean = this.assets.loaded();
+        const loaded : boolean = this.event.loaded();
 
         this.timeSum = Math.min(this.timeSum + (ts - this.oldTime), MAX_REFRESH_COUNT*frameTime);
         this.oldTime = ts;
@@ -103,19 +104,19 @@ export class Program {
 
             if (!this.initialized) {
                 
-                if (this.input.anyPressed) {
+                if (this.event.anyPressed) {
 
                     this.initialized = true;
-                    this.audio.initialize();
+                    this.event.initialize();
                     onLoad(this.event);
-                    this.event.input.update();
+                    this.event.update();
                     break;
                 }
             }
                 
             if (firstFrame) {
 
-                this.event.input.update();
+                this.event.update();
                 firstFrame = false;
             }
         }
@@ -152,4 +153,5 @@ export class Program {
         initialEvent(this.event);
         this.loop(0.0, initialScreen, onLoad);
     }
+    
 }

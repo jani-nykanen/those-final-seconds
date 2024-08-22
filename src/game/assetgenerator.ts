@@ -1,10 +1,10 @@
-import { Assets } from "../core/assets.js";
 import { applyPalette, createBigText, cropBitmap } from "../gfx/generator.js";
 import { Bitmap } from "../gfx/bitmap.js";
 import { Canvas } from "../gfx/canvas.js";
 import { Flip } from "../gfx/flip.js";
-import { AudioPlayer } from "../audio/audioplayer.js";
-import { Ramp } from "../audio/sample.js";
+// import { AudioPlayer } from "../audio/audioplayer.js";
+import { Ramp } from "../core/sample.js";
+import { ProgramEvent } from "../core/event.js";
 
 
 const PALETTE_LOOKUP : string[] = [
@@ -74,19 +74,19 @@ const GAME_ART_PALETTE_TABLE : string[] = [
 ];
 
 
-const generateGameArt = (assets : Assets) : Bitmap => {
+const generateGameArt = (event : ProgramEvent) : Bitmap => {
 
-    const bmpGameArtRaw : Bitmap = assets.getBitmap("_g");
+    const bmpGameArtRaw : Bitmap = event.getBitmap("_g");
     const bmpGameArt : Bitmap = applyPalette(bmpGameArtRaw,
         GAME_ART_PALETTE_TABLE, PALETTE_LOOKUP);
 
-    assets.addBitmap("g", bmpGameArt);
+    event.addBitmap("g", bmpGameArt);
 
     return bmpGameArt;
 }
 
 
-const generateFence = (assets : Assets, bmpGameArt : Bitmap) : void => {
+const generateFence = (event : ProgramEvent, bmpGameArt : Bitmap) : void => {
 
     const canvas : Canvas = new Canvas(null, 32, 48);
 
@@ -115,7 +115,7 @@ const generateFence = (assets : Assets, bmpGameArt : Bitmap) : void => {
         canvas.drawBitmap(bmpGameArt, Flip.None, 12, 10, i*8, 8, 8, 8);
     }
 
-    assets.addBitmap("f", canvas.toBitmap());
+    event.addBitmap("f", canvas.toBitmap());
 }
 
 
@@ -145,26 +145,26 @@ const generateBaseCloud = (colors : string[], yoffsets : number[],
 }
 
 
-const generateClouds = (assets : Assets) : void => {
+const generateClouds = (event : ProgramEvent) : void => {
 
-    assets.addBitmap("c",
+    event.addBitmap("c",
         generateBaseCloud(["#4992db", "#92dbff", "#ffffff"], [0, 2, 4], 192, 96, 16, 24, 1.5)
     );
 }
 
 
-const generateBush = (assets : Assets, bmpGameArt : Bitmap) : void => {
+const generateBush = (event : ProgramEvent, bmpGameArt : Bitmap) : void => {
     
     const canvas : Canvas = new Canvas(null, 48, 64);
 
     canvas.drawBitmap(bmpGameArt, Flip.None, 0, 0, 0, 16, 48, 16);
     canvas.fillRect(0, 16, 48, 48, "#246d00");
 
-    assets.addBitmap("b", canvas.toBitmap());
+    event.addBitmap("b", canvas.toBitmap());
 }
 
 
-const generateMushrooms = (assets : Assets, bmpGameArt : Bitmap) : void => {
+const generateMushrooms = (event : ProgramEvent, bmpGameArt : Bitmap) : void => {
     
     const canvas : Canvas = new Canvas(null, 48, 96);
 
@@ -189,11 +189,11 @@ const generateMushrooms = (assets : Assets, bmpGameArt : Bitmap) : void => {
         canvas.drawBitmap(bmpGameArt, Flip.None, 6 + 13*i, 4 + 4*(i % 2), 56, i == 2 ? 28 : 24, 8, 4);
     }
 
-    assets.addBitmap("m", canvas.toBitmap());
+    event.addBitmap("m", canvas.toBitmap());
 }
 
 
-const generateSun = (assets : Assets, bmpGameArt : Bitmap) : void => {
+const generateSun = (event : ProgramEvent, bmpGameArt : Bitmap) : void => {
 
     const RADIUS : number = 32;
     const EYE_SHIFT_X : number = 4;
@@ -230,11 +230,11 @@ const generateSun = (assets : Assets, bmpGameArt : Bitmap) : void => {
     }
         */
 
-    assets.addBitmap("s", canvas.toBitmap());
+    event.addBitmap("s", canvas.toBitmap());
 }
 
 
-const generatePlayer = (assets : Assets, bmpGameArt : Bitmap) : void => {
+const generatePlayer = (event : ProgramEvent, bmpGameArt : Bitmap) : void => {
 
     const canvas : Canvas = new Canvas(null, 32, 24);
 
@@ -243,11 +243,11 @@ const generatePlayer = (assets : Assets, bmpGameArt : Bitmap) : void => {
     canvas.drawBitmap(bmpGameArt, Flip.None, 0, 8, 16, 32, 32, 16);
     canvas.drawBitmap(bmpGameArt, Flip.None, 9, 0, 0, 32, 16, 16);
 
-    assets.addBitmap("p", canvas.toBitmap());
+    event.addBitmap("p", canvas.toBitmap());
 }
 
 
-const generateGasParticles = (assets : Assets) : void => {
+const generateGasParticles = (event : ProgramEvent) : void => {
 
     const canvas : Canvas = new Canvas(null, 64, 16);
 
@@ -263,11 +263,11 @@ const generateGasParticles = (assets : Assets) : void => {
         canvas.fillEllipse(cx - 1, 8 - 1, radius - 1);
     }
 
-    assets.addBitmap("gp", canvas.toBitmap());
+    event.addBitmap("gp", canvas.toBitmap());
 }
 
 
-const generateProjectiles = (assets : Assets, bmpGameArt : Bitmap, bmpGameArtRaw : Bitmap) : void => {
+const generateProjectiles = (event : ProgramEvent, bmpGameArt : Bitmap, bmpGameArtRaw : Bitmap) : void => {
 
     const canvas : Canvas = new Canvas(null, 32, 16);
 
@@ -293,11 +293,11 @@ const generateProjectiles = (assets : Assets, bmpGameArt : Bitmap, bmpGameArtRaw
     // canvas.fillRect(6, 6, 2, 2, "#ffdbff");
     // canvas.fillRect(22, 6, 2, 2, "#ffb66d");
 
-    assets.addBitmap("pr", canvas.toBitmap());
+    event.addBitmap("pr", canvas.toBitmap());
 }
 
 
-const generateHUD = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt : Bitmap) : void => {
+const generateHUD = (event : ProgramEvent, bmpRawGameArt : Bitmap, bmpGameArt : Bitmap) : void => {
 
     const bmpHeartRaw : Bitmap = cropBitmap(bmpRawGameArt, 48, 48, 16, 16);
 
@@ -337,11 +337,11 @@ const generateHUD = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt : Bitma
         canvas.drawBitmap(bmpGameArt, Flip.None, 4 + 16*i, 4, 56, 32 + i*8, 8, 8);
     }
 
-    assets.addBitmap("h", canvas.toBitmap());
+    event.addBitmap("h", canvas.toBitmap());
 } 
 
 
-const generateEnemyBodies = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt : Bitmap) : void => {
+const generateEnemyBodies = (event : ProgramEvent, bmpRawGameArt : Bitmap, bmpGameArt : Bitmap) : void => {
  
     const bmpBallBodiesRaw : Canvas = new Canvas(null, 96, 48);
 
@@ -387,11 +387,11 @@ const generateEnemyBodies = (assets : Assets, bmpRawGameArt : Bitmap, bmpGameArt
     // Upside-down mouth for ball 4
     canvas.drawBitmap(bmpGameArt, Flip.Vertical, 72 + 5, 37, 40, 52, 8, 4);
 
-    assets.addBitmap("e", canvas.toBitmap());
+    event.addBitmap("e", canvas.toBitmap());
 }
 
 
-const generatePropeller = (assets : Assets, bmpGameArt : Bitmap) : void => {
+const generatePropeller = (event : ProgramEvent, bmpGameArt : Bitmap) : void => {
 
     const SX : number[] = [24, 24, 34, 24];
     const SY : number[] = [48, 56, 56, 56];
@@ -410,11 +410,11 @@ const generatePropeller = (assets : Assets, bmpGameArt : Bitmap) : void => {
         canvas.drawBitmap(bmpGameArt, i == 3 ? Flip.Horizontal : Flip.None, px, 7, SX[i], SY[i], sw, 6);
     }
 
-    assets.addBitmap("ro", canvas.toBitmap());
+    event.addBitmap("ro", canvas.toBitmap());
 }
 
 
-const generateRings = (assets : Assets) : void => {
+const generateRings = (event : ProgramEvent) : void => {
 
     const SMALL_RING_COLORS : string[] = ["#ffdb00", "#ffb6b6", "#ffdbff", "#ff9292", "#db9200", "#ff6d00"];
 
@@ -445,12 +445,12 @@ const generateRings = (assets : Assets) : void => {
             }
         }
     }
-    assets.addBitmap("r1", canvas1.toBitmap());
-    assets.addBitmap("r2", canvas2.toBitmap());
+    event.addBitmap("r1", canvas1.toBitmap());
+    event.addBitmap("r2", canvas2.toBitmap());
 }
 
 
-const generateShadows = (assets : Assets) : void => {
+const generateShadows = (event : ProgramEvent) : void => {
 
     const COUNT : number = 8;
 
@@ -463,11 +463,11 @@ const generateShadows = (assets : Assets) : void => {
         canvas.fillEllipse(i*32 + 16, 16, r, r/3);
     }
 
-    assets.addBitmap("sh", canvas.toBitmap());
+    event.addBitmap("sh", canvas.toBitmap());
 }
 
 
-const generateClock = (assets : Assets, bmpGameArt : Bitmap) : void => {
+const generateClock = (event : ProgramEvent, bmpGameArt : Bitmap) : void => {
 
     const SX : number[] = [0, 16, 28, 16, 0, 16, 28, 16];
     const SW : number[] = [16, 11, 4, 11, 16, 11, 4, 11];
@@ -501,14 +501,14 @@ const generateClock = (assets : Assets, bmpGameArt : Bitmap) : void => {
         }
     }
 
-    assets.addBitmap("cl", canvas.toBitmap());
+    event.addBitmap("cl", canvas.toBitmap());
 }
 
 
 
-const generateFonts = (assets : Assets) : void => {
+const generateFonts = (event : ProgramEvent) : void => {
 
-    const bmpFontRaw : Bitmap = assets.getBitmap("_f");
+    const bmpFontRaw : Bitmap = event.getBitmap("_f");
 
     const fontBlack : Bitmap = applyPalette(bmpFontRaw, 
         (new Array<string>(16*4)).fill("0001"), 
@@ -541,29 +541,29 @@ const generateFonts = (assets : Assets) : void => {
         }
     }
 
-    assets.addBitmap("fw", fontWhite);
-    assets.addBitmap("fo", canvas.toBitmap());
+    event.addBitmap("fw", fontWhite);
+    event.addBitmap("fo", canvas.toBitmap());
 }
 
 
-const generateBigText = (assets : Assets) : void => {
+const generateBigText = (event : ProgramEvent) : void => {
 
-    assets.addBitmap("go", 
+    event.addBitmap("go", 
         createBigText("GAME OVER!", "bold 24px Arial", 192, 32, 24, 4,
             [[255, 109, 0], [182, 36, 0]], 64)
     );
 
-    assets.addBitmap("ts", 
+    event.addBitmap("ts", 
         createBigText("THOSE\nFINAL\nSECONDS", "bold 32px Arial", 160, 96, 28, 4, 
             [[255, 219, 0], [219, 109, 0]], 64)
     );
 }
 
 
-const generateSamples = (assets : Assets, audio : AudioPlayer) : void => {
+const generateSamples = (event : ProgramEvent) : void => {
 
-    assets.addSample("s",
-        audio.createSample(
+    event.addSample("s",
+        event.createSample(
             [128, 10, 1.0,
              96, 6, 0.20], 
             0.60,
@@ -574,29 +574,29 @@ const generateSamples = (assets : Assets, audio : AudioPlayer) : void => {
 }
 
 
-// Hmm, generating assets from assets...
-export const generateAssets = (assets : Assets, audio : AudioPlayer) : void => {
+// Hmm, generating assets from event...
+export const generateAssets = (event : ProgramEvent) : void => {
 
     // Bitmaps
-    const bmpGameArt : Bitmap = generateGameArt(assets);
-    const bmpGameArtRaw : Bitmap = assets.getBitmap("_g");
-    generateFence(assets, bmpGameArt);
-    generateBush(assets, bmpGameArt);
-    generateMushrooms(assets, bmpGameArt);
-    generateClouds(assets);
-    generateSun(assets, bmpGameArt);
-    generatePlayer(assets, bmpGameArt);
-    generateGasParticles(assets);
-    generateProjectiles(assets, bmpGameArt, bmpGameArtRaw);
-    generateHUD(assets, bmpGameArtRaw, bmpGameArt);
-    generateEnemyBodies(assets, bmpGameArtRaw, bmpGameArt);
-    generatePropeller(assets, bmpGameArt);
-    generateRings(assets);
-    generateShadows(assets);
-    generateClock(assets, bmpGameArt);
-    generateFonts(assets);
-    generateBigText(assets);
+    const bmpGameArt : Bitmap = generateGameArt(event);
+    const bmpGameArtRaw : Bitmap = event.getBitmap("_g");
+    generateFence(event, bmpGameArt);
+    generateBush(event, bmpGameArt);
+    generateMushrooms(event, bmpGameArt);
+    generateClouds(event);
+    generateSun(event, bmpGameArt);
+    generatePlayer(event, bmpGameArt);
+    generateGasParticles(event);
+    generateProjectiles(event, bmpGameArt, bmpGameArtRaw);
+    generateHUD(event, bmpGameArtRaw, bmpGameArt);
+    generateEnemyBodies(event, bmpGameArtRaw, bmpGameArt);
+    generatePropeller(event, bmpGameArt);
+    generateRings(event);
+    generateShadows(event);
+    generateClock(event, bmpGameArt);
+    generateFonts(event);
+    generateBigText(event);
 
     // Audio
-    generateSamples(assets, audio);
+    generateSamples(event);
 }

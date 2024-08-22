@@ -391,12 +391,12 @@ export class Game implements Scene {
                 this.transitionTimer -= 0.5*event.tick;
                 return;
             }
-            if (event.input.anyPressed) {
+            if (event.anyPressed) {
 
                 this.titleScreenActive = false;
                 this.messageTimer = 0;
 
-                event.audio.playSample("s", 0.60);
+                event.playSample("s", 0.60);
             }
             return;
         }
@@ -420,7 +420,7 @@ export class Game implements Scene {
         if (!this.player.doesExist()) {
 
             this.messageTimer = (this.messageTimer += 1.0/60.0*event.tick) % 1.0;
-            if (event.input.anyPressed) {
+            if (event.anyPressed) {
 
                 this.messageTimer = 0;
                 this.transitionTimer = TRANSITION_TIME;
@@ -436,7 +436,7 @@ export class Game implements Scene {
             this.messageText = "READY?";
             this.messageTimer = 120;
         }
-        else if (event.input.getAction("p") == InputState.Pressed) {
+        else if (event.getAction("p") == InputState.Pressed) {
 
             this.paused = !this.paused;
         }
