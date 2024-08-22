@@ -3,6 +3,7 @@ import { updateSpeedAxis } from "./gameobject.js";
 
 
 const LEVEL_UP_FLICKER_TIME : number = 30;
+const LOSE_BONUS_FLICKER_TIME : number = 30;
 
 
 export class Stats {
@@ -14,6 +15,7 @@ export class Stats {
     public experienceCurrent : number = 0;
     public experienceTarget : number = 0;
     public levelupFlicker : number = 0;
+    public bonusFlicker : number = 0;
 
     public panicLevel : number = 0;
 
@@ -75,11 +77,12 @@ export class Stats {
             }
         }
         this.levelupFlicker = Math.max(0, this.levelupFlicker - event.tick);
+        this.bonusFlicker = Math.max(0, this.bonusFlicker - event.tick);
 
         // Score
         this.score = updateSpeedAxis(this.score, this.scoreTarget, this.scoreSpeed*event.tick);
 
-        this.panicLevel = ((13*1000 - this.time)/(1000*5)) | 0;
+        this.panicLevel = Math.min(2, ((13*1000 - this.time)/(1000*5)) | 0);
     }
 
 
@@ -110,5 +113,11 @@ export class Stats {
         }
         this.level = Math.max(0, this.level - 1);
         this.levelupFlicker = LEVEL_UP_FLICKER_TIME;
+
+        if (this.bonus > 0.0) {
+
+            this.bonus = 0.0;
+            this.bonusFlicker = LOSE_BONUS_FLICKER_TIME;
+        }
     }
 }

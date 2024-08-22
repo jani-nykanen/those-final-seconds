@@ -78,18 +78,16 @@ export class Game implements Scene {
     private phase : number = 0;
     private phaseTimer : number = 0;
 
-    private messageTimer : number = 0;
+    private messageTimer : number = 0.49;
     private messageText : string = "";
 
     private bestScore : number = 0;
 
-    private transitionTimer : number = 0;
+    private transitionTimer : number = TRANSITION_TIME;
     private fadingIn : boolean = false;
 
     private titleScreenActive : boolean = true;
     private cameraBottomReached : boolean = false;
-
-    private shaking : boolean = false;
 
     
     constructor(event : ProgramEvent) {
@@ -225,9 +223,14 @@ export class Game implements Scene {
         const milliseconds : number = ((this.stats.time % 1000)/10) | 0;
         const seconds : number = (this.stats.time/1000) | 0;
 
-        canvas.drawText("fo", 
-            "#" + (seconds < 10 ? "0" : "") + String(seconds) + "." + ( (milliseconds < 10 ? "0" : "") + String(milliseconds)), 
-            canvas.width/2 - 5, -2, -7, 0, Align.Center);
+        if (this.stats.timeFreeze > 0 || 
+            this.stats.panicLevel < 2 || 
+            ((this.phaseTimer/8) | 0) % 2 == 0) {
+
+            canvas.drawText("fo", 
+                "#" + (seconds < 10 ? "0" : "") + String(seconds) + "." + ( (milliseconds < 10 ? "0" : "") + String(milliseconds)), 
+                canvas.width/2 - 5, -2, -7, 0, Align.Center);
+        }
 
         if (this.stats.timeFreeze <= 0)
             return;
@@ -253,10 +256,15 @@ export class Game implements Scene {
     private drawScore(canvas : Canvas) : void {
 
         // Score
-        canvas.drawText("fo", "SCORE:", canvas.width - 8, -4, -8, 0, Align.Right);
+        canvas.drawText("fo", "SCORE:", canvas.width - 13, -4, -8, 0, Align.Right);
         canvas.drawText("fo", createScoreString(this.stats.score), canvas.width - 44, 6, -7, 0, Align.Center);
 
         // Score bonus
+        if (((this.stats.bonusFlicker/2) | 0) % 2 != 0) {
+
+            return;
+        }
+
         const bonusStr : string = (1.0 + this.stats.bonus).toFixed(1);
         canvas.drawText("fo", "BONUS: $" + bonusStr, canvas.width, canvas.height - 18, -8, 0, Align.Right);
     }
@@ -318,8 +326,7 @@ export class Game implements Scene {
         // canvas.moveTo();
         canvas.clear("rgba(0,0,0,0.5)");
 
-        // Text
-        this.drawAnyKeyText(canvas);
+        // Copyright
         canvas.drawText("fw", "*2024 JANI NYK@NEN", cx, canvas.height - 10, -1, 0, Align.Center);
 
         // Logo
@@ -337,6 +344,19 @@ export class Game implements Scene {
         drawBar(canvas, 0, 0, 144, 40);
         canvas.drawText("fo", "   CONTROLS:\nARROW KEYS: MOVE\nSPACE: SHOOT", 4, 0, -8, -5);
         canvas.moveTo();
+
+        // Transition
+        if (this.transitionTimer > 0) {
+
+            const t : number = 1.0 - this.transitionTimer/TRANSITION_TIME;
+
+            canvas.setColor("#000000");
+            canvas.fillCircleOutside(t*t*256);
+            return;
+        }
+
+        // "Any key"
+        this.drawAnyKeyText(canvas);
     }
 
 
@@ -366,10 +386,17 @@ export class Game implements Scene {
         if (this.titleScreenActive) {
 
             this.messageTimer = (this.messageTimer += 1.0/60.0*event.tick) % 1.0;
+            if (this.transitionTimer > 0) {
+
+                this.transitionTimer -= 0.5*event.tick;
+                return;
+            }
             if (event.input.anyPressed) {
 
                 this.titleScreenActive = false;
                 this.messageTimer = 0;
+
+                event.audio.playSample("s", 0.60);
             }
             return;
         }
@@ -463,6 +490,13 @@ export class Game implements Scene {
         if (this.player.isDying()) {
 
             this.globalSpeedTarget = 0.0;
+            // this.stats.panicLevel = 0;
+
+            if (this.stats.time <= 0) {
+
+                this.messageText = "TIME UP!";
+                this.messageTimer = 30;
+            }
         }
         if (!this.player.doesExist()) {
 

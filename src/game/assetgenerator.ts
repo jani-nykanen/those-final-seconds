@@ -4,6 +4,7 @@ import { Bitmap } from "../gfx/bitmap.js";
 import { Canvas } from "../gfx/canvas.js";
 import { Flip } from "../gfx/flip.js";
 import { AudioPlayer } from "../audio/audioplayer.js";
+import { Ramp } from "../audio/sample.js";
 
 
 const PALETTE_LOOKUP : string[] = [
@@ -561,7 +562,15 @@ const generateBigText = (assets : Assets) : void => {
 
 const generateSamples = (assets : Assets, audio : AudioPlayer) : void => {
 
-    // ...
+    assets.addSample("s",
+        audio.createSample(
+            [128, 10, 1.0,
+             96, 6, 0.20], 
+            0.60,
+            "square", 
+            Ramp.Instant,
+            0.40
+        ));
 }
 
 

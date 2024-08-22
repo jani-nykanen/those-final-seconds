@@ -413,7 +413,7 @@ export class Canvas {
 
         if (align == Align.Center) {
 
-            dx -= ((text.length)*(cw + xoff)*scalex/2.0) | 0;
+            dx -= ((text.length + 1)*(cw + xoff)*scalex/2.0) | 0;
             x = dx;
         }
         else if (align == Align.Right) {

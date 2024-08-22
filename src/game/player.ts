@@ -331,7 +331,6 @@ export class Player extends GameObject {
         this.hurtTimer = HURT_TIME;
 
         this.stats.loseLevel();
-        this.stats.bonus = 0.0;
     }
 
 
