@@ -53,7 +53,9 @@ export class GameObject implements ExistingObject {
     private checkGroundCollision(event : ProgramEvent) : void {
 
         const ground : number = event.screenHeight - GROUND_LEVEL;
-        if (this.speed.y > 0 && this.pos.y + this.hitbox.y + this.hitbox.h/2 > ground) {
+        // We allow "zero y speed" to make it impossible the enemies
+        // to push other enemies with "zero y speed" through the ground.
+        if (this.speed.y >= 0 && this.pos.y + this.hitbox.y + this.hitbox.h/2 > ground) {
 
             this.pos.y = ground - this.hitbox.y - this.hitbox.h/2;
             this.speed.y *= -this.bounceFactor;

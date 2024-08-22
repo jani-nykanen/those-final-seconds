@@ -5,7 +5,6 @@ import { Bitmap } from "./bitmap.js";
 import { clamp } from "../math/utility.js";
 
 
-
 export class Canvas {
 
 
@@ -133,8 +132,8 @@ export class Canvas {
         const cornerx : number = (width/2 - multiplier*newWidth/2) | 0;
         const cornery : number  = (height/2 - multiplier*newHeight/2) | 0;
 
-        this.canvas.style.width  = String( (newWidth*multiplier) | 0) + "px";
-        this.canvas.style.height = String( (newHeight*multiplier) | 0) + "px";
+        this.canvas.style.width  = String((newWidth*multiplier) | 0) + "px";
+        this.canvas.style.height = String((newHeight*multiplier) | 0) + "px";
     
         this.canvas.style.left = String(cornerx) + "px";
         this.canvas.style.top  = String(cornery) + "px";
@@ -392,7 +391,7 @@ export class Canvas {
 
     public drawText(_font : Bitmap | string, text : string, 
         dx : number, dy : number, xoff : number = 0, yoff : number = 0, 
-        align : Align = Align.Left, scalex : number = 1.0, scaley : number = 1.0) : void {
+        align : Align = Align.Left) : void {
 
         const LINE_SHIFT : number = 2;
 
@@ -408,39 +407,38 @@ export class Canvas {
         // dx = (dx + this.translation.x) | 0;
         // dy = (dy + this.translation.y) | 0;
 
-        let x : number = dx;
-        let y : number = dy;
-
+        const len : number = (text.length + 1)*(cw + xoff);
         if (align == Align.Center) {
 
-            dx -= ((text.length + 1)*(cw + xoff)*scalex/2.0) | 0;
-            x = dx;
+            dx -= (len/2.0) | 0;
         }
         else if (align == Align.Right) {
             
-            dx -= (((text.length + 1)*(cw + xoff))*scalex) | 0;
-            x = dx;
+            dx -= len | 0;
         }
+        
+        let x : number = dx;
+        let y : number = dy;
 
         for (let i = 0; i < text.length; ++ i) {
 
-            let chr : number = text.charCodeAt(i);
+            const chr : number = text.charCodeAt(i);
             // Note: we assume that we encounter only Unix-type
             // newlines. Carriage returns (\r) are attempted to draw normally,
             // whatever the result might be.
             if (chr == '\n'.charCodeAt(0)) {
 
                 x = dx;
-                y += (ch + yoff) * scaley;
+                y += ch + yoff;
                 continue;
             }
 
             this.drawBitmap(font, Flip.None, 
                 x, y, (chr % 16)*cw, 
                 (((chr/16) | 0) - LINE_SHIFT)*ch, // To save space we do not have the first two lines in our fonts
-                cw, ch, cw*scalex, ch*scaley);
+                cw, ch);
 
-            x += (cw + xoff)*scalex;
+            x += cw + xoff;
         }
     }
 

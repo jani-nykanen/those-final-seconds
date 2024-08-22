@@ -189,6 +189,8 @@ export class Enemy extends GameObject {
                     this.speed.y = JUMP_SPEED;
 
                     ++ this.animationFlag;
+
+                    event.playSample("k1", 0.30);
                 }
                 break;
             }
@@ -430,8 +432,8 @@ export class Enemy extends GameObject {
 
             // TODO: Gets rid of a few bugs, but it is a waste of bytes, so maybe
             // remove, no one will ever notice
-            this.pos.y = Math.min(event.screenHeight - GROUND_LEVEL/2 - this.hitbox.h/2, this.pos.y);
-            e.pos.y = Math.min(event.screenHeight - GROUND_LEVEL/2 - e.hitbox.h/2, e.pos.y);
+            // this.pos.y = Math.min(event.screenHeight - GROUND_LEVEL/2 - this.hitbox.h/2, this.pos.y);
+            // e.pos.y = Math.min(event.screenHeight - GROUND_LEVEL/2 - e.hitbox.h/2, e.pos.y);
         }
     }
 
@@ -451,7 +453,7 @@ export class Enemy extends GameObject {
         this.dying = true;
         this.deathTimer = 0.0;
 
-        event.playSample("k");
+        event.playSample("k0");
 
         const isHeart : boolean = Math.random() < 0.30 - 0.10*stats.health;
         const isClock : boolean = Math.random() < (1.0 - stats.timeFreeze/stats.maxTimeFreeze)*0.40;

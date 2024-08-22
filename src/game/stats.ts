@@ -79,6 +79,8 @@ export class Stats {
                 this.levelupFlicker = LEVEL_UP_FLICKER_TIME;
                 this.experienceTarget -= 1.0;
                 this.experienceCurrent -= 1.0;
+
+                event.playSample("l");
             }
         }
         this.levelupFlicker = Math.max(0, this.levelupFlicker - event.tick);

@@ -573,20 +573,8 @@ const generateSamples = (event : ProgramEvent) : void => {
             80 + i*16, 6 + i*4, 0.20], 
             0.40,
             "square", 
-            Ramp.Instant,
-            0.40);  
+            Ramp.Instant);  
     }
-
-    // Kill
-    event.createSample("k",
-            [128, 2, 0.80,
-            160, 3, 1.0,  
-            96, 8, 0.80,],
-            0.70,
-            "sawtooth", 
-            Ramp.Linear, 
-            0.30
-    );
 
     // Hurt
     event.createSample("h",
@@ -595,8 +583,7 @@ const generateSamples = (event : ProgramEvent) : void => {
             96, 12, 0.60], 
             0.50,
             "square", 
-            Ramp.Exponential,
-            0.30
+            Ramp.Exponential
     );
 
     for (let i = 0; i < 2; ++ i) {
@@ -604,12 +591,11 @@ const generateSamples = (event : ProgramEvent) : void => {
         // Clock & heart
         event.createSample("c" + String(i),
             [160, 4, 0.60,
-            100, 2, 0.80,
-            256, 12, 1.00],
-            0.40 + i*0.60,
+            100, 2, 1.00,
+            256, 16, 0.80],
+            0.50 + i*0.60,
             ["square", "triangle"][i] as OscillatorType, 
-            Ramp.Instant,
-            0.20);
+            Ramp.Instant);
 
         // Shoot
         event.createSample("b" + String(i),
@@ -617,8 +603,17 @@ const generateSamples = (event : ProgramEvent) : void => {
             144, 4 + i*8, 0.50], 
             0.60,
             "square", 
-            Ramp.Exponential,
-            0.40
+            Ramp.Exponential
+        );
+
+        // Kill (well, the other one is for jump)
+        event.createSample("k" + String(i),
+                [128 - 16*i, 2, 0.80,
+                160, 3 + 5*i, 1.0,  
+                96 + i*128, 8 - 4*i, 0.80],
+                0.70,
+                "sawtooth", 
+                Ramp.Linear
         );
     }
 
@@ -629,9 +624,18 @@ const generateSamples = (event : ProgramEvent) : void => {
         144, 32, 0.5],
         0.70,
         "square", 
-        Ramp.Exponential, 
-        0.30
-    )
+        Ramp.Exponential
+    );
+
+
+    // Level up
+    event.createSample("l",
+        [96, 8, 0.60,
+         192, 12, 1.0,
+        256, 16, 0.20,],
+       0.60,
+       "square", 
+       Ramp.Exponential);
 }
 
 

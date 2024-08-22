@@ -230,7 +230,7 @@ export class ProgramEvent {
         baseVolume : number = 1.0,
         type : OscillatorType = "square",
         ramp : Ramp = Ramp.Exponential,
-        attackTime : number = 0.50) : void {
+        attackTime : number = 0.40) : void {
 
         this.samples.set(name, new Sample(this.ctx!, sequence, baseVolume, type, ramp, attackTime))
     }

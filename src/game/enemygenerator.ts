@@ -43,7 +43,7 @@ export class EnemyGenerator {
         this.collectibles = collectibles;
 
         this.enemies = new Array<Enemy> ();
-        this.timers = (new Array<number> (4)).fill(0).map((_ : number, i : number) => INITIAL_TIMER_TIMES[i]);
+        this.timers = Array.from(INITIAL_TIMER_TIMES);
     }
 
 
@@ -91,7 +91,7 @@ export class EnemyGenerator {
         this.stageTimer = Math.min(TERMINAL_TIME, this.stageTimer + event.tick);
         this.relativeTime = this.stageTimer/TERMINAL_TIME;
 
-        const enemyMaxCount : number = Math.floor(3 + this.relativeTime*3)
+        const enemyMaxCount : number = Math.floor(3 + this.relativeTime*2)
 
         for (let i = 0; i < this.timers.length; ++ i) {
 
@@ -99,7 +99,7 @@ export class EnemyGenerator {
 
                 const count : number = 1 + ((Math.random()*enemyMaxCount) | 0); 
 
-                this.timers[i] += count*30 + Math.random()*90;
+                this.timers[i] += count*30 + Math.random()*60;
                 this.spawnEnemy(count, event);
 
                 // Avoid spawning too many enemies at the same time
