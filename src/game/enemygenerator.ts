@@ -4,18 +4,17 @@ import { ObjectGenerator } from "./objectgenerator.js";
 import { Player } from "./player.js";
 import { Projectile } from "./projectile.js";
 import { Canvas } from "../gfx/canvas.js";
-import { Bitmap } from "../gfx/bitmap.js";
-import { CAMERA_MIN_Y } from "./constants.js";
 import { GROUND_LEVEL } from "./background.js";
 import { next } from "./existingobject.js";
 import { GasParticle } from "./gasparticle.js";
 import { Collectible } from "./collectible.js";
-import { sampleDiscreteDistribution, sampleDiscreteDistributionInterpolate } from "./sampling.js";
+import { sampleDiscreteDistributionInterpolate } from "./sampling.js";
 
 
-const TERMINAL_TIME : number = 13*60*5;
+const INITIAL_TIMER_TIMES : number[] = [0, 60, 300, 1800];
+const TERMINAL_TIME : number = 60*120; // Two minutes
 
-const ENEMY_WEIGHTS : number[][] = [[0.40, 0.30, 0.20, 0.10], [0.25, 0.25, 0.25, 0.25]];
+const ENEMY_WEIGHTS : number[][] = [[0.50, 0.40, 0.05, 0.0], [0.25, 0.25, 0.25, 0.25]];
 
 
 export class EnemyGenerator {
@@ -44,14 +43,14 @@ export class EnemyGenerator {
         this.collectibles = collectibles;
 
         this.enemies = new Array<Enemy> ();
-        this.timers = (new Array<number> (4)).fill(0).map((_ : number, i : number) => i*60);
+        this.timers = (new Array<number> (4)).fill(0).map((_ : number, i : number) => INITIAL_TIMER_TIMES[i]);
     }
 
 
     private spawnEnemy(count : number, event : ProgramEvent) : void {
 
-        const MOUTH_PROB_INITIAL : number = 0.05;
-        const MOUTH_PROB_TERMINAL : number = 0.75;
+        const MOUTH_PROB_INITIAL : number = 0.0;
+        const MOUTH_PROB_TERMINAL : number = 0.5;
 
         const XOFF : number = 32;
 
@@ -62,7 +61,7 @@ export class EnemyGenerator {
         }
         this.lastEnemy = id;
 
-        const ground : number = event.screenHeight - GROUND_LEVEL - (id == 3 ? 32 : 16);
+        const ground : number = event.screenHeight - GROUND_LEVEL - (id == 3 ? 48 : 24);
         
         const dx : number = event.screenWidth + 16;
         const dy : number = id == 1 ? ground : Math.random()*ground;
@@ -92,11 +91,13 @@ export class EnemyGenerator {
         this.stageTimer = Math.min(TERMINAL_TIME, this.stageTimer + event.tick);
         this.relativeTime = this.stageTimer/TERMINAL_TIME;
 
+        const enemyMaxCount : number = Math.floor(3 + this.relativeTime*3)
+
         for (let i = 0; i < this.timers.length; ++ i) {
 
             if ((this.timers[i] -= globalSpeed*event.tick) <= 0) {
 
-                const count : number = 1 + ( (Math.random()*3) | 0); 
+                const count : number = 1 + ((Math.random()*enemyMaxCount) | 0); 
 
                 this.timers[i] += count*30 + Math.random()*90;
                 this.spawnEnemy(count, event);

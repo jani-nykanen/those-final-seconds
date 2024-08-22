@@ -18,7 +18,7 @@ export class Stats {
     public panicLevel : number = 0;
 
     public time : number = 13*1000;
-    public timeFreeze : number = 2.0;
+    public timeFreeze : number = 0;
     public frameCount : number = 0;
 
     // public overheat : number = 0;
@@ -38,17 +38,20 @@ export class Stats {
         // I have enough spare bytes.
 
         // Time
-        if (this.timeFreeze > 0) {
+        if (updateTime) {
 
-            this.timeFreeze = Math.max(0, this.timeFreeze - 1.0/60.0*event.tick);
-        }
-        else if (updateTime) {
+            if (this.timeFreeze > 0) {
 
-            this.time -= this.frameCount == 0 ? 16 : 17;
-            if (this.time <= 0) {
+                this.timeFreeze = Math.max(0, this.timeFreeze - 1.0/60.0*event.tick);
+            }
+            else {
 
-                this.time = 0;
-                // TODO: GAME OVER!
+                this.time -= this.frameCount == 0 ? 16 : 17;
+                if (this.time <= 0) {
+
+                    this.time = 0;
+                    // TODO: GAME OVER!
+                }
             }
         }
         this.frameCount = (this.frameCount + 1) % 3;

@@ -22,6 +22,8 @@ export class Collectible extends GameObject {
 
     private startY : number = 0.0;
 
+    private forcedSpeed : boolean = false;
+
 
     constructor() {
 
@@ -66,6 +68,11 @@ export class Collectible extends GameObject {
 
             this.pos.y = this.startY + Math.sin(this.animationTimer*Math.PI*2)*4;
         }
+
+        if (!this.forcedSpeed) {
+            
+            this.target.x = -BASE_SPEED*globalSpeed;
+        }
     }
 
 
@@ -93,11 +100,17 @@ export class Collectible extends GameObject {
     }
 
 
-    public spawn(x : number, y : number, speedx : number, speedy : number, id : number) : void {
+    public spawn(x : number, y : number, speedx : number, speedy : number, id : number, forceSpeed : boolean = false) : void {
 
         this.pos = new Vector(x, y);
         this.speed = new Vector(speedx*(1 - id), speedy*(1 - id),);
-        this.target.x = -BASE_SPEED;
+
+        this.forcedSpeed = forceSpeed;
+        if (forceSpeed) {
+
+            this.target.x = speedx;
+        }
+        // this.target.x = 0.0;
         this.target.y = GRAVITY*(1 - id);
 
         this.startY = y;

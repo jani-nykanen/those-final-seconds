@@ -405,8 +405,8 @@ export class Canvas {
         const cw : number = (font.width/16) | 0;
         const ch : number = cw;
 
-        dx = (dx + this.translation.x) | 0;
-        dy = (dy + this.translation.y) | 0;
+        // dx = (dx + this.translation.x) | 0;
+        // dy = (dy + this.translation.y) | 0;
 
         let x : number = dx;
         let y : number = dy;

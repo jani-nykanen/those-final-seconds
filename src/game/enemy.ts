@@ -11,7 +11,6 @@ import { clamp } from "../math/utility.js";
 import { GasParticle } from "./gasparticle.js";
 import { Collectible } from "./collectible.js";
 import { Stats } from "./stats.js";
-import { GROUND_LEVEL } from "./background.js";
 
 
 const DEATH_TIME : number = 16;
@@ -442,17 +441,16 @@ export class Enemy extends GameObject {
 
     public kill(stats : Stats, event : ProgramEvent) : void {
 
-        const COLLECTIBLE_PROBABILITY : number = 0.33;
-
         this.dying = true;
         this.deathTimer = 0.0;
 
-        if (Math.random() > COLLECTIBLE_PROBABILITY) {
+        const isHeart : boolean = Math.random() < 0.30 - 0.10*stats.health;
+        const isClock : boolean = Math.random() < (1.0 - stats.timeFreeze/stats.maxTimeFreeze)*0.40;
+
+        if (!isHeart && !isClock) {
 
             return;
         }
-
-        const isHeart : boolean = Math.random() < 0.30 - 0.10*stats.health;
         this.collectibles.next().spawn(this.pos.x, this.pos.y, 1.5, -1.0, Number(isHeart));
     }
 

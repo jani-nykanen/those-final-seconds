@@ -26,6 +26,8 @@ const MESSAGE_FLICKER_TIME : number = 60;
 
 const TRANSITION_TIME : number = 30;
 
+const SPEED_UP_TIMES : number[] = [20, 50, 90, 140, 200];
+
 
 const drawBar = (canvas : Canvas, dx : number, dy : number, dw : number, dh : number) : void => {
 
@@ -87,6 +89,8 @@ export class Game implements Scene {
     private titleScreenActive : boolean = true;
     private cameraBottomReached : boolean = false;
 
+    private shaking : boolean = false;
+
     
     constructor(event : ProgramEvent) {
 
@@ -96,10 +100,21 @@ export class Game implements Scene {
         this.projectiles = new ObjectGenerator<Projectile> (Projectile);
         this.gasSupply = new ObjectGenerator<GasParticle> (GasParticle);
         this.collectibles = new ObjectGenerator<Collectible> (Collectible);
-        this.player = new Player(-16, 96, this.projectiles, this.gasSupply, this.stats);
+        this.player = new Player(-64, 96, this.projectiles, this.gasSupply, this.stats);
         this.enemies = new EnemyGenerator(this.projectiles, this.gasSupply, this.collectibles);
 
         this.bestScore = getBestScore();
+
+        this.spawnInitialClocks();
+    }
+
+
+    private spawnInitialClocks() : void {
+
+        for (let i = 0; i < 3; ++ i) {
+
+            this.collectibles.next().spawn(128 + 64*i, 128 + 32*(i % 2), -0.75, 2.0, 0, i < 2);
+        }
     }
 
 
@@ -124,7 +139,7 @@ export class Game implements Scene {
         // Leaks a lot of memory, but do not happen too often, sooo....
 
         this.stats = new Stats();
-        this.player = new Player(-16, 96, this.projectiles, this.gasSupply, this.stats);
+        this.player = new Player(-48, 96, this.projectiles, this.gasSupply, this.stats);
         this.enemies = new EnemyGenerator(this.projectiles, this.gasSupply, this.collectibles);
 
         this.projectiles.flush();
@@ -139,6 +154,8 @@ export class Game implements Scene {
         this.cameraTarget = 0.0;
         this.globalSpeed = 0.0;
         this.globalSpeedTarget = 0.0;
+
+        this.spawnInitialClocks();
     }
 
 
@@ -261,7 +278,20 @@ export class Game implements Scene {
         this.drawTime(canvas);
         this.drawHealth(canvas);
         this.drawScore(canvas);
-        this.drawMessage(canvas);
+
+        if (this.cameraBottomReached) {
+
+            this.drawMessage(canvas);
+        }
+    }
+
+
+    private drawAnyKeyText(canvas : Canvas) : void {
+
+        if (this.messageTimer > 0.5) {
+
+            canvas.drawText("fo", "PRESS ANY KEY", canvas.width/2, canvas.height - 36, -8, 0, Align.Center);
+        }
     }
 
 
@@ -272,10 +302,12 @@ export class Game implements Scene {
 
         canvas.clear("rgba(0,0,0,0.5)");
 
-        canvas.drawText("fo", "SCORE: " + createScoreString(this.stats.score), cx, cy + 16, - 7, 0, Align.Center);
-        canvas.drawText("fo", "BEST:  " + createScoreString(this.bestScore), cx, cy + 28, - 7, 0, Align.Center);
+        canvas.drawText("fo", "SCORE: " + createScoreString(this.stats.score), cx, cy, - 7, 0, Align.Center);
+        canvas.drawText("fo", "BEST:  " + createScoreString(this.bestScore), cx, cy + 12, - 7, 0, Align.Center);
 
         canvas.drawBitmap("go", Flip.None, cx - 96, 32);
+
+        this.drawAnyKeyText(canvas);
     }
 
 
@@ -286,19 +318,33 @@ export class Game implements Scene {
         // canvas.moveTo();
         canvas.clear("rgba(0,0,0,0.5)");
 
-        if (this.messageTimer > 0.5) {
-
-            canvas.drawText("fo", "PRESS ANY KEY", cx, canvas.height - 48, -8, 0, Align.Center);
-        }
+        // Text
+        this.drawAnyKeyText(canvas);
         canvas.drawText("fw", "*2024 JANI NYK@NEN", cx, canvas.height - 10, -1, 0, Align.Center);
 
+        // Logo
         const bmpTitleScreen : Bitmap = canvas.getBitmap("ts")!;
         const left : number = cx - bmpTitleScreen.width/2;
         for (let i = 0; i < bmpTitleScreen.width; ++ i) {
 
-            const dy : number = 24 + Math.sin(this.messageTimer*Math.PI*2 + i/bmpTitleScreen.width*Math.PI*4)*4;
+            const dy : number = 8 + Math.sin(this.messageTimer*Math.PI*2 + i/bmpTitleScreen.width*Math.PI*4)*4;
 
             canvas.drawBitmap("ts", Flip.None, left + i, dy, i, 0, 1);
+        }
+
+        // Controls
+        canvas.moveTo(cx - 72, canvas.height/2 + 12);
+        drawBar(canvas, 0, 0, 144, 40);
+        canvas.drawText("fo", "   CONTROLS:\nARROW KEYS: MOVE\nSPACE: SHOOT", 4, 0, -8, -5);
+        canvas.moveTo();
+    }
+
+
+    private applyShake(canvas : Canvas) : void {
+
+        if (this.player.shaking()) {
+
+            canvas.move(-2 + ((Math.random()*5) | 0), -2 + ((Math.random()*5) | 0));
         }
     }
 
@@ -312,11 +358,11 @@ export class Game implements Scene {
     public update(event : ProgramEvent) : void {
 
         const GLOBAL_SPEED_DELTA : number = 1.0/60.0;
-        const PHASE_LENGTH : number = 13*60;
 
         // NOTE: This function is way too long, but splitting it to smaller
         // functions would make me lose too many precious bytes, so...
 
+        // Title screen
         if (this.titleScreenActive) {
 
             this.messageTimer = (this.messageTimer += 1.0/60.0*event.tick) % 1.0;
@@ -328,6 +374,7 @@ export class Game implements Scene {
             return;
         }
 
+        // Transition
         if (this.transitionTimer > 0) {
 
             if ((this.transitionTimer -= event.tick) <= 0) {
@@ -342,16 +389,20 @@ export class Game implements Scene {
             return;
         }
 
+        // Game over
         if (!this.player.doesExist()) {
 
+            this.messageTimer = (this.messageTimer += 1.0/60.0*event.tick) % 1.0;
             if (event.input.anyPressed) {
 
+                this.messageTimer = 0;
                 this.transitionTimer = TRANSITION_TIME;
                 this.fadingIn = true;
             }
             return;
         }
 
+        // Initial stuff & pause
         const hadReachedPosition : boolean = this.player.hasReachedStartPosition()
         if (!hadReachedPosition) {
             
@@ -367,28 +418,31 @@ export class Game implements Scene {
             return;
         }
 
-        if (this.cameraBottomReached && this.player.isActive()) {
+        // Check speed phase
+        if (hadReachedPosition && this.player.isActive()) {
 
-            if ((this.phaseTimer += event.tick) >= PHASE_LENGTH) {
+            if (this.phase < 4 && 
+                (this.phaseTimer += event.tick) >= SPEED_UP_TIMES[this.phase]*60) {
 
-                this.phaseTimer -= PHASE_LENGTH;
+                this.phaseTimer = 0;
                 ++ this.phase;
 
                 this.messageText = "SPEED UP!";
                 this.messageTimer = MESSAGE_TIME;
             }
-            this.globalSpeedTarget = 1.0 + this.phase*0.25;
+            this.globalSpeedTarget = 0.75 + this.phase*0.25;
         }
         this.globalSpeed = updateSpeedAxis(this.globalSpeed, this.globalSpeedTarget, GLOBAL_SPEED_DELTA*event.tick);
 
+        // Update message timer
         this.messageTimer = Math.max(0, this.messageTimer - event.tick);
 
+        // Update objects
         this.player.update(this.globalSpeed, event);
         if (!hadReachedPosition && this.player.hasReachedStartPosition()) {
 
             this.messageText = "GO!";
         }
-
         this.gasSupply.update(this.globalSpeed, this.player, event);
         this.projectiles.update(this.globalSpeed, this.player, event);
         this.collectibles.update(this.globalSpeed, this.player, event);
@@ -397,8 +451,9 @@ export class Game implements Scene {
         this.updateCamera(event);
         this.background.update(this.globalSpeed, event);
 
+        // Update stats
         const oldPanicLevel : number = this.stats.panicLevel;
-        this.stats.update(this.player.isActive(), event);
+        this.stats.update(this.player.isActive() && hadReachedPosition, event);
         if (this.stats.panicLevel != oldPanicLevel) {
 
             this.messageText = "PANIC UP!";
@@ -420,6 +475,7 @@ export class Game implements Scene {
         
         canvas.moveTo();
 
+        this.applyShake(canvas);
         this.background.drawBackground(canvas, this.cameraPos);
 
         if (this.titleScreenActive) {
@@ -429,6 +485,7 @@ export class Game implements Scene {
         }
 
         canvas.moveTo(0, -this.cameraPos);
+        this.applyShake(canvas); // Need to apply this "twice"
         this.background.drawGround(canvas);
         
         // Shadows

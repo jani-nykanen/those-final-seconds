@@ -21,6 +21,9 @@ const SHOOT_RECOVER_TIME : number = 18.0;
 const BULLET_COUNT : number[][] = [[1, 1], [2, 1], [2, 2], [3, 2], [3, 3]];
 const DEATH_TIME : number = 90;
 
+const HURT_TIME : number = 60;
+const SHAKE_TIME : number = 30;
+
 
 export class Player extends GameObject {
 
@@ -230,6 +233,8 @@ export class Player extends GameObject {
 
     protected die(event : ProgramEvent) : boolean {
 
+        this.hurtTimer -= event.tick;
+
         return (this.deathTimer += event.tick) >= DEATH_TIME;
     }
 
@@ -238,7 +243,10 @@ export class Player extends GameObject {
         
         const ANGLE_FRICTION : number = 0.25;
 
-        this.checkBorders(event);
+        if (this.startPositionReached) {
+
+            this.checkBorders(event);
+        }
         this.angle = updateSpeedAxis(this.angle, this.angleTarget, ANGLE_FRICTION*event.tick);
     }
 
@@ -306,15 +314,13 @@ export class Player extends GameObject {
 
         const BASE_EXPERIENCE : number = 1.0;
 
-        this.stats.experienceTarget += (BASE_EXPERIENCE/(4*(1 + this.stats.level*2)));
+        this.stats.experienceTarget += (BASE_EXPERIENCE/(8*(1 + this.stats.level*2)));
         this.stats.addPoints(points);
         this.stats.bonus += 0.1;
     }
 
 
     public hurt(event : ProgramEvent) : void {
-
-        const HURT_TIME : number = 60;
 
         if (this.hurtTimer > 0) {
 
@@ -331,4 +337,5 @@ export class Player extends GameObject {
 
     public isShooting = () : boolean => this.shootRecoverTimer > 0;
     public hasReachedStartPosition = () : boolean => this.startPositionReached;
+    public shaking = () : boolean => this.hurtTimer > SHAKE_TIME;
 }
