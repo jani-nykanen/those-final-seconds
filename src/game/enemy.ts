@@ -11,6 +11,7 @@ import { clamp } from "../math/utility.js";
 import { GasParticle } from "./gasparticle.js";
 import { Collectible } from "./collectible.js";
 import { Stats } from "./stats.js";
+import { GROUND_LEVEL } from "./background.js";
 
 
 const DEATH_TIME : number = 16;
@@ -79,6 +80,8 @@ export class Enemy extends GameObject {
 
             return;
         }
+
+        event.playSample("b1");
 
         const startAngle : number = -(count - 1)*shootAngle/2;
         for (let i = 0; i < count; ++ i) {
@@ -253,8 +256,6 @@ export class Enemy extends GameObject {
         default:
             break;
         }
-
-        // this.pos.y = Math.min(event.screenHeight - GROUND_LEVEL/2 - 9, this.pos.y);
     }
 
 
@@ -426,6 +427,11 @@ export class Enemy extends GameObject {
                 e.pos.y += dir.y*dist/2;
                 e.startY += dir.y*dist/2;
             }
+
+            // TODO: Gets rid of a few bugs, but it is a waste of bytes, so maybe
+            // remove, no one will ever notice
+            this.pos.y = Math.min(event.screenHeight - GROUND_LEVEL/2 - this.hitbox.h/2, this.pos.y);
+            e.pos.y = Math.min(event.screenHeight - GROUND_LEVEL/2 - e.hitbox.h/2, e.pos.y);
         }
     }
 

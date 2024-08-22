@@ -302,7 +302,7 @@ const generateHUD = (event : ProgramEvent, bmpRawGameArt : Bitmap, bmpGameArt : 
     const bmpHeartRaw : Bitmap = cropBitmap(bmpRawGameArt, 48, 48, 16, 16);
 
     // const bmpHeart1 : Bitmap = applyPalette(bmpHeartRaw, ["10FG", "10FE", "10FE", "10FE"], PALETTE_LOOKUP);
-    const bmpHeart2 : Bitmap = applyPalette(bmpHeartRaw, ["1042", "1043", "1043", "1043"], PALETTE_LOOKUP);
+    const bmpHeart2 : Bitmap = applyPalette(bmpHeartRaw, ["1034", "1033", "1033", "1033"], PALETTE_LOOKUP);
     // const bmpHeart3 : Bitmap = applyPalette(bmpHeartRaw, ["2022", "2022", "2022", "2022"], PALETTE_LOOKUP);
 
     const canvas : Canvas = new Canvas(null, 32, 16);
@@ -332,10 +332,13 @@ const generateHUD = (event : ProgramEvent, bmpRawGameArt : Bitmap, bmpGameArt : 
     canvas.drawBitmap(bmpHeart2, Flip.None, 16, 0);
 
     // Faces
+    // Eh, no room for these. Sorry hearts.
+    /*
     for (let i = 0; i < 2; ++ i) {
 
         canvas.drawBitmap(bmpGameArt, Flip.None, 4 + 16*i, 4, 56, 32 + i*8, 8, 8);
     }
+    */
 
     event.addBitmap("h", canvas.toBitmap());
 } 
@@ -563,31 +566,22 @@ const generateBigText = (event : ProgramEvent) : void => {
 const generateSamples = (event : ProgramEvent) : void => {
 
     // Start 
-    event.createSample("s",
-        [128, 10, 1.0,
-          96, 6, 0.20], 
-        0.40,
-        "square", 
-        Ramp.Instant,
-        0.40
-    );  
+    for (let i = 0; i < 3; ++ i) {
 
-    // Shoot
-    event.createSample("b",
-        [96, 2, 1.0,
-          144, 4, 0.50], 
-        0.60,
-        "square", 
-        Ramp.Exponential,
-        0.40
-    );
+        event.createSample("s" + String(i),
+            [112 + i*16, 10, 1.0,
+            80 + i*16, 6 + i*4, 0.20], 
+            0.40,
+            "square", 
+            Ramp.Instant,
+            0.40);  
+    }
 
     // Kill
     event.createSample("k",
             [128, 2, 0.80,
-            192, 3, 1.0,  
-            160, 5, 0.80,
-            96, 8, 0.40],
+            160, 3, 1.0,  
+            96, 8, 0.80,],
             0.70,
             "sawtooth", 
             Ramp.Linear, 
@@ -604,6 +598,40 @@ const generateSamples = (event : ProgramEvent) : void => {
             Ramp.Exponential,
             0.30
     );
+
+    for (let i = 0; i < 2; ++ i) {
+
+        // Clock & heart
+        event.createSample("c" + String(i),
+            [160, 4, 0.60,
+            100, 2, 0.80,
+            256, 12, 1.00],
+            0.40 + i*0.60,
+            ["square", "triangle"][i] as OscillatorType, 
+            Ramp.Instant,
+            0.20);
+
+        // Shoot
+        event.createSample("b" + String(i),
+            [96, 2 + i*2, 1.0,
+            144, 4 + i*8, 0.50], 
+            0.60,
+            "square", 
+            Ramp.Exponential,
+            0.40
+        );
+    }
+
+    // Death
+    event.createSample("d",
+        [112, 6, 0.80,
+        192, 12, 1.0,  
+        144, 32, 0.5],
+        0.70,
+        "square", 
+        Ramp.Exponential, 
+        0.30
+    )
 }
 
 

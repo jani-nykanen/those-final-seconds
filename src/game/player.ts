@@ -74,7 +74,7 @@ export class Player extends GameObject {
         const count : number = BULLET_COUNT[this.stats.level][this.shootCount];
         const startAngle: number = -BULLET_ANGLE*(count - 1)/2;
 
-        event.playSample("b");
+        event.playSample("b0");
 
         for (let i = 0; i < count; ++ i) {
 
@@ -215,7 +215,7 @@ export class Player extends GameObject {
 
         if (this.shootRecoverTimer > 0) {
 
-            this.shootRecoverTimer -= (1.0 + this.stats.panicLevel*0.33)*event.tick;
+            this.shootRecoverTimer -= (1.0 + this.stats.panicLevel*0.25)*event.tick;
         }
 
         if (this.hurtTimer > 0) {
@@ -229,6 +229,8 @@ export class Player extends GameObject {
 
             this.dying = true;
             this.deathTimer = 0;
+
+            event.playSample("d");
         }
     }
 
@@ -328,10 +330,13 @@ export class Player extends GameObject {
 
             return;
         }
+        
+        
 
-        event.playSample("h");
+        if ((-- this.stats.health) > 0) {
 
-        -- this.stats.health;
+            event.playSample("h");
+        }
         this.hurtTimer = HURT_TIME;
 
         this.stats.loseLevel();

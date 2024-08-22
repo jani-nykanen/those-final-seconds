@@ -129,6 +129,8 @@ export class Collectible extends GameObject {
 
         if (this.overlay(player)) {
 
+            event.playSample("c" + String(this.id));
+
             if (this.id == 0) {
 
                 player.stats.addTimeFreeze(2.0);

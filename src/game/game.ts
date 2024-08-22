@@ -169,6 +169,8 @@ export class Game implements Scene {
 
                 this.cameraPos = 0;
                 this.cameraBottomReached = true;
+
+                event.playSample("s0");
             }
             return;
         }
@@ -396,7 +398,7 @@ export class Game implements Scene {
                 this.titleScreenActive = false;
                 this.messageTimer = 0;
 
-                event.playSample("s");
+                event.playSample("s1");
             }
             return;
         }
@@ -410,6 +412,10 @@ export class Game implements Scene {
 
                     this.reset();
                     this.transitionTimer += TRANSITION_TIME;
+                }
+                else {
+
+                    event.playSample("s0");
                 }
                 this.fadingIn = false;
             }
@@ -425,6 +431,8 @@ export class Game implements Scene {
                 this.messageTimer = 0;
                 this.transitionTimer = TRANSITION_TIME;
                 this.fadingIn = true;
+
+                event.playSample("s1");
             }
             return;
         }
@@ -438,6 +446,7 @@ export class Game implements Scene {
         }
         else if (event.getAction("p") == InputState.Pressed) {
 
+            event.playSample("s0");
             this.paused = !this.paused;
         }
         if (this.paused) {
@@ -456,6 +465,8 @@ export class Game implements Scene {
 
                 this.messageText = "SPEED UP!";
                 this.messageTimer = MESSAGE_TIME;
+
+                event.playSample("s2");
             }
             this.globalSpeedTarget = 0.75 + this.phase*0.25;
         }
@@ -468,6 +479,7 @@ export class Game implements Scene {
         this.player.update(this.globalSpeed, event);
         if (!hadReachedPosition && this.player.hasReachedStartPosition()) {
 
+            event.playSample("s1");
             this.messageText = "GO!";
         }
         this.gasSupply.update(this.globalSpeed, this.player, event);
@@ -485,6 +497,8 @@ export class Game implements Scene {
 
             this.messageText = "PANIC UP!";
             this.messageTimer = MESSAGE_TIME;
+
+            event.playSample("s2");
         }
 
         if (this.player.isDying()) {
