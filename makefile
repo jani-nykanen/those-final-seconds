@@ -46,6 +46,7 @@ pack:
 .PHONY: zip
 zip: 
 	(cd temp; zip -r ../dist.zip .)
+	advzip -z dist.zip
 	wc -c dist.zip
 
 .PHONY: clear_temp
