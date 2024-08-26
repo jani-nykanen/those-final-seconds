@@ -1,6 +1,5 @@
 import { ProgramEvent } from "../core/event.js";
 import { next } from "./existingobject.js";
-import { Bitmap } from "../gfx/bitmap.js";
 import { Canvas } from "../gfx/canvas.js";
 import { Spawnable } from "./spawnable.js";
 import { Player } from "./player.js";

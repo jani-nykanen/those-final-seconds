@@ -2,8 +2,7 @@ import { ProgramEvent } from "./core/event.js";
 import { Program } from "./core/program.js";
 import { Game } from "./game/game.js";
 import { generateAssets } from "./game/assetgenerator.js";
-import { Canvas } from "./gfx/canvas.js";
-import { Align } from "./gfx/align.js";
+import { Canvas, Align } from "./gfx/canvas.js";
 
 
 const initialEvent = (event : ProgramEvent) : void => {

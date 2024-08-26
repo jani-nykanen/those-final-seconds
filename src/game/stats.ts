@@ -15,6 +15,8 @@ export class Stats {
     //
         
     public health : number = 3;
+    public healthChangeTimer : number = 0.0;
+    public healthLost : boolean = false;
 
     public level : number = 0;
     public experienceCurrent : number = 0;
@@ -89,7 +91,11 @@ export class Stats {
         // Score
         this.score = updateSpeedAxis(this.score, this.scoreTarget, this.scoreSpeed*event.tick);
 
+        // Panic
         this.panicLevel = Math.min(2, ((13*1000 - this.time)/(1000*5)) | 0);
+
+        // Health
+        this.healthChangeTimer = Math.max(0, this.healthChangeTimer -= 1.0/20.0*event.tick);
     }
 
 
@@ -102,6 +108,8 @@ export class Stats {
     public addHealth(amount : number) : void {
 
         this.health = Math.min(this.maxHealth, this.health + amount);
+        this.healthChangeTimer = 1.0;
+        this.healthLost = amount < 0;
     }
 
 

@@ -1,14 +1,9 @@
-import { ProgramEvent } from "../core/event.js";
-import { InputState } from "../core/inputstate.js";
-import { Bitmap } from "../gfx/bitmap.js";
-import { Canvas } from "../gfx/canvas.js";
-import { Flip } from "../gfx/flip.js";
+import { ProgramEvent, InputState } from "../core/event.js";
+import { Canvas, Flip } from "../gfx/canvas.js";
 import { Rectangle } from "../math/rectangle.js";
 import { clamp } from "../math/utility.js";
 import { Vector } from "../math/vector.js";
-import { Collectible } from "./collectible.js";
 import { CAMERA_MIN_Y } from "./constants.js";
-import { next } from "./existingobject.js";
 import { GameObject, updateSpeedAxis } from "./gameobject.js";
 import { GasParticle } from "./gasparticle.js";
 import { ObjectGenerator } from "./objectgenerator.js";
@@ -19,10 +14,12 @@ import { Stats } from "./stats.js";
 const ANGLE_MAX : number = 4.0;
 const SHOOT_RECOVER_TIME : number = 17.0;
 const BULLET_COUNT : number[][] = [[1, 1], [2, 1], [2, 2], [3, 2], [3, 3]];
-const DEATH_TIME : number = 90;
 
 const HURT_TIME : number = 60;
 const SHAKE_TIME : number = 30;
+
+
+export const DEATH_TIME : number = 60;
 
 
 export class Player extends GameObject {
@@ -39,12 +36,13 @@ export class Player extends GameObject {
     private hurtTimer : number = 0.0;
     private shakeTimer : number = 0;
 
-    private deathTimer : number = 0;
-
     private startPositionReached : boolean = false;
     
     private readonly projectiles : ObjectGenerator<Projectile>;
     private readonly gasSupply : ObjectGenerator<GasParticle>;
+
+    // Public to safe bytes
+    public deathTimer : number = 0;
 
     public readonly stats : Stats;
 
@@ -330,10 +328,9 @@ export class Player extends GameObject {
 
             return;
         }
-        
-        
-
-        if ((-- this.stats.health) > 0) {
+    
+        this.stats.addHealth(-1);
+        if (this.stats.health > 0) {
 
             event.playSample("h");
         }

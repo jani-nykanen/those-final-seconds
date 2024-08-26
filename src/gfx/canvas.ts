@@ -1,8 +1,25 @@
 import { Vector } from "../math/vector.js";
-import { Align } from "./align.js";
-import { Flip } from "./flip.js";
-import { Bitmap } from "./bitmap.js";
 import { clamp } from "../math/utility.js";
+
+
+export type Bitmap = HTMLImageElement | HTMLCanvasElement | undefined;
+
+
+export const enum Align {
+
+    Left = 0,
+    Center = 1,
+    Right = 2
+}
+
+
+export const enum Flip {
+
+    None = 0,
+    Horizontal = 1,
+    Vertical = 2,
+    Both = 3 // == 1 | 2
+}
 
 
 export class Canvas {

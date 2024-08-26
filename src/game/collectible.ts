@@ -1,9 +1,7 @@
 import { GameObject } from "./gameobject.js";
 import { Vector } from "../math/vector.js";
 import { ProgramEvent } from "../core/event.js";
-import { Canvas } from "../gfx/canvas.js";
-import { Bitmap } from "../gfx/bitmap.js";
-import { Flip } from "../gfx/flip.js";
+import { Canvas, Flip } from "../gfx/canvas.js";
 import { Rectangle } from "../math/rectangle.js";
 import { Player } from "./player.js";
 

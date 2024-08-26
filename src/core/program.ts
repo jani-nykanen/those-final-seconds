@@ -1,27 +1,13 @@
-// import { Assets } from "./assets.js";
 import { ProgramEvent } from "./event.js";
-import { Canvas } from "../gfx/canvas.js";
-// import { Input } from "./input.js";
-// import { SceneManager } from "./scenemanager.js";
-// import { Transition } from "./transition.js";
-// import { AudioPlayer } from "../audio/audioplayer.js";
-import { Bitmap } from "../gfx/bitmap.js";
-// import { Sample } from "./sample.js";
+import { Canvas, Bitmap } from "../gfx/canvas.js";
 import { Scene } from "./scene.js";
 
 
 export class Program {
 
 
-   // private input : Input;
     private canvas : Canvas;
-
-    // private scenes : SceneManager;
     private activeScene : Scene;
-
-    // private assets : Assets;
-    // private transition : Transition;
-    // private audio : AudioPlayer;
     private event : ProgramEvent;
     
     private timeSum : number = 0.0;
@@ -33,24 +19,12 @@ export class Program {
     constructor(canvasMinWidth : number,  canvasMaxWidth : number,
         canvasMinHeight : number,  canvasMaxHeight : number,
         audioMaxVolume : number = 0.60) {
-        
-        // this.input = new Input();
-        // this.scenes = new SceneManager();
-        // this.assets = new Assets();
-        // this.transition = new Transition();
-        // this.audio = new AudioPlayer((name : string) : Sample | undefined => this.event.getSample(name), audioMaxVolume);
 
         this.canvas = new Canvas(null,
             canvasMinWidth, canvasMinHeight,
             canvasMaxWidth, canvasMaxHeight,
             (name : string) : Bitmap => this.event.getBitmap(name), true);
-        this.event = new ProgramEvent(
-            // this.input,  
-            /*this.scenes*/ 
-            // this.assets, 
-            this.canvas, 
-            //this.transition, 
-            audioMaxVolume); 
+        this.event = new ProgramEvent(this.canvas, audioMaxVolume); 
     }
 
 
@@ -97,9 +71,7 @@ export class Program {
 
             if (this.initialized) {
 
-                // this.scenes.activeScene?.update(this.event);
                 this.activeScene.update(this.event);
-                // this.transition.update(this.event);
             }
 
             if (loaded && !this.initialized) {
@@ -129,9 +101,7 @@ export class Program {
             }
             else {
 
-                // this.scenes.activeScene?.redraw(this.canvas);
                 this.activeScene.redraw(this.canvas);
-                // this.transition.draw(this.canvas);
             }
         }
         else {

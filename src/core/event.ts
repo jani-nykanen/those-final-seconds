@@ -1,12 +1,17 @@
-// import { Assets } from "./assets.js";
-import { Canvas } from "../gfx/canvas.js";
-// import { Input } from "./input.js";
-// import { SceneManager } from "./scenemanager.js";
-// import { Transition } from "./transition.js";
-// import { AudioPlayer } from "../audio/audioplayer.js";
-import { InputState } from "./inputstate.js";
-import { Bitmap } from "../gfx/bitmap.js";
+import { Bitmap, Canvas } from "../gfx/canvas.js";
 import { Ramp, Sample } from "./sample.js";
+
+
+export const enum InputState {
+
+    Up = 0,
+    Down = 1,
+    Released = 2,
+    Pressed = 3,
+
+    DownOrPressed = 1,
+}
+
 
 
 export class ProgramEvent {
@@ -14,14 +19,7 @@ export class ProgramEvent {
 
     private readonly canvas : Canvas;
 
-    // public readonly input : Input;
-    // public readonly scenes : SceneManager;
-    // public readonly assets : Assets;
-    // public readonly transition : Transition;
-    // public readonly audio : AudioPlayer;
-
     public readonly tick : number = 1.0;
-
 
     // Input
     private keys : Map<string, InputState>;
@@ -29,18 +27,15 @@ export class ProgramEvent {
     private actions : Map<string, string[]>;
     private anyKeyPressed : boolean = false;
 
-
     // Asset manager
     private loadCount : number = 0;
     private assetCount : number = 0;
     private bitmaps : Map<string, Bitmap>;
     private samples : Map<string, Sample>;
 
-
     // Audio player
     private ctx : AudioContext | undefined = undefined;
     private globalVolume : number;
-    // private enabled : boolean;
 
 
     public get screenWidth() : number {
@@ -60,13 +55,7 @@ export class ProgramEvent {
 
     constructor(canvas : Canvas, globalVolume : number) {
 
-        // this.input = input;
-        // this.scenes = scenes;
-        // this.assets = assets;
         this.canvas = canvas;
-        // this.transition = transition;
-        // this.audio = audio;
-
 
         //
         // Input
@@ -102,7 +91,6 @@ export class ProgramEvent {
         this.samples = new Map<string, Sample> ();
 
         // Audio
-        // this.enabled = true;
         this.globalVolume = globalVolume;
     }
 
@@ -149,13 +137,6 @@ export class ProgramEvent {
     public getAction(name : string) : InputState {
 
         const keys : string[] | undefined = this.actions.get(name) ?? [];
-        /*
-        if (keys === undefined) {
-
-            return InputState.Up;
-        }
-        */
-
         for (const k of keys) {
             
             const state : InputState = this.keys.get(k) ?? InputState.Up;
@@ -178,12 +159,6 @@ export class ProgramEvent {
         this.bitmaps.set(name, bmp);
     }
 
-/*
-    public addSample(name : string, sample : Sample) : void {
-
-        this.samples.set(name, sample);
-    }
-*/
 
     public getBitmap(name : string) : Bitmap | undefined {
 

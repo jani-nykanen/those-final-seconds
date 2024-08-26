@@ -2,10 +2,8 @@ import { ExistingObject } from "./existingobject.js";
 import { Vector } from "../math/vector.js";
 import { Rectangle } from "../math/rectangle.js";
 import { ProgramEvent } from "../core/event.js";
-import { Bitmap } from "../gfx/bitmap.js";
-import { Canvas } from "../gfx/canvas.js";
-import { GROUND_LEVEL } from "./background.js";
-import { Flip } from "../gfx/flip.js";
+import { Canvas, Bitmap, Flip } from "../gfx/canvas.js";
+import { GROUND_LEVEL } from "./game.js";
 
 
 export const updateSpeedAxis = (speed : number, target : number, step : number) : number => {

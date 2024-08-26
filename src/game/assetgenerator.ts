@@ -1,7 +1,5 @@
 import { applyPalette, createBigText, cropBitmap } from "../gfx/generator.js";
-import { Bitmap } from "../gfx/bitmap.js";
-import { Canvas } from "../gfx/canvas.js";
-import { Flip } from "../gfx/flip.js";
+import { Canvas, Bitmap, Flip } from "../gfx/canvas.js";
 // import { AudioPlayer } from "../audio/audioplayer.js";
 import { Ramp } from "../core/sample.js";
 import { ProgramEvent } from "../core/event.js";
@@ -208,7 +206,7 @@ const generateSun = (event : ProgramEvent, bmpGameArt : Bitmap) : void => {
     canvas.fillEllipse(RADIUS - 2, RADIUS - 2, RADIUS - 2);
 
     // Eyes & mouth
-    /*
+    
     let mouthLineRadius : number = 12;
     for (let i = 0; i < 5; ++ i) {
 
@@ -228,8 +226,6 @@ const generateSun = (event : ProgramEvent, bmpGameArt : Bitmap) : void => {
 
         mouthLineRadius -= (i + 1);
     }
-        */
-
     event.addBitmap("s", canvas.toBitmap());
 }
 
@@ -300,46 +296,18 @@ const generateProjectiles = (event : ProgramEvent, bmpGameArt : Bitmap, bmpGameA
 const generateHUD = (event : ProgramEvent, bmpRawGameArt : Bitmap, bmpGameArt : Bitmap) : void => {
 
     const bmpHeartRaw : Bitmap = cropBitmap(bmpRawGameArt, 48, 48, 16, 16);
-
-    // const bmpHeart1 : Bitmap = applyPalette(bmpHeartRaw, ["10FG", "10FE", "10FE", "10FE"], PALETTE_LOOKUP);
-    const bmpHeart2 : Bitmap = applyPalette(bmpHeartRaw, ["1034", "1033", "1033", "1033"], PALETTE_LOOKUP);
-    // const bmpHeart3 : Bitmap = applyPalette(bmpHeartRaw, ["2022", "2022", "2022", "2022"], PALETTE_LOOKUP);
+    const bmpHeartGray : Bitmap = applyPalette(bmpHeartRaw, ["1042", "1043", "1043", "1043"], PALETTE_LOOKUP);
 
     const canvas : Canvas = new Canvas(null, 32, 16);
 
-    // White outlines
-    // Maybe not needed
-    /*
-    for (let i = 0; i < 2; ++ i) {
-
-        for (let y = -1; y <= 1; ++ y) {
-
-            for (let x = -1; x <= 1; ++ x){
-                
-                if (x*y != 0) {
-
-                    continue;
-                }
-
-                canvas.drawBitmap(bmpHeart3, Flip.None, i*16 + x, y);
-            }
-        }
-    }
-    */
-
     // Hearts
     canvas.drawBitmap(bmpGameArt, Flip.None, 0, 0, 48, 48, 16, 16);
-    canvas.drawBitmap(bmpHeart2, Flip.None, 16, 0);
-
+    canvas.drawBitmap(bmpHeartGray, Flip.None, 16, 0);
     // Faces
-    // Eh, no room for these. Sorry hearts.
-    /*
     for (let i = 0; i < 2; ++ i) {
 
         canvas.drawBitmap(bmpGameArt, Flip.None, 4 + 16*i, 4, 56, 32 + i*8, 8, 8);
     }
-    */
-
     event.addBitmap("h", canvas.toBitmap());
 } 
 

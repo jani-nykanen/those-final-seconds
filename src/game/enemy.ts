@@ -1,8 +1,7 @@
 import { GameObject } from "./gameobject.js";
 import { Vector } from "../math/vector.js";
 import { ProgramEvent } from "../core/event.js";
-import { Canvas } from "../gfx/canvas.js";
-import { Flip } from "../gfx/flip.js";
+import { Canvas, Flip } from "../gfx/canvas.js";
 import { Rectangle } from "../math/rectangle.js";
 import { Projectile } from "./projectile.js";
 import { ObjectGenerator } from "./objectgenerator.js";
@@ -11,7 +10,6 @@ import { clamp } from "../math/utility.js";
 import { GasParticle } from "./gasparticle.js";
 import { Collectible } from "./collectible.js";
 import { Stats } from "./stats.js";
-import { GROUND_LEVEL } from "./background.js";
 
 
 const DEATH_TIME : number = 16;

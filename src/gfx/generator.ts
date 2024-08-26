@@ -1,4 +1,4 @@
-import { Bitmap } from "./bitmap.js";
+import { Bitmap } from "./canvas.js";
 
 
 const createEmptyCanvas = (width : number, height : number) : HTMLCanvasElement => {

@@ -1,21 +1,16 @@
-import { ProgramEvent } from "../core/event.js";
-import { Canvas } from "../gfx/canvas.js";
+import { ProgramEvent, InputState } from "../core/event.js";
+import { Canvas, Align, Flip, Bitmap } from "../gfx/canvas.js";
 import { Scene } from "../core/scene.js";
-import { Background } from "./background.js";
-import { Flip } from "../gfx/flip.js";
-import { Player } from "./player.js";
+import { DEATH_TIME, Player } from "./player.js";
 import { clamp } from "../math/utility.js";
 import { updateSpeedAxis } from "./gameobject.js";
 import { CAMERA_MIN_Y } from "./constants.js";
 import { ObjectGenerator } from "./objectgenerator.js";
-import { Align } from "../gfx/align.js";
 import { EnemyGenerator } from "./enemygenerator.js";
 import { Projectile } from "./projectile.js";
 import { GasParticle } from "./gasparticle.js";
-import { InputState } from "../core/inputstate.js";
 import { Collectible } from "./collectible.js";
 import { Stats } from "./stats.js";
-import { Bitmap } from "../gfx/bitmap.js";
 
 
 // For all kind of bars
@@ -26,7 +21,15 @@ const MESSAGE_FLICKER_TIME : number = 60;
 
 const TRANSITION_TIME : number = 30;
 
+// For background
 const SPEED_UP_TIMES : number[] = [20, 50, 90, 140, 200];
+const LAYER_MODULO : number[] = [192, 48, 192, 192];
+const LAYER_SPEED : number[] = [1, 0.5, 0.25, 0.33];
+const GROUND_HEIGHT : number = 48;
+
+// Yes it's a constant now
+export const GROUND_LEVEL : number = GROUND_HEIGHT/2;
+
 
 
 const drawBar = (canvas : Canvas, dx : number, dy : number, dw : number, dh : number) : void => {
@@ -59,8 +62,6 @@ const getBestScore = () : number => {
 export class Game implements Scene {
 
 
-    private background : Background;
-
     private stats : Stats;
     private player : Player;
     private projectiles : ObjectGenerator<Projectile>;
@@ -89,10 +90,12 @@ export class Game implements Scene {
     private titleScreenActive : boolean = true;
     private cameraBottomReached : boolean = false;
 
+    private layerPositions : number[];
+
     
     constructor(event : ProgramEvent) {
 
-        this.background = new Background();
+        this.layerPositions = (new Array<number> (4)).fill(0.0);
 
         this.stats = new Stats();
         this.projectiles = new ObjectGenerator<Projectile> (Projectile);
@@ -194,6 +197,107 @@ export class Game implements Scene {
     }
 
 
+    private drawRepeatingBitmap(canvas : Canvas, bmp : Bitmap, xpos : number, ypos : number) : void {
+
+        const w : number = bmp.width;
+        const count : number = ((canvas.width/w) | 0) + 2;
+
+        for (let i = 0; i < count; ++ i) {
+
+            canvas.drawBitmap(bmp, Flip.None, i*w - (xpos % w), ypos);
+        }
+    }
+
+
+    private drawMushrooms(canvas : Canvas, bmp : Bitmap, xpos : number, ypos : number) : void {
+
+        const YOFF : number = 24;
+        const XOFF : number = 96;
+
+        const count : number = ((canvas.width/(XOFF*2)) | 0) + 2;
+
+        for (let j = 0; j < count; ++ j) {
+
+            const dx : number = -xpos + j*(XOFF*2);
+            if (dx >= canvas.width) {
+
+                break;
+            }
+
+            for (let i = 0; i < 2; ++ i) {
+
+                canvas.drawBitmap(bmp, Flip.None, dx + XOFF*i, ypos + YOFF*i);
+            }
+        }
+    }
+
+
+    private drawGrass(canvas : Canvas, xpos : number, ypos : number) : void {
+
+        const count : number = ((canvas.width/16) | 0) + 2;
+
+        for (let i = 0; i < count; ++ i) {
+
+            canvas.drawBitmap("g", Flip.None, i*16 - (xpos % 16), ypos, 0, 0, 16, 8);
+        }
+    }
+
+
+    public drawGround(canvas : Canvas, drawGround : boolean = true) : void {
+
+        const LINE_DISTANCE : number = 24;
+
+        const xpos : number = this.layerPositions[0];
+        const ypos : number = canvas.height - GROUND_HEIGHT;
+        
+        // Green bottom
+        if (drawGround) {
+
+            canvas.fillRect(0, ypos + 4, canvas.width, GROUND_HEIGHT - 4, "#6db600");
+        }
+        canvas.setColor("#dbff00");
+
+        // Horizontal lines
+        const vcount : number = ((canvas.width/LINE_DISTANCE) | 0) + 2;
+        const shiftx : number = -(xpos % LINE_DISTANCE);
+        for (let i = 0; i < vcount; ++ i) {
+
+            // Create an impression of a 3D grid with minimal computations
+            const topX : number = i*LINE_DISTANCE + shiftx;
+            const bottomX : number = ((topX - canvas.width/2)/canvas.width)*(canvas.width*2) + canvas.width/2;
+
+            canvas.drawPixelatedLine(topX, ypos, bottomX, canvas.height);
+        }
+
+        // Vertical lines
+        let dy = ypos;
+        for (let i = 0; i < 5; ++ i) {
+
+            dy += (i + 1)*5.5;
+            canvas.fillRect(0, dy, canvas.width, 1);
+        }
+    }
+
+
+    private drawBackground(canvas : Canvas, camPos : number) : void {
+
+        const xpos : number = this.layerPositions[0] | 0;
+        const ypos : number = canvas.height - GROUND_HEIGHT;
+
+        canvas.clear("#6db6ff");
+
+        // Sun
+        canvas.drawBitmap("s", Flip.None, canvas.width - 96, 16);
+
+        this.drawRepeatingBitmap(canvas, canvas.getBitmap("c")!, this.layerPositions[3] | 0, 48 - camPos/4);
+        this.drawMushrooms(canvas, canvas.getBitmap("m")!, this.layerPositions[2] | 0, 44 - camPos/2);
+        this.drawRepeatingBitmap(canvas, canvas.getBitmap("b")!, this.layerPositions[1] | 0, 96 - camPos/1.5);
+
+        this.drawRepeatingBitmap(canvas, canvas.getBitmap("f")!, xpos, ypos - 36 - camPos);
+        this.drawGrass(canvas, xpos, ypos - 3 - camPos);
+    }
+
+
     private drawExperienceBar(canvas : Canvas) : void {
 
         const EXPERIENCE_BAR_WIDTH : number = 96;
@@ -248,9 +352,32 @@ export class Game implements Scene {
 
     private drawHealth(canvas : Canvas) : void {
 
+        const POS_X : number = 2;
+        const POS_Y : number = 2;
+        const RADIUS : number = 4;
+
+        const health : number = this.stats.health - (this.stats.healthChangeTimer > 0 && !this.stats.healthLost ? 1 : 0);
         for (let i = 0; i < this.stats.maxHealth; ++ i) {
 
-            canvas.drawBitmap("h", Flip.None, 2 + 16*i, 2, i < this.stats.health ? 0 : 16, 0, 16, 16);
+            canvas.drawBitmap("h", Flip.None, POS_X + 16*i, POS_Y, i < health ? 0 : 16, 0, 16, 16);
+        }
+
+        if (this.stats.healthChangeTimer > 0.0) {
+
+            const t : number = this.stats.healthLost ? 1.0 - this.stats.healthChangeTimer : this.stats.healthChangeTimer;
+            const hx : number = POS_X + health*16 + 8;
+            const hy : number = POS_Y + 8;
+
+            for (let i = 0; i < 4; ++ i) {
+
+                const dirx : number = -1 + 2*(1 - (i % 2));
+                const diry : number = -1 + 2*((i/2) | 0);
+
+                canvas.drawBitmap("h", Flip.None, 
+                    hx + dirx*4 - 4 + Math.round(dirx*t*RADIUS), 
+                    hy + diry*4 - 4 + Math.round(diry*t*RADIUS),
+                    (1 - (i % 2))*8, ((i/2) | 0)*8, 8, 8);
+            }
         }
     }
 
@@ -307,17 +434,27 @@ export class Game implements Scene {
 
     private drawGameOver(canvas : Canvas) : void {
 
+        const DARKEN_ALPHA : number = 0.5;
+
         const cx : number = canvas.width/2;
         const cy : number = canvas.height/2;
 
-        canvas.clear("rgba(0,0,0,0.5)");
+        const t : number = this.player.doesExist() ? this.player.deathTimer/DEATH_TIME : 1.0;
+        const alpha : number = t*DARKEN_ALPHA;
 
+        canvas.clear("rgba(0,0,0," + String(alpha) + ")");
+
+        canvas.moveTo(0, canvas.height/2*(1.0 - t));
         canvas.drawText("fo", "SCORE: " + createScoreString(this.stats.score), cx, cy, - 7, 0, Align.Center);
         canvas.drawText("fo", "BEST:  " + createScoreString(this.bestScore), cx, cy + 12, - 7, 0, Align.Center);
+        canvas.moveTo();
+        
+        canvas.drawBitmap("go", Flip.None, cx - 96, -32 + 64*t);
 
-        canvas.drawBitmap("go", Flip.None, cx - 96, 32);
+        if (!this.player.doesExist()) {
 
-        this.drawAnyKeyText(canvas);
+            this.drawAnyKeyText(canvas);
+        }
     }
 
 
@@ -444,7 +581,7 @@ export class Game implements Scene {
             this.messageText = "READY?";
             this.messageTimer = 120;
         }
-        else if (event.getAction("p") == InputState.Pressed) {
+        else if (this.player.isActive() && event.getAction("p") == InputState.Pressed) {
 
             event.playSample("s0");
             this.paused = !this.paused;
@@ -487,8 +624,13 @@ export class Game implements Scene {
         this.collectibles.update(this.globalSpeed, this.player, event);
         this.enemies.update(this.globalSpeed, this.player, event);
 
+        // Camera
         this.updateCamera(event);
-        this.background.update(this.globalSpeed, event);
+        // Background
+        for (let k in this.layerPositions) {
+
+            this.layerPositions[k] = (this.layerPositions[k] + LAYER_SPEED[k]*this.globalSpeed*event.tick) % LAYER_MODULO[k];
+        }
 
         // Update stats
         const oldPanicLevel : number = this.stats.panicLevel;
@@ -524,7 +666,7 @@ export class Game implements Scene {
         canvas.moveTo();
 
         this.applyShake(canvas);
-        this.background.drawBackground(canvas, this.cameraPos);
+        this.drawBackground(canvas, this.cameraPos);
 
         if (this.titleScreenActive) {
 
@@ -534,7 +676,7 @@ export class Game implements Scene {
 
         canvas.moveTo(0, -this.cameraPos);
         this.applyShake(canvas); // Need to apply this "twice"
-        this.background.drawGround(canvas);
+        this.drawGround(canvas);
         
         // Shadows
         this.player.drawShadow(canvas);
@@ -542,7 +684,7 @@ export class Game implements Scene {
         this.collectibles.drawShadows(canvas);
 
         canvas.setAlpha(0.25);
-        this.background.drawGround(canvas, false);
+        this.drawGround(canvas, false);
         canvas.setAlpha();
 
         // Objects
@@ -554,12 +696,8 @@ export class Game implements Scene {
         this.collectibles.draw(canvas)
         this.projectiles.draw(canvas);
 
-        // canvas.drawBitmap("g", Flip.None, 64, 16);
-        // canvas.drawBitmap("pr", Flip.None, 64, 80);
-        // canvas.drawBitmap("s", Flip.None, 128, 80);
-
         canvas.moveTo();
-        if (!this.player.doesExist()) {
+        if (!this.player.isActive()) {
 
             this.drawGameOver(canvas);
         }

@@ -4,7 +4,7 @@ import { ObjectGenerator } from "./objectgenerator.js";
 import { Player } from "./player.js";
 import { Projectile } from "./projectile.js";
 import { Canvas } from "../gfx/canvas.js";
-import { GROUND_LEVEL } from "./background.js";
+import { GROUND_LEVEL } from "./game.js";
 import { next } from "./existingobject.js";
 import { GasParticle } from "./gasparticle.js";
 import { Collectible } from "./collectible.js";
