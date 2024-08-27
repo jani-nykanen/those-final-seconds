@@ -603,7 +603,7 @@ export class Game implements Scene {
                 this.messageText = "SPEED UP!";
                 this.messageTimer = MESSAGE_TIME;
 
-                event.playSample("s2");
+                event.playSample("g1");
             }
             this.globalSpeedTarget = 0.75 + this.phase*0.25;
         }
@@ -616,7 +616,7 @@ export class Game implements Scene {
         this.player.update(this.globalSpeed, event);
         if (!hadReachedPosition && this.player.hasReachedStartPosition()) {
 
-            event.playSample("s1");
+            event.playSample("g0");
             this.messageText = "GO!";
         }
         this.gasSupply.update(this.globalSpeed, this.player, event);
@@ -640,7 +640,7 @@ export class Game implements Scene {
             this.messageText = "PANIC UP!";
             this.messageTimer = MESSAGE_TIME;
 
-            event.playSample("s2");
+            event.playSample("g1");
         }
 
         if (this.player.isDying()) {

@@ -533,12 +533,21 @@ const generateBigText = (event : ProgramEvent) : void => {
 
 const generateSamples = (event : ProgramEvent) : void => {
 
-    // Start 
-    for (let i = 0; i < 3; ++ i) {
+   
+    for (let i = 0; i < 2; ++ i) {
 
+         // Start 
         event.createSample("s" + String(i),
             [112 + i*16, 10, 1.0,
             80 + i*16, 6 + i*4, 0.20], 
+            0.40,
+            "square", 
+            Ramp.Instant);  
+
+            // "Go!" and "Speed/panic up" beeps
+        event.createSample("g" + String(i),
+            [192 + i*32, 28 - i*8, 1.0,
+            144 + i*16, 8, 0.20], 
             0.40,
             "square", 
             Ramp.Instant);  

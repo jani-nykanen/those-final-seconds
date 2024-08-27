@@ -166,12 +166,6 @@ export class ProgramEvent {
     }
 
 
-    public getSample(name : string) : Sample | undefined {
-
-        return this.samples.get(name);
-    }
-
-
     public loadBitmap(name : string, path : string) : void {
 
         ++ this.assetCount;
@@ -187,7 +181,7 @@ export class ProgramEvent {
 
 
     public loaded = () : boolean => this.loadCount >= this.assetCount;
-    // public loadedRatio = () : number => this.assetCount == 0 ? 1.0 : this.loadCount/this.assetCount;
+    public loadedRatio = () : number => this.assetCount == 0 ? 1.0 : this.loadCount/this.assetCount;
 
 
     //
@@ -213,26 +207,10 @@ export class ProgramEvent {
 
     public playSample(name : string, volume : number = 0.60) : void {
 
-        // Didn't have room for a mute button, so it is always enabled now.
-        /*
-        if (!this.enabled) {
-
-            return;
-        }
-        */
         try {
 
-            this.getSample(name)?.play(volume*this.globalVolume);
+            this.samples.get(name)?.play(volume*this.globalVolume);
         }
         catch (e) {}
-    }
-
-
-    // public toggleAudio = (state : boolean = !this.enabled) : boolean => (this.enabled = state);
-
-
-    public setGlobalVolume(vol : number) : void {
-
-        this.globalVolume = vol;
     }
 }

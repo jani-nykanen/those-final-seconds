@@ -28,8 +28,7 @@ export class Program {
     }
 
 
-    // No room for this
-    /*
+
     private drawLoadingScreen(canvas : Canvas) : void {
 
         const OUTLINE : number = 1;
@@ -37,20 +36,15 @@ export class Program {
         const HEIGHT : number  = 12;
 
         canvas.clear("#000000");
-        const p : number = this.assets.loadedRatio();
 
+        const p : number = this.event.loadedRatio();
         const dx : number = canvas.width/2 - WIDTH/2;
         const dy : number = canvas.height/2 - HEIGHT/2;
 
-        canvas.setColor("#ffffff");
-        canvas.fillRect(dx, dy, WIDTH, HEIGHT);
-        canvas.setColor("#000000");
-        canvas.fillRect(dx + OUTLINE, dy + OUTLINE, WIDTH - OUTLINE*2, HEIGHT - OUTLINE*2);
-        canvas.setColor("#ffffff");
-        canvas.fillRect(dx + OUTLINE*2, dy + OUTLINE*2, (WIDTH - OUTLINE*4)*p, HEIGHT - OUTLINE*4);
-        
+        canvas.fillRect(dx, dy, WIDTH, HEIGHT, "#ffffff");
+        canvas.fillRect(dx + OUTLINE, dy + OUTLINE, WIDTH - OUTLINE*2, HEIGHT - OUTLINE*2, "#000000");
+        canvas.fillRect(dx + OUTLINE*2, dy + OUTLINE*2, (WIDTH - OUTLINE*4)*p, HEIGHT - OUTLINE*4, "#ffffff");
     }
-    */
 
 
     private loop(ts : number, 
@@ -106,8 +100,7 @@ export class Program {
         }
         else {
 
-            // this.drawLoadingScreen(this.canvas);
-            this.canvas.clear("#055AA");
+            this.drawLoadingScreen(this.canvas);
         }
         window.requestAnimationFrame(ts => this.loop(ts, initialScreen, onLoad));
     }
