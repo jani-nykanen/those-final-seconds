@@ -44,7 +44,8 @@ const drawBar = (canvas : Canvas, dx : number, dy : number, dw : number, dh : nu
 const createScoreString = (score : number) : string => {
 
     const scoreStr : string = String(score);
-    return "0".repeat(7 - scoreStr.length) + scoreStr;
+    
+    return scoreStr.length > 7 ? scoreStr : "0".repeat(7 - scoreStr.length) + scoreStr;
 }
 
 
