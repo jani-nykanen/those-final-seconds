@@ -191,6 +191,12 @@ export class ProgramEvent {
     public initialize() : void {
 
         this.ctx = new AudioContext();
+        // Possibly redundant
+        try {
+
+            this.ctx.resume();
+        }
+        catch(e) {};
     }
 
 

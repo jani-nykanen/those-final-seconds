@@ -86,12 +86,15 @@ export class Game implements Scene {
     private bestScore : number = 0;
 
     private transitionTimer : number = TRANSITION_TIME;
-    private fadingIn : boolean = false;
+    private fadingOut : boolean = false;
 
     private titleScreenActive : boolean = true;
     private cameraBottomReached : boolean = false;
 
     private layerPositions : number[];
+
+    private introPhase : number = 0;
+    private introTimer : number = 0;
 
     
     constructor(event : ProgramEvent) {
@@ -158,6 +161,37 @@ export class Game implements Scene {
         this.globalSpeedTarget = 0.0;
 
         this.spawnInitialClocks();
+    }
+
+
+    private updateIntro(event : ProgramEvent) : void {
+
+        const INTRO_TIME : number = 45;
+
+        if ((this.transitionTimer) > 0) {
+            
+            if ((this.transitionTimer -= event.tick) <= 0) {
+
+                if (this.fadingOut) {
+
+                    this.transitionTimer = TRANSITION_TIME;
+                    this.fadingOut = false;
+
+                    ++ this.introPhase;
+                }
+                else {
+
+                    this.introTimer = INTRO_TIME;
+                }
+            }
+            return;
+        }
+
+        if ((this.introTimer -= event.tick) <= 0) {
+
+            this.transitionTimer = TRANSITION_TIME;
+            this.fadingOut = true;
+        }
     }
 
 
@@ -424,6 +458,30 @@ export class Game implements Scene {
     }
 
 
+    private drawTransition(canvas : Canvas) : void {
+
+        if (this.transitionTimer > 0) {
+
+            const t : number = this.transitionTimer/TRANSITION_TIME;
+            canvas.clear("rgba(0,0,0," + String(this.fadingOut ? (1.0 - t) : t) + ")");
+        }
+    }
+
+
+    private drawIntro(canvas : Canvas) : void {
+
+        canvas.clear("#000000");
+        canvas.drawText("fw", 
+            this.introPhase == 0 ? "A GAME BY" : "MADE FOR",
+            canvas.width/2, canvas.height/2 - 10, -1, 0, Align.Center);
+        canvas.drawText("fw", 
+            this.introPhase == 0 ? "JANI NYK@NEN" : "JS13K 2024",
+            canvas.width/2, canvas.height/2 + 2, -1, 0, Align.Center);
+
+        this.drawTransition(canvas);
+    }
+
+
     private drawAnyKeyText(canvas : Canvas) : void {
 
         if (this.messageTimer > 0.5) {
@@ -522,6 +580,13 @@ export class Game implements Scene {
         // NOTE: This function is way too long, but splitting it to smaller
         // functions would make me lose too many precious bytes, so...
 
+        // Intro
+        if (this.introPhase < 2) {
+
+            this.updateIntro(event);
+            return;
+        }
+
         // Title screen
         if (this.titleScreenActive) {
 
@@ -546,7 +611,7 @@ export class Game implements Scene {
 
             if ((this.transitionTimer -= event.tick) <= 0) {
 
-                if (this.fadingIn) {
+                if (this.fadingOut) {
 
                     this.reset();
                     this.transitionTimer += TRANSITION_TIME;
@@ -555,7 +620,7 @@ export class Game implements Scene {
 
                     event.playSample("s0");
                 }
-                this.fadingIn = false;
+                this.fadingOut = false;
             }
             return;
         }
@@ -568,7 +633,7 @@ export class Game implements Scene {
 
                 this.messageTimer = 0;
                 this.transitionTimer = TRANSITION_TIME;
-                this.fadingIn = true;
+                this.fadingOut = true;
 
                 event.playSample("s1");
             }
@@ -666,6 +731,12 @@ export class Game implements Scene {
         
         canvas.moveTo();
 
+        if (this.introPhase < 2) {
+
+            this.drawIntro(canvas);
+            return;
+        }
+
         this.applyShake(canvas);
         this.drawBackground(canvas, this.cameraPos);
 
@@ -713,10 +784,6 @@ export class Game implements Scene {
             }
         }
 
-        if (this.transitionTimer > 0) {
-
-            const t : number = this.transitionTimer/TRANSITION_TIME;
-            canvas.clear("rgba(0,0,0," + String(this.fadingIn ? (1.0 - t) : t) + ")");
-        }
+        this.drawTransition(canvas);
     }
 }

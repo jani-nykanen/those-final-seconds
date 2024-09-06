@@ -30,6 +30,8 @@ const onloadEvent = (event : ProgramEvent) : void => {
     event.addAction("p", ["Escape", "Enter"]);
 
     generateAssets(event);
+
+    event.playSample("s1");
 }
 
 
