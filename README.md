@@ -5,9 +5,7 @@
 
 ## Play
 
-The draft is available here: https://dev.js13kgames.com/drafts/those-final-seconds
-
-The final link will be... well, I'll update it here later.
+[Click here](https://dev.js13kgames.com/games/those-final-seconds)
 
 
 ## Building
